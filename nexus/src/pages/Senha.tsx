@@ -13,11 +13,14 @@ export default function Senha() {
 
 	const decrypt = async (pwd: string) => {
 		try {
-			console.log("Descriptografando\nSenha:" + password);
-			const decrypt = await decryptJson(password, vaultData);
+			console.log("Descriptografando\nSenha:" + pwd);
+			const decrypt = await decryptJson(pwd, vaultData);
 			setVaultData(decrypt);
 			setJsonText(JSON.stringify(decrypt, null, 2));
 			console.log("Descriptografia Sucesso!");
+			navigate("/new-account", {
+				state: { password: pwd, vaultData: decrypt },
+			});
 		} catch (e) {
 			console.log("Descriptografia deu Errado", e);
 		}
@@ -53,7 +56,6 @@ export default function Senha() {
 			setVaultData(encripted);
 			setPassword(pwd);
 			alert("Vault salvo localmente! (sem prompt na próxima vez)");
-			// navigate("/new-account", { state: { password: pwd } });
 		} catch (error) {
 			console.error("Erro ao salvar:", error);
 			alert("Erro ao salvar vault local");
@@ -79,7 +81,7 @@ export default function Senha() {
 						if (pwd.trim() === "") {
 							return;
 						}
-						decrypt();
+						decrypt(pwd);
 					}
 				}}
 			>

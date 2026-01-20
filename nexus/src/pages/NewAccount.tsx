@@ -24,6 +24,22 @@ export default function NewAccount() {
 	const location = useLocation();
 	const password = location.state?.password;
 
+	const handleSaveLocal = async () => {
+		try {
+			console.log("Salvando\nSenha:" + password);
+			setLoading(true);
+			const encripted = await encryptJson(password, vaultData);
+			await saveJsonFile(encripted, "vault", "documents");
+			setVaultData(encripted);
+			alert("Vault salvo localmente! (sem prompt na próxima vez)");
+		} catch (error) {
+			console.error("Erro ao salvar:", error);
+			alert("Erro ao salvar vault local");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const handleConnect = async () => {
 		try {
 			setLoading(true);
@@ -118,11 +134,14 @@ export default function NewAccount() {
 	};
 
 	useEffect(() => {
-		if (!readLocalFile.current) {
+		if (location.state?.vaultData) {
+			setVaultData(location.state.vaultData);
+			setJsonText(JSON.stringify(location.state.vaultData, null, 2));
+		} else if (!readLocalFile.current) {
 			handleReadLocal();
 			readLocalFile.current = true;
 		}
-	}, []);
+	}, [location.state]);
 
 	return (
 		<section className="bg-black w-full h-full flex items-center justify-center overflow-auto">
@@ -182,7 +201,7 @@ export default function NewAccount() {
 				<div className="flex gap-3 flex-wrap">
 					<button
 						className="bg-white text-black px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-200"
-						// onClick={handleSaveLocal}
+						onClick={handleSaveLocal}
 						disabled={loading}
 					>
 						{loading ? "Salvando..." : "💾 Salvar Local"}
