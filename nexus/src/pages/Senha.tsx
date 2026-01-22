@@ -1,68 +1,44 @@
-import { useState, useRef } from "react";
-import { decryptJson, encryptJson } from "../utils/crypto";
-import { readJsonFile, saveJsonFile } from "../utils/jsonFile";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+	checkHandleExists,
+	getFileHandle,
+	getNewFile,
+	saveNewFileHandle,
+} from "../utils/file";
+import { encryptVault } from "../utils/crypto";
 
 export default function Senha() {
-	const [password, setPassword] = useState<string>("");
 	const passwordInputRef = useRef<HTMLInputElement>(null);
 	const [loading, setLoading] = useState(false);
-	const [vaultData, setVaultData] = useState<any>(null);
+	const [hasStoredHandle, setHasStoredHandle] = useState(false);
+	const [vault, setVault] = useState<any>();
+	const [password, setPassword] = useState<string>();
 	const navigate = useNavigate();
-	const [jsonText, setJsonText] = useState<string>("");
+	// const [vault, setVault] = useState<VaultData | undefined>();
 
-	const decrypt = async (pwd: string) => {
-		try {
-			console.log("Descriptografando\nSenha:" + pwd);
-			const decrypt = await decryptJson(pwd, vaultData);
-			setVaultData(decrypt);
-			setJsonText(JSON.stringify(decrypt, null, 2));
-			console.log("Descriptografia Sucesso!");
-			navigate("/new-account", {
-				state: { password: pwd, vaultData: decrypt },
-			});
-		} catch (e) {
-			console.log("Descriptografia deu Errado", e);
-		}
-	};
+	// async function fetchVault() {
+	// 	const tempVault = await getVault();
+	// 	console.log("Vault em Memória:" + tempVault.content);
+	// 	if (tempVault) setVault(tempVault);
+	// }
 
-	const handleReadLocal = async () => {
-		try {
-			setLoading(true);
-			const data = await readJsonFile("vault");
-			setVaultData(data);
-			console.log("Vault Achado!");
-		} catch (error) {
-			console.error("Erro ao ler:", error);
-			alert("Erro ao ler vault local");
-		} finally {
-			setLoading(false);
-		}
-	};
+	async function checkHandle() {
+		const exists = await checkHandleExists();
+		console.log("Permissão: " + exists);
+		setHasStoredHandle(exists);
+		// if (exists) await verifyHandle();
+	}
 
-	const handleSaveLocal = async (pwd: string) => {
-		try {
-			console.log("Salvando\nSenha:" + pwd);
-			setLoading(true);
-			const dataToSave = {
-				senha: "minhaSenha123",
-				username: "usuario@exemplo.com",
-				teste1: "asndaoisdnaosid",
-				caraca: "123",
-				timestamp: new Date().toISOString(),
-			};
-			const encripted = await encryptJson(pwd, dataToSave);
-			await saveJsonFile(encripted, "vault", "documents");
-			setVaultData(encripted);
-			setPassword(pwd);
-			alert("Vault salvo localmente! (sem prompt na próxima vez)");
-		} catch (error) {
-			console.error("Erro ao salvar:", error);
-			alert("Erro ao salvar vault local");
-		} finally {
-			setLoading(false);
-		}
-	};
+	// async function verifyHandle() {
+	// 	const handle = await getFileHandle();
+	// 	if (handle) setIsHandle(true);
+	// }
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	useEffect(() => {
+		checkHandle();
+	}, []);
 
 	return (
 		<section className="bg-black w-full h-full flex items-center justify-center overflow-auto">
@@ -75,40 +51,63 @@ export default function Senha() {
 			/>
 			<button
 				className="px-4 py-2 rounded text-black disabled:opacity-50 bg-blue-500"
-				onClick={() => {
-					if (passwordInputRef.current) {
-						const pwd = passwordInputRef.current.value;
-						if (pwd.trim() === "") {
-							return;
-						}
-						decrypt(pwd);
-					}
+				onClick={async () => {
+					const masterPassword = passwordInputRef.current?.value;
+					setPassword(masterPassword);
+
+					// if (!hasStoredHandle) {
+					// 	await saveNewFileHandle();
+					// } else {
+					// 	const cripted = await encryptVault(masterPassword, vault);
+					// 	await saveNewFileHandle(cripted);
+					// 	console.log("Encriptado:\n" + cripted);
+					// }
 				}}
 			>
-				Entrar
+				Próximo
 			</button>
 			<button
 				className="bg-white text-black px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-200"
-				onClick={handleReadLocal}
-				disabled={loading}
-			>
-				{loading ? "Lendo..." : "📂 Abrir Local"}
-			</button>
-			<button
-				className="bg-white text-black px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-200"
-				onClick={() => {
-					if (passwordInputRef.current) {
-						const pwd = passwordInputRef.current.value;
-						if (pwd.trim() === "") {
-							return;
-						}
-						handleSaveLocal(pwd);
-					}
+				onClick={async () => {
+					const content = await getFileHandle();
+					setVault(content);
+					await checkHandle();
 				}}
 				disabled={loading}
 			>
-				{loading ? "Salvando..." : "💾 Salvar Local"}
+				{!hasStoredHandle
+					? "Selecionar Arquivo"
+					: "Selecionar Arquivo Anterior"}
 			</button>
+			{!hasStoredHandle && (
+				<button
+					className="bg-white text-black px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-200"
+					onClick={async () => {
+						if (!password) {
+							console.log("Senha não definida");
+						} else {
+							await saveNewFileHandle(password);
+						}
+						await checkHandle();
+					}}
+					disabled={loading}
+				>
+					Salvar Arquivo Inicial
+				</button>
+			)}
+			{hasStoredHandle && (
+				<button
+					className="bg-white text-black px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-200"
+					onClick={async () => {
+						const content = await getNewFile();
+						setVault(content);
+						await checkHandle();
+					}}
+					disabled={loading}
+				>
+					Selecionar Arquivo
+				</button>
+			)}
 		</section>
 	);
 }
