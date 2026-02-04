@@ -108,6 +108,12 @@ export default function Senha() {
 					Selecionar Arquivo
 				</button>
 			)}
+			<button
+				className="px-4 py-2 rounded text-black disabled:opacity-50 bg-blue-500"
+				onClick={async () => {}}
+			>
+				Concluir
+			</button>
 		</section>
 	);
 }
