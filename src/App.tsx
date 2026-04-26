@@ -1,6 +1,5 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState } from "react";
 import LetterGlitch from "./components/Home/LetterGlitch";
-import { motion } from "motion/react";
 import { Step } from "./components/Home/Step";
 
 function App() {
