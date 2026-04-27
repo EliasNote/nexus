@@ -35,8 +35,8 @@ export function Step({
           }}
           transition={{
             type: "spring",
-            duration: 1,
-            ease: "easeIn",
+            duration: 0.3,
+            ease: "easeInOut",
           }}
           onAnimationComplete={() => {
             if (!step0) {
