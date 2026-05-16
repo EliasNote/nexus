@@ -1,0 +1,171 @@
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import LetterGlitch from "./components/Home/LetterGlitch";
+import { Step } from "./components/Home/Step";
+
+export const Steps = () => {
+  const navigate = useNavigate();
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [password, setPassword] = useState("");
+
+  const [step0, setStep0] = useState(true);
+  const [hideStep0, setHideStep0] = useState(false);
+
+  const [step1, setStep1] = useState(false);
+  const [hideStep1, setHideStep1] = useState(true);
+
+  const [step2, setStep2] = useState(false);
+  const [hideStep2, setHideStep2] = useState(true);
+
+  const [invertido, setInvertido] = useState(false);
+
+  const handleStep0 = () => {
+    setHideStep1(false);
+    setHideStep0(true);
+  };
+
+  const handleStep1 = () => {
+    if (invertido) {
+      setHideStep0(false);
+      setHideStep1(true);
+    } else {
+      setHideStep2(false);
+      setHideStep1(true);
+    }
+  };
+
+  const handleStep2 = () => {
+    if (invertido) {
+      setHideStep1(false);
+      setHideStep2(true);
+    } else {
+      setHideStep2(true);
+    }
+  };
+
+  const handlePasswordChange = () => {
+    setPassword(inputRef.current!.value);
+  };
+
+  return (
+    <div className="relative isolate min-h-screen overflow-hidden text-white">
+      <LetterGlitch
+        glitchSpeed={50}
+        centerVignette={true}
+        outerVignette={false}
+        smooth={true}
+        classname="fixed inset-0 z-0 pointer-events-none"
+      />
+      <main className="relative z-10 flex min-h-screen items-center justify-center">
+        <Step
+          id={0}
+          step0={step0}
+          hideStep0={hideStep0}
+          handleStep={handleStep0}
+          x0={invertido ? -1200 : 0}
+          x1={0}
+          x2={-1200}
+        >
+          <button
+            className="px-7 py-2.5 text-base bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+            onClick={() => {
+              setInvertido(false);
+              setStep1(true);
+              setStep0(false);
+            }}
+          >
+            Começar
+          </button>
+          <button className="px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer">
+            Como usar
+          </button>
+        </Step>
+        <Step
+          id={1}
+          step0={step1}
+          hideStep0={hideStep1}
+          handleStep={handleStep1}
+          x0={invertido ? -1200 : 1200}
+          x1={0}
+          x2={invertido ? 1200 : -1200}
+        >
+          <div className="flex flex-col gap-2 items-center">
+            <div className="w-full flex flex-col items-start">
+              <p className="text-sm font-bold">SENHA MESTRA</p>
+              <input
+                className="bg-zinc-900 h-[40px] w-[384px] border border-zinc-800 px-2"
+                ref={inputRef}
+                type="password"
+              />
+            </div>
+            <div className="flex gap-3 items-start">
+              <button
+                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                onClick={() => {
+                  setInvertido(false);
+                  setStep2(true);
+                  setStep1(false);
+                  handlePasswordChange();
+                }}
+              >
+                Próximo
+              </button>
+              <button
+                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                onClick={() => {
+                  setInvertido(true);
+                  setStep0(true);
+                  setStep1(false);
+                }}
+              >
+                Anterior
+              </button>
+            </div>
+          </div>
+        </Step>
+        <Step
+          id={2}
+          step0={step2}
+          hideStep0={hideStep2}
+          handleStep={handleStep2}
+          x0={invertido ? -1200 : 1200}
+          x1={0}
+          x2={invertido ? 1200 : -1200}
+        >
+          <div className="flex flex-col gap-2 items-center">
+            <div className="w-full flex flex-col items-start">
+              <p className="text-sm font-bold">SENHA MESTRA</p>
+              <input
+                className="bg-zinc-900 h-[40px] w-[384px] border border-zinc-800 px-2"
+                type="password"
+              />
+            </div>
+            <div className="flex gap-3 items-start">
+              <button
+                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                onClick={() => {
+                  navigate("/principal", { state: { texto: password } });
+                }}
+              >
+                Finalizar
+              </button>
+              <button
+                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                onClick={() => {
+                  setInvertido(true);
+                  setStep1(true);
+                  setStep2(false);
+                }}
+              >
+                Anterior
+              </button>
+            </div>
+          </div>
+        </Step>
+      </main>
+    </div>
+  );
+};
+
+export default Steps;
