@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import LetterGlitch from "./components/Home/LetterGlitch";
+import { FileUp } from "lucide-react";
 import { Step } from "./components/Home/Step";
 
 export const Steps = () => {
@@ -94,7 +95,7 @@ export const Steps = () => {
             <div className="w-full flex flex-col items-start">
               <p className="text-sm font-bold">SENHA MESTRA</p>
               <input
-                className="bg-zinc-900 h-[40px] w-[384px] border border-zinc-800 px-2"
+                className="bg-zinc-900 text-[16px] h-[40px] w-[384px] border border-zinc-800 px-2"
                 ref={inputRef}
                 type="password"
               />
@@ -112,7 +113,7 @@ export const Steps = () => {
                 Próximo
               </button>
               <button
-                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                className="px-7 text-base max-w-[fit-content] py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer"
                 onClick={() => {
                   setInvertido(true);
                   setStep0(true);
@@ -134,12 +135,13 @@ export const Steps = () => {
           x2={invertido ? 1200 : -1200}
         >
           <div className="flex flex-col gap-2 items-center">
-            <div className="w-full flex flex-col items-start">
-              <p className="text-sm font-bold">SENHA MESTRA</p>
-              <input
-                className="bg-zinc-900 h-[40px] w-[384px] border border-zinc-800 px-2"
-                type="password"
-              />
+            <div className="w-full max-w-[384px] flex flex-row items-start">
+              <button className="flex p-[14px] gap-[14px] justify-start items-center w-full h-[63px] bg-zinc-900 border border-zinc-800">
+                <div className="flex justify-center items-center border border-zinc-700 w-[35px] h-[35px] bg-zinc-950">
+                  <FileUp strokeWidth={1.5} className="text-zinc-400" />
+                  <div className="flex flex-col"></div>
+                </div>
+              </button>
             </div>
             <div className="flex gap-3 items-start">
               <button
@@ -148,10 +150,10 @@ export const Steps = () => {
                   navigate("/principal", { state: { texto: password } });
                 }}
               >
-                Finalizar
+                Concluir
               </button>
               <button
-                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                className="px-7 text-base max-w-[fit-content] py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer"
                 onClick={() => {
                   setInvertido(true);
                   setStep1(true);
