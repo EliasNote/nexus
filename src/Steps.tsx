@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import LetterGlitch from "./components/Home/LetterGlitch";
 import { FileUp } from "lucide-react";
 import { Step } from "./components/Home/Step";
+import { IconButton } from "./components/Home/IconButton";
 
 export const Steps = () => {
   const navigate = useNavigate();
@@ -52,10 +53,10 @@ export const Steps = () => {
   return (
     <div className="relative isolate min-h-screen overflow-hidden text-white">
       <LetterGlitch
-        glitchSpeed={50}
+        glitchSpeed={25}
         centerVignette={true}
         outerVignette={false}
-        smooth={true}
+        smooth={false}
         classname="fixed inset-0 z-0 pointer-events-none"
       />
       <main className="relative z-10 flex min-h-screen items-center justify-center">
@@ -136,10 +137,24 @@ export const Steps = () => {
         >
           <div className="flex flex-col gap-2 items-center">
             <div className="w-full max-w-[384px] flex flex-row items-start">
-              <button className="flex p-[14px] gap-[14px] justify-start items-center w-full h-[63px] bg-zinc-900 border border-zinc-800">
-                <div className="flex justify-center items-center border border-zinc-700 w-[35px] h-[35px] bg-zinc-950">
-                  <FileUp strokeWidth={1.5} className="text-zinc-400" />
-                  <div className="flex flex-col"></div>
+              <button className="flex p-[14px] justify-start items-center w-full h-[63px] bg-zinc-900 border border-zinc-800">
+                <div className="flex flex-row gap-[14px] justify-center items-start">
+                  <div className="flex flex-row justify-center items-center border border-zinc-700 w-[35px] h-[35px] bg-zinc-950">
+                    <FileUp
+                      width={22}
+                      height={22}
+                      strokeWidth={1.5}
+                      className="text-zinc-400"
+                    />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="text-white text-[14px]">
+                      Selecionar arquivo
+                    </span>
+                    <span className="text-zinc-600 text-[12px]">
+                      Carregar cofre existente
+                    </span>
+                  </div>
                 </div>
               </button>
             </div>
