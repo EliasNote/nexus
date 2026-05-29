@@ -74,7 +74,7 @@ export const Steps = () => {
         smooth={false}
         classname="fixed inset-0 z-0 pointer-events-none"
       />
-      <main className="relative z-10 flex min-h-screen items-center justify-center">
+      <section className="relative z-10 flex min-h-screen items-center justify-center">
         <Step
           id={0}
           step0={step0}
@@ -190,7 +190,7 @@ export const Steps = () => {
             </div>
           </div>
         </Step>
-      </main>
+      </section>
     </div>
   );
 };
