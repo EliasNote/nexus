@@ -132,14 +132,19 @@ const LetterGlitch = ({
     const x = (index % grid.current.columns) * charWidth;
     const y = Math.floor(index / grid.current.columns) * charHeight;
 
-    // Limpar área anterior (com margem)
-    ctx.clearRect(x - 1, y - 1, charWidth + 2, charHeight + 2);
+    // Limpar área anterior (sem margem para não invadir vizinhos)
+    ctx.clearRect(x, y, charWidth, charHeight);
 
-    // Desenhar novo caractere
+    // Desenhar novo caractere sem invadir células vizinhas
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, charWidth, charHeight);
+    ctx.clip();
     ctx.fillStyle = letter.color;
     ctx.font = `${fontSize}px monospace`;
     ctx.textBaseline = "top";
     ctx.fillText(letter.char, x, y);
+    ctx.restore();
   };
 
   const drawLetters = () => {
