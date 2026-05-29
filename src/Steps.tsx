@@ -65,6 +65,12 @@ export const Steps = () => {
     setPassword(inputRef.current!.value);
   };
 
+  const nextButtonStyle =
+    "px-7 py-2.5 text-base bg-brand border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer";
+
+  const prevButtonStyle =
+    "px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer";
+
   return (
     <div className="relative isolate min-h-screen overflow-hidden text-white">
       <LetterGlitch
@@ -85,7 +91,7 @@ export const Steps = () => {
           x2={-1200}
         >
           <button
-            className="px-7 py-2.5 text-base bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+            className={nextButtonStyle}
             onClick={() => {
               setInvertido(false);
               setStep1(true);
@@ -94,9 +100,7 @@ export const Steps = () => {
           >
             Começar
           </button>
-          <button className="px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer">
-            Como usar
-          </button>
+          <button className={prevButtonStyle}>Como usar</button>
         </Step>
         <Step
           id={1}
@@ -118,7 +122,7 @@ export const Steps = () => {
             </div>
             <div className="flex gap-3 items-start">
               <button
-                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                className={nextButtonStyle}
                 onClick={() => {
                   setInvertido(false);
                   setStep2(true);
@@ -129,7 +133,7 @@ export const Steps = () => {
                 Próximo
               </button>
               <button
-                className="px-7 text-base max-w-[fit-content] py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer"
+                className={prevButtonStyle}
                 onClick={() => {
                   setInvertido(true);
                   setStep0(true);
@@ -150,7 +154,7 @@ export const Steps = () => {
           x1={0}
           x2={invertido ? 1200 : -1200}
         >
-          <div className="flex flex-col gap-2 items-center gap-[10px]">
+          <div className="flex flex-col items-center gap-[10px]">
             <div className="w-full max-w-[384px] flex flex-col gap-[10px] items-start">
               {TextsButtonsArchives.map((text, index) => (
                 <IconButton
@@ -170,7 +174,7 @@ export const Steps = () => {
             </div>
             <div className="flex gap-3 items-start">
               <button
-                className="px-7 text-base max-w-[fit-content] py-2.5 bg-[#2563EB] border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer"
+                className={nextButtonStyle}
                 onClick={() => {
                   navigate("/principal", { state: { texto: password } });
                 }}
@@ -178,7 +182,7 @@ export const Steps = () => {
                 Concluir
               </button>
               <button
-                className="px-7 text-base max-w-[fit-content] py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer"
+                className={prevButtonStyle}
                 onClick={() => {
                   setInvertido(true);
                   setStep1(true);
