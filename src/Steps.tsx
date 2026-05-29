@@ -3,7 +3,22 @@ import { useNavigate } from "react-router-dom";
 import LetterGlitch from "./components/Home/LetterGlitch";
 import { FileUp } from "lucide-react";
 import { Step } from "./components/Home/Step";
-import { IconButton } from "./components/Home/IconButton";
+import { IconButton } from "./components/Steps/IconButton";
+
+const TextsButtonsArchives = [
+  {
+    title: "SELECIONAR ARQUIVO",
+    subtitle: "Carregar cofre existente",
+  },
+  {
+    title: "CRIAR COFRE",
+    subtitle: "Criar cofre de segurança menu",
+  },
+  {
+    title: "SELECIONAR ARQUIVO ANTERIOR",
+    subtitle: "Usar cofre da sessão anterior",
+  },
+];
 
 export const Steps = () => {
   const navigate = useNavigate();
@@ -135,28 +150,23 @@ export const Steps = () => {
           x1={0}
           x2={invertido ? 1200 : -1200}
         >
-          <div className="flex flex-col gap-2 items-center">
-            <div className="w-full max-w-[384px] flex flex-row items-start">
-              <button className="flex p-[14px] justify-start items-center w-full h-[63px] bg-zinc-900 border border-zinc-800">
-                <div className="flex flex-row gap-[14px] justify-center items-start">
-                  <div className="flex flex-row justify-center items-center border border-zinc-700 w-[35px] h-[35px] bg-zinc-950">
+          <div className="flex flex-col gap-2 items-center gap-[10px]">
+            <div className="w-full max-w-[384px] flex flex-col gap-[10px] items-start">
+              {TextsButtonsArchives.map((text, index) => (
+                <IconButton
+                  key={index}
+                  icon={
                     <FileUp
                       width={22}
                       height={22}
                       strokeWidth={1.5}
                       className="text-zinc-400"
                     />
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <span className="text-white text-[14px]">
-                      Selecionar arquivo
-                    </span>
-                    <span className="text-zinc-600 text-[12px]">
-                      Carregar cofre existente
-                    </span>
-                  </div>
-                </div>
-              </button>
+                  }
+                  title={text.title}
+                  subtitle={text.subtitle}
+                />
+              ))}
             </div>
             <div className="flex gap-3 items-start">
               <button
