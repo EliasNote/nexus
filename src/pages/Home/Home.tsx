@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import LetterGlitch from "./components/Home/LetterGlitch";
+import LetterGlitch from "./components/LetterGlitch";
 import { FileUp } from "lucide-react";
-import { Step } from "./components/Home/Step";
-import { IconButton } from "./components/Steps/IconButton";
+import { Step } from "./components/Step";
+import { IconButton } from "./components/IconButton";
 
 const TextsButtonsArchives = [
   {
@@ -66,10 +66,10 @@ export const Steps = () => {
   };
 
   const nextButtonStyle =
-    "px-7 py-2.5 text-base bg-brand border font-medium border-[#5C8FFF] text-white shadow-lg cursor-pointer";
+    "px-7 py-2.5 text-base bg-brand border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer";
 
   const prevButtonStyle =
-    "px-7 text-base py-2.5 bg-zinc-800 border font-medium border-zinc-600 text-white shadow-lg cursor-pointer";
+    "px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer";
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden text-white">

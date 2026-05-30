@@ -21,7 +21,7 @@ export const IconButton = ({
           {icon}
         </div>
         <div className="flex flex-col items-start">
-          <span className="text-white text-[14px] font-medium">{title}</span>
+          <span className="text-white text-[14px] font-bold">{title}</span>
           <span className="text-zinc-600 text-[12px]">{subtitle}</span>
         </div>
       </div>

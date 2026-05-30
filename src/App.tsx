@@ -1,6 +1,6 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
-import TelaPrincipal from "./Tela Principal";
-import Steps from "./Home";
+import TelaPrincipal from "./pages/Dashboard/Dashboard";
+import Steps from "./pages/Home/Home";
 
 function App() {
   return (
