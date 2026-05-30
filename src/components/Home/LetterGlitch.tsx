@@ -132,10 +132,8 @@ const LetterGlitch = ({
     const x = (index % grid.current.columns) * charWidth;
     const y = Math.floor(index / grid.current.columns) * charHeight;
 
-    // Limpar área anterior (sem margem para não invadir vizinhos)
     ctx.clearRect(x, y, charWidth, charHeight);
 
-    // Desenhar novo caractere sem invadir células vizinhas
     ctx.save();
     ctx.beginPath();
     ctx.rect(x, y, charWidth, charHeight);
@@ -151,7 +149,6 @@ const LetterGlitch = ({
     if (!context.current || letters.current.length === 0 || !canvasRef.current)
       return;
 
-    // Se há índices sujos, desenhar apenas eles
     if (dirtyIndices.current.size > 0) {
       dirtyIndices.current.forEach((index) => {
         drawLetter(index);
@@ -163,7 +160,6 @@ const LetterGlitch = ({
   const updateLetters = () => {
     if (!letters.current || letters.current.length === 0) return;
 
-    // Atualizar apenas 0.5-1% dos caracteres
     const updateCount = Math.max(1, Math.floor(letters.current.length * 0.005));
 
     for (let i = 0; i < updateCount; i++) {
@@ -181,7 +177,6 @@ const LetterGlitch = ({
         letter.colorProgress = 0;
       }
 
-      // Marcar como sujo para redraw
       dirtyIndices.current.add(index);
     }
   };
@@ -230,7 +225,6 @@ const LetterGlitch = ({
       needsRedraw = needsRedraw || smoothRedraw;
     }
 
-    // Desenhar apenas se houver mudanças e passou o throttle
     if (needsRedraw && now - lastDrawTime.current >= 16) {
       drawLetters();
       lastDrawTime.current = now;
@@ -260,7 +254,6 @@ const LetterGlitch = ({
       }, 100);
     };
 
-    // Intersection Observer para pausar quando não visível
     const observer = new IntersectionObserver(
       ([entry]) => {
         isVisibleRef.current = entry.isIntersecting;
