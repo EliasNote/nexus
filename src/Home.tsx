@@ -90,17 +90,25 @@ export const Steps = () => {
           x1={0}
           x2={-1200}
         >
-          <button
-            className={nextButtonStyle}
-            onClick={() => {
-              setInvertido(false);
-              setStep1(true);
-              setStep0(false);
-            }}
-          >
-            Começar
-          </button>
-          <button className={prevButtonStyle}>Como usar</button>
+          <div className="flex flex-col items-center justify-center gap-[20px]">
+            <div className="flex flex-row items-center justify-center gap-[10px] text-[64px]">
+              <img src="/logo.svg" alt="Logo" className="w-[124px]" />
+              <h1 className="font-medium">Nexus</h1>
+            </div>
+            <div className="flex gap-3">
+              <button
+                className={nextButtonStyle}
+                onClick={() => {
+                  setInvertido(false);
+                  setStep1(true);
+                  setStep0(false);
+                }}
+              >
+                Começar
+              </button>
+              <button className={prevButtonStyle}>Como usar</button>
+            </div>
+          </div>
         </Step>
         <Step
           id={1}
@@ -120,7 +128,7 @@ export const Steps = () => {
                 type="password"
               />
             </div>
-            <div className="flex gap-3 items-start">
+            <div className="flex gap-3">
               <button
                 className={nextButtonStyle}
                 onClick={() => {
