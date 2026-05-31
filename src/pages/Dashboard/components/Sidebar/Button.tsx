@@ -21,7 +21,7 @@ export const Button = ({
     >
       <span className={iconStyle}>{icon}</span>
       <span
-        className={`font-medium ${isSelected ? "text-white" : "text-zinc-500 group-hover:text-zinc-400"}`}
+        className={`font-medium truncate ${isSelected ? "text-white" : "text-zinc-500 group-hover:text-zinc-400"}`}
       >
         {title}
       </span>
