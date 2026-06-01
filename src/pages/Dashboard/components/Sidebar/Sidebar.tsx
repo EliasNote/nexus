@@ -12,8 +12,10 @@ import {
   Minus,
   Cloud,
   LogOut,
+  RefreshCcw,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useGoogleDrive } from "../../../../hooks/useGoogleDrive";
 
 const Sidebar = ({
   selected,
@@ -36,6 +38,8 @@ const Sidebar = ({
   addDirectory: () => void;
   directories: string[];
 }) => {
+  const { refresh } = useGoogleDrive();
+
   return (
     <section className="flex flex-col gap-[20px] items-start border-r border-zinc-800 h-screen overflow-hidden max-w-[248px] w-full">
       <div className="w-full">
@@ -139,8 +143,8 @@ const Sidebar = ({
           )}
           {directories.map((dir, index) => (
             <Button
-              key={index + 7}
-              id={index + 7}
+              key={index + 8}
+              id={index + 8}
               selectedId={selected}
               title={dir}
               setSelected={setSelected}
@@ -155,12 +159,23 @@ const Sidebar = ({
         <Button
           id={5}
           selectedId={selected}
+          title="Refresh Token"
+          setSelected={setSelected}
+          icon={<RefreshCcw size={iconsSize} />}
+          onClick={() => {
+            refresh();
+          }}
+        />
+
+        <Button
+          id={6}
+          selectedId={selected}
           title="Sincronizar"
           setSelected={setSelected}
           icon={<Cloud size={iconsSize} />}
         />
         <Button
-          id={6}
+          id={7}
           selectedId={selected}
           title="Sair"
           setSelected={setSelected}

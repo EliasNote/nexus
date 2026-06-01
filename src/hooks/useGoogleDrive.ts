@@ -6,6 +6,7 @@ export const useGoogleDrive = () => {
   const token = useGoogleDriveStore((state) => state.accessToken);
   const setToken = useGoogleDriveStore((state) => state.setAccessToken);
   const clearSession = useGoogleDriveStore((state) => state.clearSession);
+  const setExpiresIn = useGoogleDriveStore((state) => state.setExpiresIn);
 
   const [isLoading, setIsLoading] = useState(false);
   const loginPromiseResolveRef = useRef<((token: string) => void) | null>(null);
@@ -13,6 +14,7 @@ export const useGoogleDrive = () => {
   const login = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/drive.appdata",
     onSuccess: (res) => {
+      setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
       setToken(res.access_token);
       if (loginPromiseResolveRef.current) {
         loginPromiseResolveRef.current(res.access_token);
@@ -30,6 +32,18 @@ export const useGoogleDrive = () => {
       loginPromiseResolveRef.current = resolve;
       login();
     });
+  };
+
+  const refresh = async () => {
+    try {
+      const newToken = await loginWithPromise();
+      setToken(newToken);
+      return;
+    } catch (error) {
+      console.error("Erro na renovação do token:", error);
+      clearSession();
+      return null;
+    }
   };
 
   const find = async (accessToken: string) => {
@@ -125,6 +139,7 @@ export const useGoogleDrive = () => {
     isLoading,
     login,
     loginWithPromise,
+    refresh,
     download,
     uploadVault,
     disconnect,
