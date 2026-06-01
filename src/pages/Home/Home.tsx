@@ -4,23 +4,65 @@ import LetterGlitch from "./components/LetterGlitch";
 import { FileUp } from "lucide-react";
 import { Step } from "./components/Step";
 import { IconButton } from "./components/IconButton";
+import { useGoogleDrive } from "@/hooks/useGoogleDrive";
 
 const TextsButtonsArchives = [
   {
+    id: "select",
     title: "SELECIONAR ARQUIVO",
     subtitle: "Carregar cofre existente",
+    icon: (
+      <FileUp
+        width={22}
+        height={22}
+        strokeWidth={1.5}
+        className="text-zinc-400"
+      />
+    ),
   },
   {
+    id: "create",
     title: "CRIAR COFRE",
     subtitle: "Criar cofre de segurança menu",
+    icon: (
+      <FileUp
+        width={22}
+        height={22}
+        strokeWidth={1.5}
+        className="text-zinc-400"
+      />
+    ),
   },
   {
+    id: "previous",
     title: "SELECIONAR ARQUIVO ANTERIOR",
     subtitle: "Usar cofre da sessão anterior",
+    icon: (
+      <FileUp
+        width={22}
+        height={22}
+        strokeWidth={1.5}
+        className="text-zinc-400"
+      />
+    ),
+  },
+  {
+    id: "google",
+    title: "GOOGLE DRIVE",
+    subtitle: "Usar cofre do Google Drive",
+    icon: (
+      <FileUp
+        width={22}
+        height={22}
+        strokeWidth={1.5}
+        className="text-zinc-400"
+      />
+    ),
   },
 ];
 
-export const Steps = () => {
+export const Home = () => {
+  const { uploadVault, token } = useGoogleDrive();
   const navigate = useNavigate();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +100,16 @@ export const Steps = () => {
       setHideStep2(true);
     } else {
       setHideStep2(true);
+    }
+  };
+
+  const handleConcluir = async () => {
+    try {
+      await uploadVault(JSON.stringify({ teste: "teste" }));
+      navigate("/principal", { state: { texto: password } });
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+      alert("Erro ao fazer upload do cofre");
     }
   };
 
@@ -164,28 +216,24 @@ export const Steps = () => {
         >
           <div className="flex flex-col items-center gap-[10px]">
             <div className="w-full max-w-[384px] flex flex-col gap-[10px] items-start">
-              {TextsButtonsArchives.map((text, index) => (
-                <IconButton
-                  key={index}
-                  icon={
-                    <FileUp
-                      width={22}
-                      height={22}
-                      strokeWidth={1.5}
-                      className="text-zinc-400"
-                    />
-                  }
-                  title={text.title}
-                  subtitle={text.subtitle}
-                />
-              ))}
+              {TextsButtonsArchives.map((text, index) => {
+                const verify = text.id === "google" && token != null;
+                return (
+                  <IconButton
+                    id={text.id}
+                    key={index}
+                    icon={text.icon}
+                    title={text.title}
+                    subtitle={text.subtitle}
+                    synced={verify}
+                  />
+                );
+              })}
             </div>
             <div className="flex gap-3 items-start">
               <button
                 className={nextButtonStyle}
-                onClick={() => {
-                  navigate("/principal", { state: { texto: password } });
-                }}
+                onClick={async () => await handleConcluir()}
               >
                 Concluir
               </button>
@@ -207,4 +255,4 @@ export const Steps = () => {
   );
 };
 
-export default Steps;
+export default Home;

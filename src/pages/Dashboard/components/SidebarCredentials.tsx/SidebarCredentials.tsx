@@ -26,6 +26,7 @@ const SidebarCredentials = () => {
       <div className="w-full h-full">
         {credentials.map((credential) => (
           <Credential
+            key={credential.id}
             selected={selectedCredential === credential.id}
             setSelectedCredential={setSelectedCredential}
             credential={credential}

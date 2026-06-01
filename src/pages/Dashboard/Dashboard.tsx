@@ -1,7 +1,8 @@
 // import { useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCredentials";
+import { useGoogleDrive } from "../../hooks/useGoogleDrive";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -52,11 +53,18 @@ const TelaPrincipal = () => {
   ] as string[]);
   const [isAddDirectory, setIsAddDirectory] = useState(false);
   const [newDirectory, setNewDirectory] = useState("");
+  const [vault, setVault] = useState(null);
   const iconsSize = 20;
 
-  // const location = useLocation();
-  // const texto = location.state?.texto || "";
-  //
+  const { download, token } = useGoogleDrive();
+
+  useEffect(() => {
+    if (token) {
+      download()
+        .then(setVault)
+        .catch((err) => console.error("Erro ao baixar cofre:", err));
+    }
+  }, [token, download]);
 
   const addDirectory = () => {
     if (newDirectory.trim() === "") return;
