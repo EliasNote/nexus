@@ -5,7 +5,7 @@ import TelaPrincipal from "./pages/Dashboard/Dashboard";
 import Home from "./pages/Home/Home";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function App() {
   const token = useGoogleDriveStore((state) => state.accessToken);
@@ -18,7 +18,7 @@ function App() {
   }, [token, expiresIn]);
 
   return (
-    <GoogleOAuthProvider clientId={clientId}>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <HashRouter>
         <Routes>
           <Route path="/" element={<Home />} />
