@@ -163,6 +163,7 @@ export const useGoogleDrive = () => {
     token,
     isLoading,
     login,
+    loginRefresh,
     loginWithPromise,
     refresh,
     download,
