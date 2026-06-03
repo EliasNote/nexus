@@ -27,6 +27,25 @@ export const useGoogleDrive = () => {
     },
   });
 
+  const loginRefresh = useGoogleLogin({
+    scope: "https://www.googleapis.com/auth/drive.appdata",
+    prompt: "none",
+    onSuccess: (res) => {
+      setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
+      setToken(res.access_token);
+      if (loginPromiseResolveRef.current) {
+        loginPromiseResolveRef.current(res.access_token);
+        loginPromiseResolveRef.current = null;
+      }
+    },
+    onError: (error) => {
+      console.error("Erro ao renovar o token:", error);
+      if (loginPromiseResolveRef.current)
+        loginPromiseResolveRef.current(null as any);
+      clearSession();
+    },
+  });
+
   const loginWithPromise = (): Promise<string> => {
     return new Promise((resolve) => {
       loginPromiseResolveRef.current = resolve;
@@ -37,6 +56,7 @@ export const useGoogleDrive = () => {
   const refresh = async () => {
     try {
       const newToken = await loginWithPromise();
+
       setToken(newToken);
       return;
     } catch (error) {
@@ -87,9 +107,14 @@ export const useGoogleDrive = () => {
     }
   };
 
-  const uploadVault = async (vaultContentString: string) => {
+  const uploadVault = async (
+    vaultContentString: string,
+    firstUpload: boolean,
+  ) => {
     if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
+
+    if (!firstUpload) return;
 
     try {
       const existingFile = await find(token);

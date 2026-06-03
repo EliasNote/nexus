@@ -105,7 +105,7 @@ export const Home = () => {
 
   const handleConcluir = async () => {
     try {
-      await uploadVault(JSON.stringify({ teste: "teste" }));
+      await uploadVault(JSON.stringify({ teste: "teste" }), true);
       navigate("/principal", { state: { texto: password } });
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
