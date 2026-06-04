@@ -7,6 +7,7 @@ export const useGoogleDrive = () => {
   const setToken = useGoogleDriveStore((state) => state.setAccessToken);
   const clearSession = useGoogleDriveStore((state) => state.clearSession);
   const setExpiresIn = useGoogleDriveStore((state) => state.setExpiresIn);
+  const setIsTokenValid = useGoogleDriveStore((state) => state.setIsTokenValid);
 
   const [isLoading, setIsLoading] = useState(false);
   const loginPromiseResolveRef = useRef<
@@ -24,6 +25,7 @@ export const useGoogleDrive = () => {
     scope: "https://www.googleapis.com/auth/drive.appdata",
     onSuccess: (res) => {
       setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
+      setIsTokenValid(true);
       setToken(res.access_token);
       resolvePromise(res.access_token);
     },
@@ -42,6 +44,7 @@ export const useGoogleDrive = () => {
     prompt: "none",
     onSuccess: (res) => {
       setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
+      setIsTokenValid(true);
       setToken(res.access_token);
       resolvePromise(res.access_token);
     },
@@ -64,13 +67,13 @@ export const useGoogleDrive = () => {
     });
   };
 
-  const find = async (accessToken: string) => {
+  const find = async () => {
     const query = encodeURIComponent("name = 'vault.json'");
     const url = `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${query}`;
 
     const response = await fetch(url, {
       method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) throw new Error("Erro ao buscar no Drive");
@@ -78,20 +81,19 @@ export const useGoogleDrive = () => {
     return data.files && data.files.length > 0 ? data.files[0] : null;
   };
 
-  const download = async (accessToken?: string) => {
-    const tokenToUse = accessToken || token;
-    if (!tokenToUse) throw new Error("Não autenticado");
+  const download = async (idParam?: string) => {
+    if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
 
     try {
-      const file = await find(tokenToUse);
-      if (!file) throw new Error("Arquivo não encontrado na nuvem");
+      const id = idParam ?? (await find())?.id;
+      if (!id) throw new Error("Arquivo não encontrado na nuvem");
 
       const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
+        `https://www.googleapis.com/drive/v3/files/${id}?alt=media`,
         {
           method: "GET",
-          headers: { Authorization: `Bearer ${tokenToUse}` },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
 
@@ -105,17 +107,17 @@ export const useGoogleDrive = () => {
     }
   };
 
-  const uploadVault = async (vaultContentString: string) => {
+  const uploadVault = async (vaultContentString: string, idParam?: string) => {
     if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
 
     try {
-      const existingFile = await find(token);
-      const fileId = existingFile ? existingFile.id : undefined;
+      const id = idParam ?? (await find())?.id;
+      if (!id) throw new Error("Arquivo não encontrado na nuvem");
 
       const metadata = {
         name: "vault.json",
-        parents: fileId ? undefined : ["appDataFolder"],
+        parents: id ? undefined : ["appDataFolder"],
       };
 
       const form = new FormData();
@@ -128,18 +130,18 @@ export const useGoogleDrive = () => {
         new Blob([vaultContentString], { type: "application/json" }),
       );
 
-      const url = fileId
-        ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+      const url = id
+        ? `https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=multipart`
         : "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
 
       const response = await fetch(url, {
-        method: fileId ? "PATCH" : "POST",
+        method: id ? "PATCH" : "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,
       });
 
       if (!response.ok) throw new Error("Falha no upload");
-      return await response.json();
+      return response.json();
     } catch (error) {
       console.error(error);
       throw error;
@@ -156,6 +158,7 @@ export const useGoogleDrive = () => {
     token,
     isLoading,
     login,
+    find,
     loginRefresh,
     loginWithPromise,
     download,

@@ -3,19 +3,19 @@ import { useEffect } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import TelaPrincipal from "./pages/Dashboard/Dashboard";
 import Home from "./pages/Home/Home";
-import { useGoogleDrive } from "./hooks/useGoogleDrive";
 
 function App() {
   const token = useGoogleDriveStore((state) => state.accessToken);
   const expiresIn = useGoogleDriveStore((state) => state.expiresIn);
-  const { loginRefresh } = useGoogleDrive();
+  const setIsTokenValid = useGoogleDriveStore((state) => state.setIsTokenValid);
 
   useEffect(() => {
-    if (token && expiresIn && Date.now() > expiresIn) {
-      loginRefresh();
-      console.log("Token expirado");
+    if (token && expiresIn && Date.now() < expiresIn) {
+      setIsTokenValid(true);
+    } else {
+      setIsTokenValid(false);
     }
-  }, [token, expiresIn]);
+  }, [token, expiresIn, setIsTokenValid]);
 
   return (
     <HashRouter>

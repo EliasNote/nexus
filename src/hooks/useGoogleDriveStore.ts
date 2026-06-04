@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -7,6 +8,8 @@ type GoogleDriveState = {
   clearSession: () => void;
   expiresIn: number | null;
   setExpiresIn: (expiresIn: number | null) => void;
+  isTokenValid: boolean;
+  setIsTokenValid: (isValid: boolean) => void;
 };
 
 export const useGoogleDriveStore = create<GoogleDriveState>()(
@@ -21,11 +24,16 @@ export const useGoogleDriveStore = create<GoogleDriveState>()(
       expiresIn: null,
 
       setExpiresIn: (expiresIn) => set({ expiresIn }),
+
+      isTokenValid: false,
+
+      setIsTokenValid: (isValid) => set({ isTokenValid: isValid }),
     }),
     {
       name: "google-drive-store",
       partialize: (state) => ({
         accessToken: state.accessToken,
+        expiresIn: state.expiresIn,
       }),
     },
   ),

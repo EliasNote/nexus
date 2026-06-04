@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LetterGlitch from "./components/LetterGlitch";
 import { FileUp } from "lucide-react";
@@ -6,6 +6,7 @@ import { Step } from "./components/Step";
 import { IconButton } from "./components/IconButton";
 import { useGoogleDrive } from "@/hooks/useGoogleDrive";
 import { useGoogleDriveStore } from "@/hooks/useGoogleDriveStore";
+import { useStore } from "@/hooks/useStore";
 
 const TextsButtonsArchives = [
   {
@@ -63,8 +64,9 @@ const TextsButtonsArchives = [
 ];
 
 export const Home = () => {
-  const { uploadVault, token, download } = useGoogleDrive();
-  const { setAccessToken } = useGoogleDriveStore();
+  const { uploadVault, download, find } = useGoogleDrive();
+  const { vault, setVault } = useStore();
+
   const navigate = useNavigate();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -73,7 +75,9 @@ export const Home = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  const synced = !token;
+  const isTokenValid = useGoogleDriveStore((state) => state.isTokenValid);
+  const setToken = useGoogleDriveStore((state) => state.setAccessToken);
+  const setExpiresIn = useGoogleDriveStore((state) => state.setExpiresIn);
 
   const nextStep = () => {
     setDirection(1);
@@ -87,17 +91,23 @@ export const Home = () => {
 
   const handleConcluir = async () => {
     try {
-      if (token) {
-        const vault = await download(token);
+      const data = await find();
+      let vault;
+
+      if (data) {
+        vault = await download(data.id);
         console.log("Vault baixado:", vault);
       } else {
-        await uploadVault(JSON.stringify({ teste: "teste" }));
+        // COLOCAR VAULT PADRÃO
+        vault = JSON.stringify({ teste: "teste" });
+        await uploadVault(vault);
       }
+
+      setVault(vault);
 
       navigate("/principal", { state: { texto: password } });
     } catch (error) {
-      console.error("Erro ao fazer upload:", error);
-      alert("Erro ao fazer upload do cofre");
+      console.error("Erro: ", error);
     }
   };
 
@@ -121,6 +131,15 @@ export const Home = () => {
         classname="fixed inset-0 z-0 pointer-events-none"
       />
       <section className="relative z-10 flex min-h-screen items-center justify-center">
+        <button
+          className="mb-100"
+          onClick={() => setExpiresIn(Date.now() - 1000)}
+        >
+          Expirar ExpireIn
+        </button>
+        <button className="mb-100" onClick={() => setToken(null)}>
+          Remover Token
+        </button>
         {currentStep === 0 && (
           <Step key="step0" direction={direction}>
             <div className="flex flex-col items-center justify-center gap-[20px]">
@@ -158,7 +177,7 @@ export const Home = () => {
                 <button
                   className={nextButtonStyle}
                   onClick={nextStep}
-                  disabled={synced}
+                  disabled={!isTokenValid}
                 >
                   Próximo
                 </button>
