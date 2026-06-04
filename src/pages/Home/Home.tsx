@@ -5,6 +5,7 @@ import { FileUp } from "lucide-react";
 import { Step } from "./components/Step";
 import { IconButton } from "./components/IconButton";
 import { useGoogleDrive } from "@/hooks/useGoogleDrive";
+import { useGoogleDriveStore } from "@/hooks/useGoogleDriveStore";
 
 const TextsButtonsArchives = [
   {
@@ -62,50 +63,38 @@ const TextsButtonsArchives = [
 ];
 
 export const Home = () => {
-  const { uploadVault, token } = useGoogleDrive();
+  const { uploadVault, token, download } = useGoogleDrive();
+  const { setAccessToken } = useGoogleDriveStore();
   const navigate = useNavigate();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [password, setPassword] = useState("");
 
-  const [step0, setStep0] = useState(true);
-  const [hideStep0, setHideStep0] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [direction, setDirection] = useState(1);
 
-  const [step1, setStep1] = useState(false);
-  const [hideStep1, setHideStep1] = useState(true);
+  const synced = !token;
 
-  const [step2, setStep2] = useState(false);
-  const [hideStep2, setHideStep2] = useState(true);
-
-  const [invertido, setInvertido] = useState(false);
-
-  const handleStep0 = () => {
-    setHideStep1(false);
-    setHideStep0(true);
+  const nextStep = () => {
+    setAccessToken(null);
+    setDirection(1);
+    setCurrentStep((prev) => prev + 1);
   };
 
-  const handleStep1 = () => {
-    if (invertido) {
-      setHideStep0(false);
-      setHideStep1(true);
-    } else {
-      setHideStep2(false);
-      setHideStep1(true);
-    }
-  };
-
-  const handleStep2 = () => {
-    if (invertido) {
-      setHideStep1(false);
-      setHideStep2(true);
-    } else {
-      setHideStep2(true);
-    }
+  const prevStep = () => {
+    setDirection(-1);
+    setCurrentStep((prev) => prev - 1);
   };
 
   const handleConcluir = async () => {
     try {
-      await uploadVault(JSON.stringify({ teste: "teste" }), true);
+      if (token) {
+        const vault = await download(token);
+        console.log("Vault baixado:", vault);
+      } else {
+        await uploadVault(JSON.stringify({ teste: "teste" }));
+      }
+
       navigate("/principal", { state: { texto: password } });
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
@@ -118,7 +107,7 @@ export const Home = () => {
   };
 
   const nextButtonStyle =
-    "px-7 py-2.5 text-base bg-brand border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer";
+    "px-7 py-2.5 text-base bg-brand border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
   const prevButtonStyle =
     "px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer";
@@ -133,123 +122,79 @@ export const Home = () => {
         classname="fixed inset-0 z-0 pointer-events-none"
       />
       <section className="relative z-10 flex min-h-screen items-center justify-center">
-        <Step
-          id={0}
-          step0={step0}
-          hideStep0={hideStep0}
-          handleStep={handleStep0}
-          x0={invertido ? -1200 : 0}
-          x1={0}
-          x2={-1200}
-        >
-          <div className="flex flex-col items-center justify-center gap-[20px]">
-            <div className="flex flex-row items-center justify-center gap-[10px] text-[64px]">
-              <img src="/logo.svg" alt="Logo" className="w-[124px]" />
-              <h1 className="font-medium">Nexus</h1>
+        {currentStep === 0 && (
+          <Step key="step0" direction={direction}>
+            <div className="flex flex-col items-center justify-center gap-[20px]">
+              <div className="flex flex-row items-center justify-center gap-[10px] text-[64px]">
+                <img src="/logo.svg" alt="Logo" className="w-[124px]" />
+                <h1 className="font-medium">Nexus</h1>
+              </div>
+              <div className="flex gap-3">
+                <button className={nextButtonStyle} onClick={nextStep}>
+                  Começar
+                </button>
+                <button className={prevButtonStyle}>Como usar</button>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                className={nextButtonStyle}
-                onClick={() => {
-                  setInvertido(false);
-                  setStep1(true);
-                  setStep0(false);
-                }}
-              >
-                Começar
-              </button>
-              <button className={prevButtonStyle}>Como usar</button>
+          </Step>
+        )}
+
+        {currentStep === 1 && (
+          <Step key="step1" direction={direction}>
+            <div className="flex flex-col items-center gap-[10px]">
+              <div className="w-full max-w-[384px] flex flex-col gap-[10px] items-start">
+                {TextsButtonsArchives.map((text, index) => {
+                  return (
+                    <IconButton
+                      id={text.id}
+                      key={index}
+                      icon={text.icon}
+                      title={text.title}
+                      subtitle={text.subtitle}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex gap-3 items-start">
+                <button
+                  className={nextButtonStyle}
+                  onClick={nextStep}
+                  disabled={synced}
+                >
+                  Próximo
+                </button>
+                <button className={prevButtonStyle} onClick={prevStep}>
+                  Anterior
+                </button>
+              </div>
             </div>
-          </div>
-        </Step>
-        <Step
-          id={1}
-          step0={step1}
-          hideStep0={hideStep1}
-          handleStep={handleStep1}
-          x0={invertido ? -1200 : 1200}
-          x1={0}
-          x2={invertido ? 1200 : -1200}
-        >
-          <div className="flex flex-col gap-2 items-center">
-            <div className="w-full flex flex-col items-start">
-              <p className="text-sm font-bold">SENHA MESTRA</p>
-              <input
-                className="bg-zinc-900 text-[16px] h-[40px] w-[384px] border border-zinc-800 px-2"
-                ref={inputRef}
-                type="password"
-              />
+          </Step>
+        )}
+        {currentStep === 2 && (
+          <Step key="step2" direction={direction}>
+            <div className="flex flex-col gap-2 items-center">
+              <div className="w-full flex flex-col items-start">
+                <p className="text-sm font-bold">SENHA MESTRA</p>
+                <input
+                  className="bg-zinc-900 text-[16px] h-[40px] w-[384px] border border-zinc-800 px-2"
+                  ref={inputRef}
+                  type="password"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  className={nextButtonStyle}
+                  onClick={async () => await handleConcluir()}
+                >
+                  Concluir
+                </button>
+                <button className={prevButtonStyle} onClick={prevStep}>
+                  Anterior
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                className={nextButtonStyle}
-                onClick={() => {
-                  setInvertido(false);
-                  setStep2(true);
-                  setStep1(false);
-                  handlePasswordChange();
-                }}
-              >
-                Próximo
-              </button>
-              <button
-                className={prevButtonStyle}
-                onClick={() => {
-                  setInvertido(true);
-                  setStep0(true);
-                  setStep1(false);
-                }}
-              >
-                Anterior
-              </button>
-            </div>
-          </div>
-        </Step>
-        <Step
-          id={2}
-          step0={step2}
-          hideStep0={hideStep2}
-          handleStep={handleStep2}
-          x0={invertido ? -1200 : 1200}
-          x1={0}
-          x2={invertido ? 1200 : -1200}
-        >
-          <div className="flex flex-col items-center gap-[10px]">
-            <div className="w-full max-w-[384px] flex flex-col gap-[10px] items-start">
-              {TextsButtonsArchives.map((text, index) => {
-                const verify = text.id === "google" && token != null;
-                return (
-                  <IconButton
-                    id={text.id}
-                    key={index}
-                    icon={text.icon}
-                    title={text.title}
-                    subtitle={text.subtitle}
-                    synced={verify}
-                  />
-                );
-              })}
-            </div>
-            <div className="flex gap-3 items-start">
-              <button
-                className={nextButtonStyle}
-                onClick={async () => await handleConcluir()}
-              >
-                Concluir
-              </button>
-              <button
-                className={prevButtonStyle}
-                onClick={() => {
-                  setInvertido(true);
-                  setStep1(true);
-                  setStep2(false);
-                }}
-              >
-                Anterior
-              </button>
-            </div>
-          </div>
-        </Step>
+          </Step>
+        )}
       </section>
     </div>
   );

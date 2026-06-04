@@ -1,37 +1,31 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { useGoogleDrive } from "@/hooks/useGoogleDrive";
-import { Check } from "lucide-react";
 
 export const IconButton = ({
   id,
   icon,
   title,
   subtitle,
-  synced,
 }: {
   id: string;
   icon: ReactNode;
   title: string;
   subtitle: string;
-  synced: boolean;
 }) => {
-  const { loginWithPromise, download } = useGoogleDrive();
+  const { loginWithPromise } = useGoogleDrive();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
     if (id === "google") {
       setIsLoading(true);
-      try {
-        const accessToken = await loginWithPromise();
-
-        const vault = await download(accessToken);
-        console.log("Vault baixado:", vault);
-      } catch (error) {
-        console.error("Erro ao processar Google Drive:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      loginWithPromise()
+        .catch((err) => {
+          console.error("Erro no login:", err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   };
 
@@ -43,7 +37,7 @@ export const IconButton = ({
     >
       <div className="flex flex-row gap-[14px] justify-center items-center">
         <div className="flex flex-row justify-center items-center border border-zinc-700 w-[35px] h-[35px] bg-zinc-950">
-          {synced ? <Check className="text-green-400" /> : icon}
+          {icon}
         </div>
         <div className="flex flex-col items-start">
           <span className="text-white text-[14px] font-bold">{title}</span>
