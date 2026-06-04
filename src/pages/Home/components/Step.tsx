@@ -1,52 +1,33 @@
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
 type Props = {
-  step0: boolean;
-  hideStep0: boolean;
-  handleStep: () => void;
-  id: number;
-  children?: ReactNode;
-  x0: number;
-  x1: number;
-  x2: number;
+  direction: number;
+  children: ReactNode;
 };
 
-export function Step({
-  step0,
-  hideStep0,
-  handleStep,
-  id,
-  children,
-  x0,
-  x1,
-  x2,
-}: Props) {
+export function Step({ direction, children }: Props) {
+  const variants = {
+    initial: (dir: number) => ({
+      x: dir === 1 ? 1200 : -1200,
+    }),
+    animate: { x: 0 },
+    exit: (dir: number) => ({
+      x: dir === 1 ? -1200 : 1200,
+    }),
+  };
+
   return (
-    <>
-      {!hideStep0 && (
-        <motion.div
-          key={id}
-          id={`${id}`}
-          className="absolute flex gap-4 items-center justify-center font-normal text-sm"
-          initial={{ x: x0 }}
-          animate={{
-            x: step0 ? x1 : x2,
-          }}
-          transition={{
-            type: "spring",
-            duration: 0.3,
-            ease: "easeInOut",
-          }}
-          onAnimationComplete={() => {
-            if (!step0) {
-              handleStep();
-            }
-          }}
-        >
-          {children}
-        </motion.div>
-      )}
-    </>
+    <motion.div
+      custom={direction}
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={{ type: "spring", duration: 0.3, ease: "easeInOut" }}
+      className="absolute flex gap-4 items-center justify-center font-normal text-sm"
+    >
+      {children}
+    </motion.div>
   );
 }
