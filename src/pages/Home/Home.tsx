@@ -76,7 +76,6 @@ export const Home = () => {
   const synced = !token;
 
   const nextStep = () => {
-    setAccessToken(null);
     setDirection(1);
     setCurrentStep((prev) => prev + 1);
   };
