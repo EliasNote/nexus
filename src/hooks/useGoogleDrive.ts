@@ -9,21 +9,31 @@ export const useGoogleDrive = () => {
   const setExpiresIn = useGoogleDriveStore((state) => state.setExpiresIn);
 
   const [isLoading, setIsLoading] = useState(false);
-  const loginPromiseResolveRef = useRef<((token: string) => void) | null>(null);
+  const loginPromiseResolveRef = useRef<
+    ((token: string | null) => void) | null
+  >(null);
+
+  const resolvePromise = (token: string | null) => {
+    if (loginPromiseResolveRef.current) {
+      loginPromiseResolveRef.current(token);
+      loginPromiseResolveRef.current = null;
+    }
+  };
 
   const login = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/drive.appdata",
     onSuccess: (res) => {
       setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
       setToken(res.access_token);
-      if (loginPromiseResolveRef.current) {
-        loginPromiseResolveRef.current(res.access_token);
-        loginPromiseResolveRef.current = null;
-      }
+      resolvePromise(res.access_token);
     },
     onError: (error) => {
       console.error("Erro ao conectar ao Google Drive:", error);
-      alert("Erro ao conectar ao Google Drive.");
+      resolvePromise(null);
+    },
+    onNonOAuthError: (error) => {
+      console.error("Ação cancelada ou popup fechado:", error);
+      resolvePromise(null);
     },
   });
 
@@ -33,37 +43,25 @@ export const useGoogleDrive = () => {
     onSuccess: (res) => {
       setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
       setToken(res.access_token);
-      if (loginPromiseResolveRef.current) {
-        loginPromiseResolveRef.current(res.access_token);
-        loginPromiseResolveRef.current = null;
-      }
+      resolvePromise(res.access_token);
     },
     onError: (error) => {
       console.error("Erro ao renovar o token:", error);
-      if (loginPromiseResolveRef.current)
-        loginPromiseResolveRef.current(null as any);
+      resolvePromise(null);
+      clearSession();
+    },
+    onNonOAuthError: (error) => {
+      console.error("Erro ao renovar token:", error);
+      resolvePromise(null);
       clearSession();
     },
   });
 
-  const loginWithPromise = (): Promise<string> => {
+  const loginWithPromise = (): Promise<string | null> => {
     return new Promise((resolve) => {
       loginPromiseResolveRef.current = resolve;
       login();
     });
-  };
-
-  const refresh = async () => {
-    try {
-      const newToken = await loginWithPromise();
-
-      setToken(newToken);
-      return;
-    } catch (error) {
-      console.error("Erro na renovação do token:", error);
-      clearSession();
-      return null;
-    }
   };
 
   const find = async (accessToken: string) => {
@@ -107,14 +105,9 @@ export const useGoogleDrive = () => {
     }
   };
 
-  const uploadVault = async (
-    vaultContentString: string,
-    firstUpload: boolean,
-  ) => {
+  const uploadVault = async (vaultContentString: string) => {
     if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
-
-    if (!firstUpload) return;
 
     try {
       const existingFile = await find(token);
@@ -165,7 +158,6 @@ export const useGoogleDrive = () => {
     login,
     loginRefresh,
     loginWithPromise,
-    refresh,
     download,
     uploadVault,
     disconnect,
