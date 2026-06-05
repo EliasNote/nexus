@@ -1,13 +1,18 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState, useRef } from "react";
-import { useGoogleDriveStore } from "./useGoogleDriveStore";
+import { useCloudStore } from "./useCloudStore";
+import type { StorageProviderInterface } from "./interface";
 
-export const useGoogleDrive = () => {
-  const token = useGoogleDriveStore((state) => state.accessToken);
-  const setToken = useGoogleDriveStore((state) => state.setAccessToken);
-  const clearSession = useGoogleDriveStore((state) => state.clearSession);
-  const setExpiresIn = useGoogleDriveStore((state) => state.setExpiresIn);
-  const setIsTokenValid = useGoogleDriveStore((state) => state.setIsTokenValid);
+export const useGoogle = (): StorageProviderInterface => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const token = useCloudStore((state) => state.accessToken);
+  const setToken = useCloudStore((state) => state.setAccessToken);
+  const refreshToken = useCloudStore((state) => state.refreshToken);
+  const setRefreshToken = useCloudStore((state) => state.setRefreshToken);
+  const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
+  const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
+  const clearSession = useCloudStore((state) => state.clearSession);
 
   const [isLoading, setIsLoading] = useState(false);
   const loginPromiseResolveRef = useRef<
@@ -23,40 +28,39 @@ export const useGoogleDrive = () => {
 
   const login = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/drive.appdata",
-    onSuccess: (res) => {
-      setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
-      setIsTokenValid(true);
-      setToken(res.access_token);
-      resolvePromise(res.access_token);
-    },
-    onError: (error) => {
-      console.error("Erro ao conectar ao Google Drive:", error);
-      resolvePromise(null);
-    },
-    onNonOAuthError: (error) => {
-      console.error("Ação cancelada ou popup fechado:", error);
-      resolvePromise(null);
-    },
-  });
+    flow: "auth-code",
+    onSuccess: async (res) => {
+      try {
+        const response = await fetch(`${API_URL}/api/auth/google`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: res.code }),
+        });
 
-  const loginRefresh = useGoogleLogin({
-    scope: "https://www.googleapis.com/auth/drive.appdata",
-    prompt: "none",
-    onSuccess: (res) => {
-      setExpiresIn(Date.now() + res.expires_in * 1000 - 300000);
-      setIsTokenValid(true);
-      setToken(res.access_token);
-      resolvePromise(res.access_token);
+        if (!response.ok) throw new Error("Erro na troca de tokens");
+        const data = await response.json();
+
+        setExpiresIn(Date.now() + data.expires_in * 1000 - 300000);
+        setIsTokenValid(true);
+        setToken(data.access_token);
+
+        if (data.refresh_token) {
+          setRefreshToken(data.refresh_token);
+        }
+
+        resolvePromise(data.access_token);
+      } catch (error) {
+        console.error(error);
+        resolvePromise(null);
+      }
     },
     onError: (error) => {
-      console.error("Erro ao renovar o token:", error);
+      console.error("Erro no login do Google:", error);
       resolvePromise(null);
-      clearSession();
     },
     onNonOAuthError: (error) => {
-      console.error("Erro ao renovar token:", error);
+      console.error("Popup fechado ou erro não-oauth:", error);
       resolvePromise(null);
-      clearSession();
     },
   });
 
@@ -65,6 +69,32 @@ export const useGoogleDrive = () => {
       loginPromiseResolveRef.current = resolve;
       login();
     });
+  };
+
+  const refresh = async (): Promise<string | null> => {
+    if (!refreshToken) {
+      clearSession();
+      return null;
+    }
+    try {
+      const response = await fetch(`${API_URL}/api/auth/google/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+
+      setExpiresIn(Date.now() + data.expires_in * 1000 - 300000);
+      setIsTokenValid(true);
+      setToken(data.access_token);
+      return data.access_token;
+    } catch (error) {
+      clearSession();
+      console.error("Erro ao renovar a sessão:", error);
+      return null;
+    }
   };
 
   const find = async () => {
@@ -113,7 +143,6 @@ export const useGoogleDrive = () => {
 
     try {
       const id = idParam ?? (await find())?.id;
-      if (!id) throw new Error("Arquivo não encontrado na nuvem");
 
       const metadata = {
         name: "vault.json",
@@ -159,7 +188,7 @@ export const useGoogleDrive = () => {
     isLoading,
     login,
     find,
-    loginRefresh,
+    refresh,
     loginWithPromise,
     download,
     uploadVault,
