@@ -36,11 +36,8 @@ export const useGitHub = () => {
       if (!response.ok) throw new Error("Erro na troca de tokens");
       const data = await response.json();
 
-      if (data.expires_in) {
+      if (data.expires_in)
         setExpiresIn(Date.now() + data.expires_in * 1000 - 300000);
-      } else {
-        setExpiresIn(Date.now() + 31536000000);
-      }
 
       setIsTokenValid(true);
       setToken(data.access_token);

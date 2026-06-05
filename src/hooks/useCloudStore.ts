@@ -54,6 +54,7 @@ export const useCloudStore = create<CloudState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         expiresIn: state.expiresIn,
+        activeProvider: state.activeProvider,
       }),
     },
   ),
