@@ -6,6 +6,7 @@ import { Step } from "./components/Step";
 import { IconButton } from "./components/IconButton";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useCloudStore } from "@/hooks/useCloudStore";
+import { dashboardRoute } from "@/App";
 
 const TextsButtonsArchives = [
   {
@@ -65,20 +66,17 @@ export const Home = () => {
   const handleConcluir = async () => {
     try {
       const data = await find();
-      let vault;
 
-      if (data) {
-        vault = await download();
-        console.log("Vault baixado:", vault);
+      if (data && (data.id || data.sha)) {
+        console.log("Vault existe");
       } else {
+        console.log("Vault não existe, fazendo upload");
         // COLOCAR VAULT PADRÃO
-        vault = JSON.stringify({ teste: "teste" });
+        const vault = JSON.stringify({ teste: "teste" });
         await uploadVault(vault);
       }
 
-      setVault(vault);
-
-      navigate("/principal", { state: { texto: password } });
+      navigate(dashboardRoute, { state: { texto: password } });
     } catch (error) {
       console.error("Erro: ", error);
     }

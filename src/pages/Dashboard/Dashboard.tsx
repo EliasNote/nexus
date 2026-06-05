@@ -1,13 +1,13 @@
-// import { useLocation } from "react-router-dom";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCredentials";
 import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
+import { useNavigate } from "react-router-dom";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
-const TelaPrincipal = () => {
+const Dashboard = () => {
   const [selected, setSelected] = useState(0);
   const [directories, setDirectories] = useState([
     "asdasd",
@@ -52,33 +52,28 @@ const TelaPrincipal = () => {
     "asdasd",
     "asdasd",
   ] as string[]);
+
   const [isAddDirectory, setIsAddDirectory] = useState(false);
   const [newDirectory, setNewDirectory] = useState("");
   const [vault, setVault] = useState(null);
   const iconsSize = 20;
-  const isTokenValid = useCloudStore((state) => state.isTokenValid);
-  const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
-  const token = useCloudStore((state) => state.accessToken);
-  const expiresIn = useCloudStore((state) => state.expiresIn);
 
-  const { download, refresh } = useCloudSync();
+  const isTokenValid = useCloudStore((state) => state.isTokenValid);
+
+  const { download } = useCloudSync();
 
   useEffect(() => {
-    if (token) {
+    if (isTokenValid) {
       download()
-        .then(setVault)
+        .then((res) => {
+          if (res) {
+            setVault(res);
+            console.log("Vault baixado real:", res);
+          }
+        })
         .catch((err) => console.error("Erro ao baixar cofre:", err));
     }
-  }, [token, download]);
-
-  useEffect(() => {
-    if (token && expiresIn && Date.now() < expiresIn) {
-      setIsTokenValid(true);
-    } else {
-      setIsTokenValid(false);
-      refresh();
-    }
-  }, [token, expiresIn, setIsTokenValid, refresh]);
+  }, [isTokenValid]);
 
   const addDirectory = () => {
     if (newDirectory.trim() === "") return;
@@ -115,4 +110,4 @@ const TelaPrincipal = () => {
 </button>*/
 }
 
-export default TelaPrincipal;
+export default Dashboard;

@@ -12,10 +12,9 @@ import {
   Minus,
   Cloud,
   LogOut,
-  RefreshCcw,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useCloudSync } from "../../../../hooks/useCloudSync";
+import { useCloudSync } from "@/hooks/useCloudSync";
 
 const Sidebar = ({
   selected,
@@ -38,7 +37,11 @@ const Sidebar = ({
   addDirectory: () => void;
   directories: string[];
 }) => {
-  const { refresh } = useCloudSync();
+  const { disconnect } = useCloudSync();
+
+  const handleLogout = () => {
+    disconnect();
+  };
 
   return (
     <section className="flex flex-col gap-[20px] items-start border-r border-zinc-800 h-screen overflow-hidden max-w-[248px] w-full">
@@ -157,17 +160,6 @@ const Sidebar = ({
       <hr className="w-full text-zinc-800 mt-[-20px] mb-[-15px]" />
       <div className="flex flex-col w-full gap-2 ">
         <Button
-          id={5}
-          selectedId={selected}
-          title="Refresh Token"
-          setSelected={setSelected}
-          icon={<RefreshCcw size={iconsSize} />}
-          onClick={() => {
-            refresh();
-          }}
-        />
-
-        <Button
           id={6}
           selectedId={selected}
           title="Sincronizar"
@@ -179,6 +171,7 @@ const Sidebar = ({
           selectedId={selected}
           title="Sair"
           setSelected={setSelected}
+          onClick={handleLogout}
           icon={<LogOut size={iconsSize} />}
         />
       </div>
