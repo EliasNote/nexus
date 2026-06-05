@@ -13,12 +13,16 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.use("*", async (c, next) => {
-  const corsMiddleware = cors({
-    origin: [c.env.CORS_ORIGIN],
-  });
-  return await corsMiddleware(c, next);
-});
+app.use(
+  "*",
+  cors({
+    origin: (origin, c) => {
+      return c.env.CORS_ORIGIN;
+    },
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization", "Accept"],
+  }),
+);
 
 app.post("/api/auth/google", async (c) => {
   const { code } = await c.req.json();
