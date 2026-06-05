@@ -13,7 +13,7 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.use("/*", async (c, next) => {
+app.use("*", async (c, next) => {
   const corsMiddleware = cors({
     origin: [c.env.CORS_ORIGIN],
   });
