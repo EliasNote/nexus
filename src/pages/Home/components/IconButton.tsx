@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
-import { useGoogleDrive } from "@/hooks/useGoogleDrive";
+import { useCloudSync } from "@/hooks/useCloudSync";
+import { useCloudStore, type StorageProvider } from "@/hooks/useCloudStore";
 
 export const IconButton = ({
   id,
@@ -13,19 +13,16 @@ export const IconButton = ({
   title: string;
   subtitle: string;
 }) => {
-  const { loginWithPromise } = useGoogleDrive();
-  const [isLoading, setIsLoading] = useState(false);
+  const { loginWithPromise, isLoading } = useCloudSync();
+  const setProvider = useCloudStore((state) => state.setActiveProvider);
 
   const handleClick = async () => {
-    if (id === "google") {
-      setIsLoading(true);
-      loginWithPromise()
-        .catch((err) => {
-          console.error("Erro no login:", err);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+    try {
+      setProvider(id as StorageProvider);
+      const token = await loginWithPromise();
+      if (token) console.log(`Conectado ao ${id} com sucesso!`);
+    } catch (err) {
+      console.error(`Erro ao conectar ao ${id}:`, err);
     }
   };
 

@@ -15,7 +15,7 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useGoogleDrive } from "../../../../hooks/useGoogleDrive";
+import { useCloudSync } from "../../../../hooks/useCloudSync";
 
 const Sidebar = ({
   selected,
@@ -38,7 +38,7 @@ const Sidebar = ({
   addDirectory: () => void;
   directories: string[];
 }) => {
-  const { refresh } = useGoogleDrive();
+  const { refresh } = useCloudSync();
 
   return (
     <section className="flex flex-col gap-[20px] items-start border-r border-zinc-800 h-screen overflow-hidden max-w-[248px] w-full">

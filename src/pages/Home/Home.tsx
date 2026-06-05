@@ -1,44 +1,17 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import LetterGlitch from "./components/LetterGlitch";
 import { FileUp } from "lucide-react";
 import { Step } from "./components/Step";
 import { IconButton } from "./components/IconButton";
-import { useGoogleDrive } from "@/hooks/useGoogleDrive";
-import { useGoogleDriveStore } from "@/hooks/useGoogleDriveStore";
-import { useStore } from "@/hooks/useStore";
+import { useCloudSync } from "@/hooks/useCloudSync";
+import { useCloudStore } from "@/hooks/useCloudStore";
 
 const TextsButtonsArchives = [
   {
-    id: "select",
-    title: "SELECIONAR ARQUIVO",
-    subtitle: "Carregar cofre existente",
-    icon: (
-      <FileUp
-        width={22}
-        height={22}
-        strokeWidth={1.5}
-        className="text-zinc-400"
-      />
-    ),
-  },
-  {
-    id: "create",
-    title: "CRIAR COFRE",
-    subtitle: "Criar cofre de segurança menu",
-    icon: (
-      <FileUp
-        width={22}
-        height={22}
-        strokeWidth={1.5}
-        className="text-zinc-400"
-      />
-    ),
-  },
-  {
-    id: "previous",
-    title: "SELECIONAR ARQUIVO ANTERIOR",
-    subtitle: "Usar cofre da sessão anterior",
+    id: "github",
+    title: "GITHUB",
+    subtitle: "Usar GitHub como cofre",
     icon: (
       <FileUp
         width={22}
@@ -64,8 +37,7 @@ const TextsButtonsArchives = [
 ];
 
 export const Home = () => {
-  const { uploadVault, download, find } = useGoogleDrive();
-  const { vault, setVault } = useStore();
+  const { uploadVault, download, find } = useCloudSync();
 
   const navigate = useNavigate();
 
@@ -75,9 +47,10 @@ export const Home = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  const isTokenValid = useGoogleDriveStore((state) => state.isTokenValid);
-  const setToken = useGoogleDriveStore((state) => state.setAccessToken);
-  const setExpiresIn = useGoogleDriveStore((state) => state.setExpiresIn);
+  const isTokenValid = useCloudStore((state) => state.isTokenValid);
+  const setToken = useCloudStore((state) => state.setAccessToken);
+  const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
+  const setVault = useCloudStore((state) => state.setVault);
 
   const nextStep = () => {
     setDirection(1);
@@ -95,7 +68,7 @@ export const Home = () => {
       let vault;
 
       if (data) {
-        vault = await download(data.id);
+        vault = await download();
         console.log("Vault baixado:", vault);
       } else {
         // COLOCAR VAULT PADRÃO

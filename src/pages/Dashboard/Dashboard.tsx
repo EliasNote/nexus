@@ -2,8 +2,8 @@
 import { useState, useEffect, use } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCredentials";
-import { useGoogleDrive } from "../../hooks/useGoogleDrive";
-import { useGoogleDriveStore } from "../../hooks/useGoogleDriveStore";
+import { useCloudSync } from "../../hooks/useCloudSync";
+import { useCloudStore } from "../../hooks/useCloudStore";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -56,10 +56,12 @@ const TelaPrincipal = () => {
   const [newDirectory, setNewDirectory] = useState("");
   const [vault, setVault] = useState(null);
   const iconsSize = 20;
-  const isTokenValid = useGoogleDriveStore((state) => state.isTokenValid);
-  const setIsTokenValid = useGoogleDriveStore((state) => state.setIsTokenValid);
+  const isTokenValid = useCloudStore((state) => state.isTokenValid);
+  const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
+  const token = useCloudStore((state) => state.accessToken);
+  const expiresIn = useCloudStore((state) => state.expiresIn);
 
-  const { download, token, loginRefresh } = useGoogleDrive();
+  const { download, refresh } = useCloudSync();
 
   useEffect(() => {
     if (token) {
@@ -70,11 +72,13 @@ const TelaPrincipal = () => {
   }, [token, download]);
 
   useEffect(() => {
-    if (isTokenValid) {
-      loginRefresh();
+    if (token && expiresIn && Date.now() < expiresIn) {
       setIsTokenValid(true);
+    } else {
+      setIsTokenValid(false);
+      refresh();
     }
-  }, [isTokenValid]);
+  }, [token, expiresIn, setIsTokenValid, refresh]);
 
   const addDirectory = () => {
     if (newDirectory.trim() === "") return;
