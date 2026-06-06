@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCredentials";
 import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
+import { Credential } from "./components/Credential/Credential";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -16,6 +17,9 @@ const Dashboard = () => {
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
   const setVault = useCloudStore((state) => state.setVault);
   const vault = useCloudStore((state) => state.vault);
+  const [selectedSideCredential, setSelectedSideCredential] = useState<
+    string | null
+  >(null);
 
   const { download } = useCloudSync();
 
@@ -56,8 +60,13 @@ const Dashboard = () => {
         addFolder={addFolder}
         folders={folders}
       />
-      <SidebarCredentials />
-      <div className="bg-black w-full"></div>
+      <SidebarCredentials
+        selectedSideCredential={selectedSideCredential}
+        setSelectedSideCredential={setSelectedSideCredential}
+      />
+      <Credential
+        credential={vault?.entries.find((x) => x.id === selectedSideCredential)}
+      />
     </main>
   );
 };

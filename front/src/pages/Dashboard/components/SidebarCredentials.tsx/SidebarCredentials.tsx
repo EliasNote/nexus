@@ -1,14 +1,15 @@
 import { useCloudStore } from "@/hooks/useCloudStore";
-import Credential from "./Credential";
-import { useState } from "react";
+import SideCredential from "./SideCredential";
 
-const SidebarCredentials = () => {
+const SidebarCredentials = ({
+  selectedSideCredential,
+  setSelectedSideCredential,
+}: {
+  selectedSideCredential: string | null;
+  setSelectedSideCredential: (id: string | null) => void;
+}) => {
   const vault = useCloudStore((state) => state.vault);
   const credentials = vault?.entries || [];
-
-  const [selectedCredential, setSelectedCredential] = useState<string | null>(
-    null,
-  );
 
   return (
     <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[280px] w-full">
@@ -25,10 +26,10 @@ const SidebarCredentials = () => {
       <hr className="w-full text-zinc-800" />
       <div className="w-full h-full">
         {credentials.map((credential) => (
-          <Credential
+          <SideCredential
             key={credential.id}
-            selected={selectedCredential === credential.id}
-            setSelectedCredential={setSelectedCredential}
+            selected={selectedSideCredential === credential.id}
+            setSelectedSideCredential={setSelectedSideCredential}
             credential={credential}
           />
         ))}
