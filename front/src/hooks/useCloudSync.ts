@@ -52,6 +52,9 @@ export const useCloudSync = () => {
     return getActiveService()?.find() ?? null;
   }, [activeProvider, token]);
 
+  const needsRepoFix = useCloudStore((state) => state.needsRepoFix);
+  const setNeedsRepoFix = useCloudStore((state) => state.setNeedsRepoFix);
+
   const currentService = activeProvider ? services[activeProvider] : null;
 
   return {
@@ -66,5 +69,8 @@ export const useCloudSync = () => {
     disconnect,
     refresh,
     find,
+    needsRepoFix,
+    setNeedsRepoFix,
+    loginRepoNotFound: githubService.loginRepoNotFound,
   };
 };

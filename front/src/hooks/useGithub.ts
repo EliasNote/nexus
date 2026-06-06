@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { useCloudStore } from "./useCloudStore";
+import type { StorageProviderInterface } from "./interface";
 
-export const useGitHub = () => {
+export const useGitHub = (): StorageProviderInterface => {
   const API_URL = import.meta.env.VITE_API_URL;
   const REPO_NAME = "nexus-vault";
 
@@ -12,6 +13,8 @@ export const useGitHub = () => {
   const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
   const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
   const clearSession = useCloudStore((state) => state.clearSession);
+  const needsRepoFix = useCloudStore((state) => state.needsRepoFix);
+  const setNeedsRepoFix = useCloudStore((state) => state.setNeedsRepoFix);
 
   const [isLoading, setIsLoading] = useState(false);
   const loginPromiseResolveRef = useRef<
@@ -100,6 +103,45 @@ export const useGitHub = () => {
     });
   };
 
+  const loginRepoNotFound = () => {
+    const GITHUB_PUBLIC_URL = import.meta.env.VITE_GITHUB_PUBLIC_URL;
+
+    const width = 600;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    const popup = window.open(
+      GITHUB_PUBLIC_URL,
+      "github-configure",
+      `width=${width},height=${height},left=${left},top=${top}`,
+    );
+
+    const interval = setInterval(async () => {
+      try {
+        if (!popup || popup.closed) {
+          clearInterval(interval);
+          return;
+        }
+
+        if (popup.location.origin === window.location.origin) {
+          popup.close();
+          clearInterval(interval);
+          setNeedsRepoFix(false);
+
+          const token = await loginWithPromise();
+          if (token) {
+            console.log("Sessão reconfigurada e conectada com sucesso!");
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }, 500);
+
+    return;
+  };
+
   const refresh = async (): Promise<string | null> => {
     if (!refreshToken) {
       clearSession();
@@ -157,7 +199,7 @@ export const useGitHub = () => {
         },
       );
 
-      if (response.status === 404) return null;
+      if (response.status === 404) throw new Error("GITHUB_404");
       if (!response.ok) throw new Error("Erro ao buscar no GitHub");
 
       const data = await response.json();
@@ -233,7 +275,10 @@ export const useGitHub = () => {
         },
       );
 
-      if (!response.ok) throw new Error("Falha no upload");
+      if (!response.ok) {
+        if (response.status === 404) throw new Error("GITHUB_404");
+        throw new Error("Falha no upload");
+      }
       return await response.json();
     } catch (error) {
       console.error(error);
@@ -252,6 +297,9 @@ export const useGitHub = () => {
     isLoading,
     login,
     find,
+    loginRepoNotFound,
+    needsRepoFix,
+    setNeedsRepoFix,
     refresh,
     loginWithPromise,
     download,

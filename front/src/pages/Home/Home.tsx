@@ -7,6 +7,7 @@ import { IconButton } from "./components/IconButton";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { dashboardRoute } from "@/App";
+import { createInitialVault } from "@/utils/crypto";
 
 const TextsButtonsArchives = [
   {
@@ -72,8 +73,8 @@ export const Home = () => {
       } else {
         console.log("Vault não existe, fazendo upload");
         // COLOCAR VAULT PADRÃO
-        const vault = JSON.stringify({ teste: "teste" });
-        await uploadVault(vault);
+        const vault = await createInitialVault(password);
+        await uploadVault(JSON.stringify(vault));
       }
 
       navigate(dashboardRoute, { state: { texto: password } });

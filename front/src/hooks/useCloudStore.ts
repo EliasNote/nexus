@@ -12,6 +12,10 @@ type CloudState = {
   setAccessToken: (token: string | null) => void;
   refreshToken: string | null;
   setRefreshToken: (token: string | null) => void;
+  loginRepoNotFound?: () => void;
+  setLoginRepoNotFound: (fn: () => void) => void;
+  needsRepoFix: boolean;
+  setNeedsRepoFix: (needsRepoFix: boolean) => void;
   clearSession: () => void;
   expiresIn: number | null;
   setExpiresIn: (expiresIn: number | null) => void;
@@ -33,6 +37,12 @@ export const useCloudStore = create<CloudState>()(
 
       activeProvider: null,
       setActiveProvider: (provider) => set({ activeProvider: provider }),
+
+      needsRepoFix: false,
+      setNeedsRepoFix: (needsRepoFix) => set({ needsRepoFix }),
+
+      loginRepoNotFound: undefined,
+      setLoginRepoNotFound: (fn) => set({ loginRepoNotFound: fn }),
 
       clearSession: () =>
         set({
