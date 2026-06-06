@@ -34,6 +34,8 @@ export type CreditCardCredential = CommonMetadata & {
 
 export type NoteCredential = CommonMetadata & {
   type: "note";
+  name: string;
+  content: string;
 };
 
 export type VaultEntry =

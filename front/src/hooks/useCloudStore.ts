@@ -1,11 +1,12 @@
+import type { DecryptedVault } from "@/types/vault";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type StorageProvider = "google" | "github" | null;
 
 type CloudState = {
-  vault: null;
-  setVault: (vault: null) => void;
+  vault: null | DecryptedVault;
+  setVault: (vault: null | DecryptedVault) => void;
   activeProvider: StorageProvider;
   setActiveProvider: (provider: StorageProvider) => void;
   accessToken: string | null;

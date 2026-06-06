@@ -1,12 +1,12 @@
+import { useCloudStore } from "@/hooks/useCloudStore";
 import Credential from "./Credential";
 import { useState } from "react";
 
 const SidebarCredentials = () => {
-  const credentials = [
-    { id: 1, name: "Github", user: "EliasNote" },
-    { id: 2, name: "Youtube", user: "Nome" },
-  ];
-  const [selectedCredential, setSelectedCredential] = useState<number | null>(
+  const vault = useCloudStore((state) => state.vault);
+  const credentials = vault?.entries || [];
+
+  const [selectedCredential, setSelectedCredential] = useState<string | null>(
     null,
   );
 

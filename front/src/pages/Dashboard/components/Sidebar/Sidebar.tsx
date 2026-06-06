@@ -1,4 +1,3 @@
-// import { useLocation } from "react-router-dom";
 import { Button } from "./Button";
 import {
   LayoutGrid,
@@ -15,29 +14,27 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
+import { useState } from "react";
 
 const Sidebar = ({
   selected,
   setSelected,
   iconsSize,
-  setIsAddDirectory,
-  isAddDirectory,
-  setNewDirectory,
-  newDirectory,
-  addDirectory,
-  directories,
+  setIsAddFolder,
+  isAddFolder,
+  addFolder,
+  folders,
 }: {
   selected: number;
   setSelected: (id: number) => void;
   iconsSize: number;
-  setIsAddDirectory: (isAddDirectory: boolean) => void;
-  isAddDirectory: boolean;
-  setNewDirectory: (newDirectory: string) => void;
-  newDirectory: string;
-  addDirectory: () => void;
-  directories: string[];
+  setIsAddFolder: (isAddFolder: boolean) => void;
+  isAddFolder: boolean;
+  addFolder: (name: string) => void;
+  folders: string[];
 }) => {
   const { disconnect } = useCloudSync();
+  const [newFolder, setNewFolder] = useState("");
 
   const handleLogout = () => {
     disconnect();
@@ -105,46 +102,42 @@ const Sidebar = ({
             <motion.button
               className="cursor-pointer text-zinc-300 hover:text-brand"
               whileHover={{ rotate: 180 }}
-              onClick={() => setIsAddDirectory(!isAddDirectory)}
+              onClick={() => setIsAddFolder(!isAddFolder)}
             >
-              {isAddDirectory ? (
-                <Minus size={22} />
-              ) : (
-                <Plus size={22} onClick={() => setNewDirectory("")} />
-              )}
+              {isAddFolder ? <Minus size={22} /> : <Plus size={22} />}
             </motion.button>
           </div>
         </div>
         <div className="flex flex-col gap-[5px] overflow-y-auto overflow-x-hidden flex-1">
-          {isAddDirectory && (
+          {isAddFolder && (
             <div className="flex flex-col gap-2 items-center px-2">
               <input
                 type="text"
-                value={newDirectory}
-                onChange={(e) => setNewDirectory(e.target.value)}
+                value={newFolder}
+                onChange={(e) => setNewFolder(e.target.value)}
                 className="bg-zinc-900 text-white px-2 py-1.5 outline-none border border-zinc-700 focus:border-brand text-sm w-full"
                 placeholder="Novo diretório"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    addDirectory();
+                    addFolder(newFolder);
                   } else if (e.key === "Escape") {
-                    setIsAddDirectory(false);
-                    setNewDirectory("");
+                    setIsAddFolder(false);
+                    setNewFolder("");
                   }
                 }}
               />
               <button
                 className="px-5 py-1.5 rounded bg-brand text-white font-medium hover:bg-blue-700 transition-colors text-sm cursor-pointer"
                 onClick={() => {
-                  addDirectory();
+                  addFolder(newFolder);
                 }}
               >
                 Confirmar
               </button>
             </div>
           )}
-          {directories.map((dir, index) => (
+          {folders.map((dir, index) => (
             <Button
               key={index + 8}
               id={index + 8}
