@@ -12,9 +12,8 @@ export type CommonMetadata = {
   foldersIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastRenewedAt?: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type LoginCredential = CommonMetadata & {
