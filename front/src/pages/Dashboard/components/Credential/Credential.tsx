@@ -5,14 +5,14 @@ import { AddButton } from "./AddButton";
 
 export const Credential = ({ credential }: { credential?: VaultEntry }) => {
   const iconsSize = 18;
-  const px = 40;
-  const py = 30;
+  const isWeak = credential?.audit?.weak;
+
   return (
-    <section className="flex flex-col w-full">
+    <section className="flex flex-col h-full w-full">
       {credential ? (
         <>
           <div
-            className={`flex flex-row w-full h-fit justify-between px-[${px}px] py-[${py}px] border-b border-zinc-800`}
+            className={`flex flex-row w-full h-fit justify-between px-[40px] py-[30px] border-b border-zinc-800`}
           >
             <div className="flex gap-[10px]">
               <div className="w-[60px] h-[60px] flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">
@@ -40,7 +40,7 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
           </div>
           <div>{credential?.type === "login" && <Login />}</div>
           <div
-            className={`w-full flex justify-between border-t border-zinc-800 px-[${px}px] py-[${py}px]`}
+            className={`w-full flex h-fit justify-between border-t border-zinc-800 px-[40px] py-[30px]`}
           >
             <div className="flex flex-col text-zinc-400">
               <span>
@@ -52,12 +52,11 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
                 {`${new Date(credential?.updatedAt).toLocaleDateString("pt-BR")}, ${new Date(credential?.updatedAt).toLocaleTimeString("pt-BR")}`}
               </span>
             </div>
-            <div className="">
-              <ShieldCheck
-                className="text-green-500"
-                strokeWidth={1.3}
-                size={50}
-              />
+            <div
+              className={`flex flex-col items-center justify-center gap-1 ${isWeak ? "text-red-600" : "text-green-500"} font-medium`}
+            >
+              <ShieldCheck strokeWidth={1.3} size={58} />
+              <span>Senha {isWeak ? "Insegura" : "Segura"}</span>
             </div>
             <AddButton />
           </div>

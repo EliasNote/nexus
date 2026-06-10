@@ -10,6 +10,7 @@ export type CommonMetadata = {
   title: string;
   notes?: string;
   foldersIds?: string[];
+  audit: Audit;
   isFavorite: boolean;
   isDeleted: boolean;
   createdAt: Date;
@@ -41,6 +42,13 @@ export type VaultEntry =
   | LoginCredential
   | CreditCardCredential
   | NoteCredential;
+
+export type Audit = {
+  leak: boolean;
+  weak: boolean;
+  reused: boolean;
+  renewal: boolean;
+};
 
 export type DecryptedVault = {
   version: string;

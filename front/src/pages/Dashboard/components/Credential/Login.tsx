@@ -1,3 +1,7 @@
 export const Login = () => {
-  return <section className="flex w-full"></section>;
+  return (
+    <section className="flex w-full">
+      <div></div>
+    </section>
+  );
 };
