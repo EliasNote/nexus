@@ -14,7 +14,7 @@ const SidebarCredentials = ({
   return (
     <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[280px] w-full">
       <div className="flex flex-col w-full p-[14px] gap-[14px]">
-        <span className="border-l-brand border-l-4 text-white pl-3 text-[16px] font-bold">
+        <span className="border-l-brand border-l-4 text-white pl-3 text-[18px] font-bold">
           TODOS OS ITENS
         </span>
         <input

@@ -6,7 +6,7 @@ export const AddButton = () => {
     <motion.button
       initial="initial"
       whileHover="hover"
-      className="flex h-fit w-fit cursor-pointer gap-[5px] py-[12px] px-[15px] pl-[10px] bg-brand items-center justify-center text-[20px] text-white"
+      className="flex h-fit w-fit cursor-pointer gap-[5px] py-[12px] px-[20px] pl-[14px] bg-brand items-center justify-center text-[18px] text-white"
     >
       <motion.div
         variants={{
