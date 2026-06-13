@@ -8,8 +8,8 @@ const SidebarCredentials = ({
   selectedSideCredential: string | null;
   setSelectedSideCredential: (id: string | null) => void;
 }) => {
-  const vault = useCloudStore((state) => state.vault);
-  const credentials = vault?.entries || [];
+  const entries = useCloudStore((state) => state.vault?.entries);
+  const credentials = entries ?? [];
 
   return (
     <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[280px] w-full">

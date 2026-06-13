@@ -1,6 +1,13 @@
 import type { VaultEntry } from "@/types/vault";
 import { Login } from "./Login";
-import { Trash2, Pencil, ShieldCheck, ShieldAlert } from "lucide-react";
+import {
+  Trash2,
+  Pencil,
+  ShieldCheck,
+  ShieldAlert,
+  X,
+  Save,
+} from "lucide-react";
 import { AddButton } from "./AddButton";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { useState } from "react";
@@ -8,7 +15,8 @@ import { useState } from "react";
 export const Credential = ({ credential }: { credential?: VaultEntry }) => {
   const iconsSize = 18;
   const isWeak = credential?.audit?.weak;
-  const folders = useCloudStore((state) => state.vault?.folders || []);
+  const rawFolders = useCloudStore((state) => state.vault?.folders);
+  const folders = rawFolders ?? [];
   const [isEdit, setIsEdit] = useState(false);
 
   return (
@@ -32,22 +40,49 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
               </div>
             </div>
             <div className="flex gap-[10px] items-center justify-center text-[14px]">
-              <button
-                onClick={() => setIsEdit(true)}
-                className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer"
-              >
-                <Pencil size={iconsSize} />
-                EDITAR
-              </button>
-              <button className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-red-alert text-red-alert hover:bg-red-alert hover:text-white cursor-pointer">
-                <Trash2 size={iconsSize} />
-                APAGAR
-              </button>
+              {isEdit ? (
+                <button
+                  onClick={() => setIsEdit(false)}
+                  className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer"
+                >
+                  <Save size={iconsSize} />
+                  SALVAR
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsEdit(true)}
+                  className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer"
+                >
+                  <Pencil size={iconsSize} />
+                  EDITAR
+                </button>
+              )}
+              {isEdit ? (
+                <button
+                  onClick={() => setIsEdit(false)}
+                  className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                >
+                  <X size={iconsSize} />
+                  CANCELAR
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsEdit(false)}
+                  className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-red-alert text-red-alert hover:bg-red-alert hover:text-white cursor-pointer"
+                >
+                  <Trash2 size={iconsSize} />
+                  APAGAR
+                </button>
+              )}
             </div>
           </div>
           <div className="flex-1 h-full w-full flex flex-col">
             {credential?.type === "login" && (
-              <Login folders={folders} isEdit={isEdit} />
+              <Login
+                folders={folders}
+                isEdit={isEdit}
+                credential={credential}
+              />
             )}
           </div>
           <div

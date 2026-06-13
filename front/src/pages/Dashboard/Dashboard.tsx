@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCredentials";
 import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
+import type { Folder } from "@/types/vault";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
 const Dashboard = () => {
   const [selected, setSelected] = useState(0);
-  const [folders, setFolders] = useState([] as string[]);
-
   const [isAddFolder, setIsAddFolder] = useState(false);
   const iconsSize = 20;
 
@@ -36,18 +35,33 @@ const Dashboard = () => {
     }
   }, [isTokenValid, download, setVault, vault]);
 
-  const addFolder = (name: string) => {
-    if (name.trim() === "") return;
-    setFolders([...folders, `/${name}`]);
-    setIsAddFolder(false);
-  };
-
-  useEffect(() => {
-    if (vault && folders.length === 0) {
-      vault.folders.map((folder) => addFolder(folder.name));
-      console.log("Adicionando pastas ", folders);
-    }
+  const folders = useMemo(() => {
+    return vault?.folders?.map((f: Folder) => `/${f.name}`) || [];
   }, [vault]);
+
+  const addFolder = useCallback(
+    (name: string) => {
+      if (name.trim() === "" || !vault) return;
+
+      const newFolder = {
+        id: crypto.randomUUID(),
+        name: name.trim(),
+      };
+
+      const updatedVault = {
+        ...vault,
+        folders: [...(vault.folders || []), newFolder],
+      };
+
+      setVault(updatedVault);
+      setIsAddFolder(false);
+    },
+    [vault, setVault],
+  );
+
+  const selectedCredential = useMemo(() => {
+    return vault?.entries.find((x) => x.id === selectedSideCredential);
+  }, [vault?.entries, selectedSideCredential]);
 
   return (
     <main className="flex bg-[#0A0A0A] max-h-screen w-screen">
@@ -64,9 +78,7 @@ const Dashboard = () => {
         selectedSideCredential={selectedSideCredential}
         setSelectedSideCredential={setSelectedSideCredential}
       />
-      <Credential
-        credential={vault?.entries.find((x) => x.id === selectedSideCredential)}
-      />
+      <Credential credential={selectedCredential} />
     </main>
   );
 };
