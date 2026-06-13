@@ -2,10 +2,14 @@ import type { VaultEntry } from "@/types/vault";
 import { Login } from "./Login";
 import { Trash2, Pencil, ShieldCheck, ShieldAlert } from "lucide-react";
 import { AddButton } from "./AddButton";
+import { useCloudStore } from "@/hooks/useCloudStore";
+import { useState } from "react";
 
 export const Credential = ({ credential }: { credential?: VaultEntry }) => {
   const iconsSize = 18;
   const isWeak = credential?.audit?.weak;
+  const folders = useCloudStore((state) => state.vault?.folders || []);
+  const [isEdit, setIsEdit] = useState(false);
 
   return (
     <section className="flex flex-col h-screen w-full">
@@ -28,7 +32,10 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
               </div>
             </div>
             <div className="flex gap-[10px] items-center justify-center text-[14px]">
-              <button className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer">
+              <button
+                onClick={() => setIsEdit(true)}
+                className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer"
+              >
                 <Pencil size={iconsSize} />
                 EDITAR
               </button>
@@ -39,12 +46,14 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
             </div>
           </div>
           <div className="flex-1 h-full w-full flex flex-col">
-            {credential?.type === "login" && <Login />}
+            {credential?.type === "login" && (
+              <Login folders={folders} isEdit={isEdit} />
+            )}
           </div>
           <div
             className={`w-full flex justify-between items-center border-t border-zinc-800 px-[40px] py-[30px]`}
           >
-            <div className="flex flex-col text-zinc-400">
+            <div className="flex flex-col text-[14px] text-zinc-400">
               <span>
                 CRIADO:
                 {`${new Date(credential?.createdAt).toLocaleDateString("pt-BR")}, ${new Date(credential?.createdAt).toLocaleTimeString("pt-BR")}`}
@@ -58,13 +67,13 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
               {isWeak ? (
                 <ShieldAlert
                   className="text-red-600"
-                  strokeWidth={1.3}
+                  strokeWidth={1}
                   size={50}
                 />
               ) : (
                 <ShieldCheck
                   className="text-green-500"
-                  strokeWidth={1.3}
+                  strokeWidth={1}
                   size={50}
                 />
               )}

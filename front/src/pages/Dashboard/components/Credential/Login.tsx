@@ -1,18 +1,51 @@
-import { Copy } from "lucide-react";
+import { Copy, User, Eye, Key, Globe, Folder, NotepadText } from "lucide-react";
+import { Input } from "./components/Input";
+import { DirectorySelect } from "./components/DirectorySelect";
+import { TextArea } from "./components/TextArea";
+import type { Folder as FolderType } from "@/types/vault";
 
-export const Login = () => {
+export const Login = ({
+  folders,
+  isEdit,
+}: {
+  folders: FolderType[];
+  isEdit: boolean;
+}) => {
   return (
-    <section className="flex flex-1 h-full flex-col gap-4 w-full items-center justify-center">
-      <div className="group flex items-center focus-within:border-zinc-600 bg-zinc-900 border border-zinc-800 h-[45px] w-full max-w-[760px]">
-        <input
-          className="flex-1 bg-transparent px-3 text-white outline-none placeholder:text-zinc-500"
-          type="text"
-          placeholder="Usuário/email"
-        />
-        <button className="flex items-center justify-center border-l border-zinc-800 group-focus-within:border-zinc-600 h-full w-12 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand">
-          <Copy strokeWidth={2.5} size={22} />
-        </button>
-      </div>
+    <section className="flex flex-1 h-full flex-col gap-4 w-full items-center justify-center py-10 overflow-y-auto no-scrollbar">
+      <Input
+        disabled={!isEdit}
+        placeholder="Usuário/email"
+        iconTop={User}
+        topName="USUÁRIO"
+        iconsInput={[Copy]}
+      />
+      <Input
+        disabled={!isEdit}
+        placeholder="Senha"
+        iconTop={Key}
+        topName="SENHA"
+        iconsInput={[Eye, Copy]}
+      />
+      <Input
+        disabled={!isEdit}
+        placeholder="https://exemplo.com.br"
+        iconTop={Globe}
+        topName="URL"
+        iconsInput={[Copy]}
+      />
+      <DirectorySelect
+        disabled={!isEdit}
+        iconTop={Folder}
+        topName="DIRETÓRIOS"
+        folders={folders}
+      />
+      <TextArea
+        disabled={!isEdit}
+        iconTop={NotepadText}
+        topName="ANOTAÇÕES"
+        placeholder="anotações"
+      />
     </section>
   );
 };
