@@ -1,4 +1,6 @@
-import { Copy, type LucideIcon } from "lucide-react";
+import { copyToClipboard } from "@/utils/utils";
+import { Copy, Check, type LucideIcon } from "lucide-react";
+import { useState } from "react";
 
 interface TextAreaProps {
   iconTop: LucideIcon;
@@ -15,6 +17,16 @@ export const TextArea = ({
   disabled,
   value,
 }: TextAreaProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (value: string) => {
+    copyToClipboard(value);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 1000);
+  };
+
   return (
     <div className="flex flex-col gap-0.5 w-full max-w-[760px]">
       <span className="text-[12px] text-zinc-400 font-medium flex items-start gap-1">
@@ -32,8 +44,13 @@ export const TextArea = ({
         <button
           className="absolute top-1 right-1 flex items-center justify-center h-10 w-10 bg-zinc-900 border border-zinc-800 group-focus-within:border-zinc-600 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand"
           title="Copiar anotações"
+          onClick={() => handleCopy(value!)}
         >
-          <Copy size={20} strokeWidth={2.5} />
+          {copied ? (
+            <Check className="text-green-500" size={20} strokeWidth={2.5} />
+          ) : (
+            <Copy size={20} strokeWidth={2} />
+          )}
         </button>
       </div>
     </div>

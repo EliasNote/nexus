@@ -20,7 +20,12 @@ export const Login = ({
         placeholder="Usuário/email"
         iconTop={User}
         topName="USUÁRIO"
-        iconsInput={[Copy]}
+        iconsInput={[
+          {
+            id: "copy",
+            icon: Copy,
+          },
+        ]}
         value={credential.username!}
       />
       <Input
@@ -29,7 +34,16 @@ export const Login = ({
         isPassword={true}
         iconTop={Key}
         topName="SENHA"
-        iconsInput={[Eye, Copy]}
+        iconsInput={[
+          {
+            id: "password",
+            icon: Eye,
+          },
+          {
+            id: "copy",
+            icon: Copy,
+          },
+        ]}
         value={credential.password}
       />
       <Input
@@ -37,7 +51,12 @@ export const Login = ({
         placeholder="https://exemplo.com.br"
         iconTop={Globe}
         topName="URL"
-        iconsInput={[Copy]}
+        iconsInput={[
+          {
+            id: "copy",
+            icon: Copy,
+          },
+        ]}
         value={credential.url}
       />
       <DirectorySelect

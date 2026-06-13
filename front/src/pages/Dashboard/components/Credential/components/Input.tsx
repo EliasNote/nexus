@@ -1,5 +1,12 @@
 import type { LucideIcon } from "lucide-react";
+import { Check } from "lucide-react";
 import { useState } from "react";
+import { copyToClipboard } from "../../../../../utils/utils";
+
+type iconsInputProp = {
+  id: string;
+  icon: LucideIcon;
+};
 
 export const Input = ({
   iconsInput,
@@ -10,7 +17,7 @@ export const Input = ({
   value,
   isPassword,
 }: {
-  iconsInput: LucideIcon[];
+  iconsInput: iconsInputProp[];
   iconTop: LucideIcon;
   topName: string;
   placeholder: string;
@@ -19,8 +26,17 @@ export const Input = ({
   isPassword?: boolean;
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleCopy = (value: string) => {
+    copyToClipboard(value);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 1000);
   };
 
   return (
@@ -38,15 +54,20 @@ export const Input = ({
             placeholder={placeholder}
             value={value}
           />
-          {iconsInput.map((Icon, index) => (
+          {iconsInput.map((icon, index) => (
             <button
               key={index}
-              onClick={() =>
-                isPassword && index == 0 && togglePasswordVisibility()
-              }
+              onClick={() => {
+                if (icon.id === "password") togglePasswordVisibility();
+                if (icon.id === "copy") handleCopy(value!);
+              }}
               className="flex items-center justify-center border-l border-zinc-800 group-focus-within:border-zinc-600 h-full w-12 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand"
             >
-              <Icon size={20} strokeWidth={2} />
+              {icon.id === "copy" && copied ? (
+                <Check className="text-green-500" size={20} strokeWidth={2.5} />
+              ) : (
+                <icon.icon size={20} strokeWidth={2} />
+              )}
             </button>
           ))}
         </div>

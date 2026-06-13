@@ -14,3 +14,12 @@ export const getGithubUserRepo = async (token: string, user: string) => {
   );
   return repoRes;
 };
+
+export const copyToClipboard = (text: string) => {
+  try {
+    navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
