@@ -1,3 +1,5 @@
+import type { DecryptedVault } from "@/types/vault";
+
 export interface StorageProviderInterface {
   token: string | null;
   refresh: () => Promise<string | null>;
@@ -9,6 +11,7 @@ export interface StorageProviderInterface {
   login: () => void;
   loginWithPromise: () => Promise<string | null>;
   download: () => Promise<any>;
-  uploadVault: (content: string) => Promise<any>;
+  uploadVault: (content: DecryptedVault) => Promise<any>;
   disconnect: () => void;
+  deleteVault: () => Promise<any>;
 }

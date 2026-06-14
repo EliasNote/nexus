@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useCloudStore } from "./useCloudStore";
 import type { StorageProviderInterface } from "./interface";
+import type { DecryptedVault } from "@/types/vault";
 
 export const useGitHub = (): StorageProviderInterface => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -188,8 +189,9 @@ export const useGitHub = (): StorageProviderInterface => {
     if (!token) throw new Error("Não autenticado");
     try {
       const username = await getUsername(token);
+      const timestamp = new Date().getTime();
       const response = await fetch(
-        `https://api.github.com/repos/${username}/${REPO_NAME}/contents/vault.json`,
+        `https://api.github.com/repos/${username}/${REPO_NAME}/contents/vault.json?t=${timestamp}`,
         {
           method: "GET",
           headers: {
@@ -245,7 +247,7 @@ export const useGitHub = (): StorageProviderInterface => {
     }
   };
 
-  const uploadVault = async (vaultContentString: string) => {
+  const uploadVault = async (vault: DecryptedVault) => {
     if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
 
@@ -255,7 +257,7 @@ export const useGitHub = (): StorageProviderInterface => {
       const sha = fileData?.sha;
 
       const base64Content = btoa(
-        unescape(encodeURIComponent(vaultContentString)),
+        unescape(encodeURIComponent(JSON.stringify(vault))),
       );
 
       const response = await fetch(
@@ -292,6 +294,11 @@ export const useGitHub = (): StorageProviderInterface => {
     clearSession();
   };
 
+  const deleteVault = async () => {
+    if (!token) throw new Error("Não autenticado");
+    setIsLoading(true);
+  };
+
   return {
     token,
     isLoading,
@@ -305,5 +312,6 @@ export const useGitHub = (): StorageProviderInterface => {
     download,
     uploadVault,
     disconnect,
+    deleteVault,
   };
 };

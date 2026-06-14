@@ -8,6 +8,7 @@ import { useCloudSync } from "@/hooks/useCloudSync";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { dashboardRoute } from "@/App";
 import { createInitialVault } from "@/utils/crypto";
+import { useGoogle } from "@/hooks/useGoogle";
 
 const TextsButtonsArchives = [
   {
@@ -54,6 +55,8 @@ export const Home = () => {
   const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
   const setVault = useCloudStore((state) => state.setVault);
 
+  const { deleteVault } = useGoogle();
+
   const nextStep = () => {
     setDirection(1);
     setCurrentStep((prev) => prev + 1);
@@ -70,11 +73,14 @@ export const Home = () => {
 
       if (data && (data.id || data.sha)) {
         console.log("Vault existe");
+        const cloudVault = await download();
+        setVault(cloudVault);
       } else {
         console.log("Vault não existe, fazendo upload");
         // COLOCAR VAULT PADRÃO
         const vault = await createInitialVault(password);
-        await uploadVault(JSON.stringify(vault));
+        await uploadVault(vault);
+        setVault(vault);
       }
 
       navigate(dashboardRoute, { state: { texto: password } });
@@ -111,6 +117,9 @@ export const Home = () => {
         </button>
         <button className="mb-100" onClick={() => setToken(null)}>
           Remover Token
+        </button>
+        <button onClick={() => deleteVault()} className="bg-red-500 p-4">
+          APAGAR TUDO DO GOOGLE AGORA
         </button>
         {currentStep === 0 && (
           <Step key="step0" direction={direction}>

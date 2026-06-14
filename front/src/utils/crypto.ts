@@ -34,6 +34,26 @@ export const createInitialVault = async (
         password: "uma-senha-forte-123",
         url: "https://mail.google.com",
       },
+      {
+        type: "login",
+        id: "entry-2",
+        title: "Email Principal",
+        notes: "",
+        foldersIds: ["folder-1"],
+        audit: {
+          leak: false,
+          weak: true,
+          reused: false,
+          renewal: false,
+        },
+        isFavorite: true,
+        isDeleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        username: "meu.email@exemplo.com",
+        password: "uma-senha-forte-123",
+        url: "https://mail.google.com",
+      },
     ],
   };
 };

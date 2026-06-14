@@ -1,4 +1,4 @@
-import type { VaultEntry } from "@/types/vault";
+import type { LoginCredential, VaultEntry } from "@/types/vault";
 import { Login } from "./Login";
 import {
   Trash2,
@@ -11,13 +11,42 @@ import {
 import { AddButton } from "./AddButton";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { useState } from "react";
+import { updateVaultCredential } from "@/utils/utils";
+import { useCloudSync } from "@/hooks/useCloudSync";
 
 export const Credential = ({ credential }: { credential?: VaultEntry }) => {
   const iconsSize = 18;
   const isWeak = credential?.audit?.weak;
-  const rawFolders = useCloudStore((state) => state.vault?.folders);
+  const vault = useCloudStore((state) => state.vault);
+  const setVault = useCloudStore((state) => state.setVault);
+  const { uploadVault } = useCloudSync();
+
+  const rawFolders = vault?.folders;
   const folders = rawFolders ?? [];
   const [isEdit, setIsEdit] = useState(false);
+  const [tempVault, setTempVault] = useState<VaultEntry | null>(null);
+
+  const handleEditClick = () => {
+    setTempVault(credential || null);
+    setIsEdit(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      const newVault = updateVaultCredential(vault!, tempVault!);
+
+      await uploadVault(newVault);
+
+      setVault(newVault);
+      setIsEdit(false);
+      console.log("Salvo com sucesso na nuvem e localmente!");
+    } catch (error) {
+      console.error("Erro ao salvar no GitHub. Tentando recuperar...", error);
+      alert(
+        "Erro ao sincronizar. Verifique sua conexão ou tente salvar novamente.",
+      );
+    }
+  };
 
   return (
     <section className="flex flex-col h-screen w-full">
@@ -42,7 +71,7 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
             <div className="flex gap-[10px] items-center justify-center text-[14px]">
               {isEdit ? (
                 <button
-                  onClick={() => setIsEdit(false)}
+                  onClick={handleSave}
                   className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer"
                 >
                   <Save size={iconsSize} />
@@ -50,7 +79,7 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
                 </button>
               ) : (
                 <button
-                  onClick={() => setIsEdit(true)}
+                  onClick={handleEditClick}
                   className="flex gap-[5px] items-center px-[14px] py-[8px] border-[2px] font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer"
                 >
                   <Pencil size={iconsSize} />
@@ -79,9 +108,15 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
           <div className="flex-1 h-full w-full flex flex-col">
             {credential?.type === "login" && (
               <Login
+                key={credential?.id}
                 folders={folders}
                 isEdit={isEdit}
-                credential={credential}
+                credential={
+                  isEdit
+                    ? (tempVault! as LoginCredential)
+                    : (credential! as LoginCredential)
+                }
+                setCredential={setTempVault}
               />
             )}
           </div>

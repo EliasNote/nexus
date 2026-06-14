@@ -1,3 +1,5 @@
+import type { DecryptedVault, VaultEntry } from "@/types/vault";
+
 export const getGithubUserData = async (token: string) => {
   const userRes = await fetch("https://api.github.com/user", {
     headers: { Authorization: `Bearer ${token}` },
@@ -22,4 +24,16 @@ export const copyToClipboard = (text: string) => {
   } catch (e) {
     return false;
   }
+};
+
+export const updateVaultCredential = (
+  vault: DecryptedVault,
+  updatedCredential: VaultEntry,
+): DecryptedVault => {
+  return {
+    ...vault,
+    entries: vault.entries.map((entry) =>
+      entry.id === updatedCredential.id ? { ...updatedCredential } : entry,
+    ),
+  };
 };

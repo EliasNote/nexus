@@ -2,6 +2,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useState, useRef } from "react";
 import { useCloudStore } from "./useCloudStore";
 import type { StorageProviderInterface } from "./interface";
+import type { DecryptedVault } from "@/types/vault";
 
 export const useGoogle = (): StorageProviderInterface => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -137,7 +138,7 @@ export const useGoogle = (): StorageProviderInterface => {
     }
   };
 
-  const uploadVault = async (vaultContentString: string, idParam?: string) => {
+  const uploadVault = async (vault: DecryptedVault, idParam?: string) => {
     if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
 
@@ -156,7 +157,7 @@ export const useGoogle = (): StorageProviderInterface => {
       );
       form.append(
         "file",
-        new Blob([vaultContentString], { type: "application/json" }),
+        new Blob([JSON.stringify(vault)], { type: "application/json" }),
       );
 
       const url = id
@@ -179,6 +180,40 @@ export const useGoogle = (): StorageProviderInterface => {
     }
   };
 
+  const deleteVault = async () => {
+    if (!token) {
+      alert("Faça login primeiro!");
+      return;
+    }
+
+    try {
+      const file = await find(); // Isso busca o arquivo na appDataFolder
+      if (!file || !file.id) {
+        alert("Arquivo não encontrado no Google Drive.");
+        return;
+      }
+
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${file.id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (response.status === 204) {
+        alert("Arquivo apagado com sucesso!");
+      } else {
+        const error = await response.json();
+        console.error(error);
+        alert("Erro ao apagar arquivo.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Erro na requisição.");
+    }
+  };
+
   const disconnect = () => {
     clearSession();
   };
@@ -193,5 +228,6 @@ export const useGoogle = (): StorageProviderInterface => {
     download,
     uploadVault,
     disconnect,
+    deleteVault,
   };
 };

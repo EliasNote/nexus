@@ -51,6 +51,8 @@ export const useCloudStore = create<CloudState>()(
           refreshToken: null,
           expiresIn: null,
           isTokenValid: false,
+          vault: null,
+          activeProvider: null,
         }),
 
       expiresIn: null,

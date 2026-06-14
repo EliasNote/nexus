@@ -8,14 +8,17 @@ export const DirectorySelect = ({
   topName,
   folders,
   disabled,
+  selectedFoldersIds,
+  setSelectedFoldersIds,
 }: {
   iconTop: LucideIcon;
   topName: string;
   folders: Folder[];
   disabled?: boolean;
+  selectedFoldersIds: string[];
+  setSelectedFoldersIds: (ids: string[]) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,12 +35,16 @@ export const DirectorySelect = ({
   }, []);
 
   const toggleFolder = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
+    const newIds = selectedFoldersIds.includes(id)
+      ? selectedFoldersIds.filter((i) => i !== id)
+      : [...selectedFoldersIds, id];
+
+    setSelectedFoldersIds(newIds);
   };
 
-  const selectedFolders = folders.filter((f) => selectedIds.includes(f.id));
+  const selectedFolders = folders.filter((f) =>
+    selectedFoldersIds.includes(f.id),
+  );
 
   return (
     <div
@@ -94,7 +101,7 @@ export const DirectorySelect = ({
                 className="flex items-center justify-between px-4 py-2 hover:bg-zinc-800 cursor-pointer text-sm text-zinc-300 transition-colors"
               >
                 <span>{folder.name}</span>
-                {selectedIds.includes(folder.id) && (
+                {selectedFoldersIds.includes(folder.id) && (
                   <Check size={16} className="text-brand" />
                 )}
               </div>

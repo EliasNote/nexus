@@ -2,21 +2,21 @@ import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
-interface TextAreaProps {
-  iconTop: LucideIcon;
-  topName: string;
-  placeholder?: string;
-  disabled?: boolean;
-  value?: string;
-}
-
 export const TextArea = ({
   iconTop: IconTop,
   topName,
   placeholder,
   disabled,
   value,
-}: TextAreaProps) => {
+  onChange,
+}: {
+  iconTop: LucideIcon;
+  topName: string;
+  placeholder?: string;
+  disabled?: boolean;
+  value?: string;
+  onChange?: (val: string) => void;
+}) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (value: string) => {
@@ -40,6 +40,7 @@ export const TextArea = ({
           placeholder={placeholder}
           disabled={disabled}
           value={value}
+          onChange={(e) => onChange?.(e.target.value)}
         />
         <button
           className="absolute top-1 right-1 flex items-center justify-center h-10 w-10 bg-zinc-900 border border-zinc-800 group-focus-within:border-zinc-600 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand"

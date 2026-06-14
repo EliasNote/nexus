@@ -16,6 +16,7 @@ export const Input = ({
   disabled,
   value,
   isPassword,
+  onChange,
 }: {
   iconsInput: iconsInputProp[];
   iconTop: LucideIcon;
@@ -24,6 +25,7 @@ export const Input = ({
   disabled?: boolean;
   value?: string;
   isPassword?: boolean;
+  onChange?: (val: string) => void;
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -53,6 +55,7 @@ export const Input = ({
             type={isPassword ? (showPassword ? "text" : "password") : "text"}
             placeholder={placeholder}
             value={value}
+            onChange={(e) => onChange?.(e.target.value)}
           />
           {iconsInput.map((icon, index) => (
             <button
