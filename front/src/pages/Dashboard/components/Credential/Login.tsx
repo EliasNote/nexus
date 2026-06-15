@@ -50,7 +50,7 @@ export const Login = ({
         topName="SENHA"
         iconsInput={[
           {
-            id: "password",
+            id: "eye",
             icon: Eye,
           },
           {
@@ -77,6 +77,7 @@ export const Login = ({
       />
       <DirectorySelect
         disabled={!isEdit}
+        isEdit={isEdit}
         iconTop={Folder}
         topName="DIRETÓRIOS"
         selectedFoldersIds={credential.foldersIds ?? []}

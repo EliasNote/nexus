@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Check } from "lucide-react";
+import { Check, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import { copyToClipboard } from "../../../../../utils/utils";
 
@@ -61,16 +61,27 @@ export const Input = ({
             <button
               key={index}
               onClick={() => {
-                if (icon.id === "password") togglePasswordVisibility();
+                if (icon.id === "eye") togglePasswordVisibility();
                 if (icon.id === "copy") handleCopy(value!);
               }}
               className="flex items-center justify-center border-l border-zinc-800 group-focus-within:border-zinc-600 h-full w-12 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand"
             >
-              {icon.id === "copy" && copied ? (
-                <Check className="text-green-500" size={20} strokeWidth={2.5} />
-              ) : (
-                <icon.icon size={20} strokeWidth={2} />
-              )}
+              {icon.id === "eye" &&
+                (showPassword ? (
+                  <EyeClosed size={20} strokeWidth={2} />
+                ) : (
+                  <icon.icon size={20} strokeWidth={2} />
+                ))}
+              {icon.id === "copy" &&
+                (copied ? (
+                  <Check
+                    className="text-green-500"
+                    size={20}
+                    strokeWidth={2.5}
+                  />
+                ) : (
+                  <icon.icon size={20} strokeWidth={2} />
+                ))}
             </button>
           ))}
         </div>

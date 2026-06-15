@@ -12,6 +12,18 @@ export const createInitialVault = async (
         icon: "bi-briefcase",
         colorHex: "#3498db",
       },
+      {
+        id: "folder-2",
+        name: "Casa",
+        icon: "bi-briefcase",
+        colorHex: "#3498db",
+      },
+      {
+        id: "folder-3",
+        name: "Compras",
+        icon: "bi-briefcase",
+        colorHex: "#3498db",
+      },
     ],
     entries: [
       {
@@ -19,7 +31,7 @@ export const createInitialVault = async (
         id: "entry-1",
         title: "Email Principal",
         notes: "",
-        foldersIds: ["folder-1"],
+        foldersIds: ["folder-1", "folder-2"],
         audit: {
           leak: false,
           weak: true,
@@ -39,7 +51,7 @@ export const createInitialVault = async (
         id: "entry-2",
         title: "Email Principal",
         notes: "",
-        foldersIds: ["folder-1"],
+        foldersIds: ["folder-2"],
         audit: {
           leak: false,
           weak: true,

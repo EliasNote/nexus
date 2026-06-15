@@ -1,25 +1,13 @@
 import { Button } from "./Button";
-import {
-  LayoutGrid,
-  Star,
-  Trash2,
-  Dot,
-  Binary,
-  Shield,
-  Folder,
-  Plus,
-  Minus,
-  Cloud,
-  LogOut,
-} from "lucide-react";
+import { Dot, Folder, Plus, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useState } from "react";
+import { getAllButtons } from "./Buttons";
 
 const Sidebar = ({
   selected,
   setSelected,
-  iconsSize,
   setIsAddFolder,
   isAddFolder,
   addFolder,
@@ -27,7 +15,6 @@ const Sidebar = ({
 }: {
   selected: number;
   setSelected: (id: number) => void;
-  iconsSize: number;
   setIsAddFolder: (isAddFolder: boolean) => void;
   isAddFolder: boolean;
   addFolder: (name: string) => void;
@@ -35,6 +22,9 @@ const Sidebar = ({
 }) => {
   const { disconnect } = useCloudSync();
   const [newFolder, setNewFolder] = useState("");
+
+  const iconsSize = 20;
+  const { defaults, tools, footers } = getAllButtons(iconsSize);
 
   const handleLogout = () => {
     disconnect();
@@ -50,27 +40,16 @@ const Sidebar = ({
         <hr className="w-full text-zinc-800" />
       </div>
       <div className="flex flex-col gap-[5px]">
-        <Button
-          id={0}
-          selectedId={selected}
-          title="TODOS OS ITENS"
-          setSelected={setSelected}
-          icon={<LayoutGrid size={iconsSize} />}
-        />
-        <Button
-          id={1}
-          selectedId={selected}
-          title="FAVORITOS"
-          setSelected={setSelected}
-          icon={<Star size={iconsSize} />}
-        />
-        <Button
-          id={2}
-          selectedId={selected}
-          title="LIXEIRA"
-          setSelected={setSelected}
-          icon={<Trash2 size={iconsSize} />}
-        />
+        {defaults.map((button, index) => (
+          <Button
+            key={index}
+            id={index}
+            selectedId={selected}
+            title={button.title}
+            setSelected={setSelected}
+            icon={button.icon}
+          />
+        ))}
       </div>
       <div className="flex flex-col gap-[10px]">
         <div className="text-white font-medium text-[16px] flex flex-row">
@@ -78,20 +57,16 @@ const Sidebar = ({
           <span>FERRAMENTAS</span>
         </div>
         <div className="flex flex-col gap-[5px]">
-          <Button
-            id={3}
-            selectedId={selected}
-            title="GERADOR"
-            setSelected={setSelected}
-            icon={<Binary size={iconsSize} />}
-          />
-          <Button
-            id={4}
-            selectedId={selected}
-            title="AUDITORIA"
-            setSelected={setSelected}
-            icon={<Shield size={iconsSize} />}
-          />
+          {tools.map((button, index) => (
+            <Button
+              key={defaults.length + index}
+              id={defaults.length + index}
+              selectedId={selected}
+              title={button.title}
+              setSelected={setSelected}
+              icon={button.icon}
+            />
+          ))}
         </div>
       </div>
       <div className="flex flex-col gap-[10px] w-full flex-1 min-h-0">
@@ -139,12 +114,12 @@ const Sidebar = ({
           )}
           {folders.map((dir, index) => (
             <Button
-              key={index + 8}
-              id={index + 8}
+              key={defaults.length + tools.length + footers.length + index}
+              id={defaults.length + tools.length + footers.length + index}
               selectedId={selected}
               title={dir}
               setSelected={setSelected}
-              icon={<Folder size={iconsSize} />}
+              icon={<Folder size={20} />}
             />
           ))}
         </div>
@@ -152,21 +127,19 @@ const Sidebar = ({
 
       <hr className="w-full text-zinc-800 mt-[-20px] mb-[-15px]" />
       <div className="flex flex-col w-full gap-2 ">
-        <Button
-          id={6}
-          selectedId={selected}
-          title="Sincronizar"
-          setSelected={setSelected}
-          icon={<Cloud size={iconsSize} />}
-        />
-        <Button
-          id={7}
-          selectedId={selected}
-          title="Sair"
-          setSelected={setSelected}
-          onClick={handleLogout}
-          icon={<LogOut size={iconsSize} />}
-        />
+        {footers.map((item, index) => (
+          <Button
+            key={defaults.length + tools.length + index}
+            id={defaults.length + tools.length + index}
+            selectedId={selected}
+            title={item.title}
+            onClick={() => {
+              if (footers.length - 1 === index) handleLogout();
+            }}
+            setSelected={setSelected}
+            icon={item.icon}
+          />
+        ))}
       </div>
     </section>
   );

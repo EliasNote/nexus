@@ -8,6 +8,8 @@ import {
   X,
   Save,
 } from "lucide-react";
+import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
+import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { AddButton } from "./AddButton";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { useState } from "react";
@@ -21,10 +23,12 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
   const setVault = useCloudStore((state) => state.setVault);
   const { uploadVault } = useCloudSync();
 
-  const rawFolders = vault?.folders;
-  const folders = rawFolders ?? [];
+  const folders = vault?.folders ?? [];
   const [isEdit, setIsEdit] = useState(false);
   const [tempVault, setTempVault] = useState<VaultEntry | null>(null);
+  const isFavorite = isEdit
+    ? (tempVault?.isFavorite ?? false)
+    : (credential?.isFavorite ?? false);
 
   const handleEditClick = () => {
     setTempVault(credential || null);
@@ -63,9 +67,34 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
                 <h2 className="text-[18px] text-zinc-300 font-bold">
                   {credential?.title}
                 </h2>
-                <span className="flex items-center justify-center px-3 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[14px] font-bold">
-                  {credential.type}
-                </span>
+                <div className="flex">
+                  <span className="flex items-center justify-center px-3 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[14px] font-bold">
+                    {credential.type}
+                  </span>
+                  <button
+                    className={`flex items-center justify-center px-3 py-1 ${isEdit && "cursor-pointer"}`}
+                    disabled={!isEdit}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTempVault({
+                        ...tempVault!,
+                        isFavorite: !tempVault?.isFavorite,
+                      });
+                    }}
+                  >
+                    {isFavorite ? (
+                      <StarSolid
+                        strokeWidth={1.8}
+                        className="text-amber-400 size-[25px]"
+                      />
+                    ) : (
+                      <StarOutline
+                        strokeWidth={1.8}
+                        className="text-amber-400 size-[25px]"
+                      />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
             <div className="flex gap-[10px] items-center justify-center text-[14px]">
@@ -123,7 +152,7 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
           <div
             className={`w-full flex justify-between items-center border-t border-zinc-800 px-[40px] py-[30px]`}
           >
-            <div className="flex flex-col text-[14px] text-zinc-400">
+            <div className="flex flex-col text-[14px] text-zinc-400 w-full">
               <span>
                 CRIADO:
                 {`${new Date(credential?.createdAt).toLocaleDateString("pt-BR")}, ${new Date(credential?.createdAt).toLocaleTimeString("pt-BR")}`}
@@ -133,7 +162,7 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
                 {`${new Date(credential?.updatedAt).toLocaleDateString("pt-BR")}, ${new Date(credential?.updatedAt).toLocaleTimeString("pt-BR")}`}
               </span>
             </div>
-            <div className="flex flex-col items-center justify-center gap-1 font-medium">
+            <div className="flex flex-col items-center justify-center gap-1 font-medium  min-w-[180px]">
               {isWeak ? (
                 <ShieldAlert
                   className="text-red-600"
@@ -152,7 +181,9 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
                 Senha {isWeak ? "Insegura" : "Segura"}
               </span>
             </div>
-            <AddButton />
+            <div className="flex justify-end w-full">
+              <AddButton />
+            </div>
           </div>
         </>
       ) : (

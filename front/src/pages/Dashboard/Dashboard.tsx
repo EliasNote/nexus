@@ -5,13 +5,13 @@ import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
 import type { Folder } from "@/types/vault";
+import { getAllButtons } from "./components/Sidebar/Buttons";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
 const Dashboard = () => {
   const [selected, setSelected] = useState(0);
   const [isAddFolder, setIsAddFolder] = useState(false);
-  const iconsSize = 20;
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
   const setVault = useCloudStore((state) => state.setVault);
@@ -20,7 +20,37 @@ const Dashboard = () => {
     string | null
   >(null);
 
+  const folders = useMemo(() => {
+    return vault?.folders?.map((f: Folder) => `/${f.name}`) || [];
+  }, [vault]);
+
   const { download } = useCloudSync();
+
+  const allFolders = useMemo(() => vault?.folders || [], [vault]);
+  const credentials = useMemo(() => {
+    if (!vault?.entries) return [];
+
+    const { defaults, tools, footers } = getAllButtons(0);
+    const lastButtons = [...defaults, ...tools, ...footers];
+
+    if (selected === 0) {
+      return vault.entries;
+    } else if (selected === 1) {
+      return vault.entries.filter((credential) => credential.isFavorite);
+    } else if (selected === 2) {
+      return vault.entries.filter((credential) => credential.isDeleted);
+    } else if (selected >= lastButtons.length) {
+      const targetFolder = allFolders[selected - lastButtons.length];
+
+      if (!targetFolder) return [];
+
+      return vault.entries.filter((c) =>
+        c.foldersIds?.includes(targetFolder.id),
+      );
+    } else {
+      return [];
+    }
+  }, [selected, vault]);
 
   useEffect(() => {
     if (isTokenValid && !vault) {
@@ -34,10 +64,6 @@ const Dashboard = () => {
         .catch((err) => console.error("Erro ao baixar cofre:", err));
     }
   }, [isTokenValid, download, setVault, vault]);
-
-  const folders = useMemo(() => {
-    return vault?.folders?.map((f: Folder) => `/${f.name}`) || [];
-  }, [vault]);
 
   const addFolder = useCallback(
     (name: string) => {
@@ -68,7 +94,6 @@ const Dashboard = () => {
       <Sidebar
         selected={selected}
         setSelected={setSelected}
-        iconsSize={iconsSize}
         setIsAddFolder={setIsAddFolder}
         isAddFolder={isAddFolder}
         addFolder={addFolder}
@@ -77,8 +102,9 @@ const Dashboard = () => {
       <SidebarCredentials
         selectedSideCredential={selectedSideCredential}
         setSelectedSideCredential={setSelectedSideCredential}
+        credentials={credentials}
       />
-      <Credential credential={selectedCredential} />
+      {credentials && <Credential credential={selectedCredential} />}
     </main>
   );
 };

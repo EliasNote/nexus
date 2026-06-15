@@ -1,18 +1,17 @@
-import { useCloudStore } from "@/hooks/useCloudStore";
-import SideCredential from "./SideCredential";
+import type { VaultEntry } from "@/types/vault";
+import Credentials from "./Credentials";
 
 const SidebarCredentials = ({
   selectedSideCredential,
   setSelectedSideCredential,
+  credentials,
 }: {
   selectedSideCredential: string | null;
   setSelectedSideCredential: (id: string | null) => void;
+  credentials: VaultEntry[];
 }) => {
-  const entries = useCloudStore((state) => state.vault?.entries);
-  const credentials = entries ?? [];
-
   return (
-    <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[280px] w-full">
+    <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[320px] w-full">
       <div className="flex flex-col w-full p-[14px] gap-[14px]">
         <span className="border-l-brand border-l-4 text-white pl-3 text-[18px] font-bold">
           TODOS OS ITENS
@@ -26,7 +25,7 @@ const SidebarCredentials = ({
       <hr className="w-full text-zinc-800" />
       <div className="w-full h-full">
         {credentials.map((credential) => (
-          <SideCredential
+          <Credentials
             key={credential.id}
             selected={selectedSideCredential === credential.id}
             setSelectedSideCredential={setSelectedSideCredential}

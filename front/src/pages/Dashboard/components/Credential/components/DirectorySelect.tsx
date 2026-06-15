@@ -6,6 +6,7 @@ import type { Folder } from "@/types/vault";
 export const DirectorySelect = ({
   iconTop: Icontop,
   topName,
+  isEdit,
   folders,
   disabled,
   selectedFoldersIds,
@@ -13,6 +14,7 @@ export const DirectorySelect = ({
 }: {
   iconTop: LucideIcon;
   topName: string;
+  isEdit?: boolean;
   folders: Folder[];
   disabled?: boolean;
   selectedFoldersIds: string[];
@@ -71,8 +73,8 @@ export const DirectorySelect = ({
                 >
                   {f.name}
                   <X
-                    size={12}
-                    className="hover:text-red-500 cursor-pointer"
+                    size={14}
+                    className={`${isEdit && "hover:text-red-500 cursor-pointer"}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFolder(f.id);
