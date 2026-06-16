@@ -4,13 +4,11 @@ import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCrede
 import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
-import type { Folder } from "@/types/vault";
-import { getAllButtons } from "./components/Sidebar/Buttons";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
 const Dashboard = () => {
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState<number | string>(0);
   const [isAddFolder, setIsAddFolder] = useState(false);
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
@@ -21,7 +19,7 @@ const Dashboard = () => {
   >(null);
 
   const folders = useMemo(() => {
-    return vault?.folders?.map((f: Folder) => `/${f.name}`) || [];
+    return vault?.folders || [];
   }, [vault]);
 
   const { download } = useCloudSync();
@@ -30,17 +28,14 @@ const Dashboard = () => {
   const credentials = useMemo(() => {
     if (!vault?.entries) return [];
 
-    const { defaults, tools, footers } = getAllButtons(0);
-    const lastButtons = [...defaults, ...tools, ...footers];
-
     if (selected === 0) {
       return vault.entries;
     } else if (selected === 1) {
       return vault.entries.filter((credential) => credential.isFavorite);
     } else if (selected === 2) {
       return vault.entries.filter((credential) => credential.isDeleted);
-    } else if (selected >= lastButtons.length) {
-      const targetFolder = allFolders[selected - lastButtons.length];
+    } else if (selected as string) {
+      const targetFolder = allFolders.find((f) => f.id === selected);
 
       if (!targetFolder) return [];
 

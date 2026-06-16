@@ -1,9 +1,10 @@
 import { Button } from "./Button";
-import { Dot, Folder, Plus, Minus } from "lucide-react";
+import { Dot, Folder as FolderIcon, Plus, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useState } from "react";
 import { getAllButtons } from "./Buttons";
+import type { Folder } from "@/types/vault";
 
 const Sidebar = ({
   selected,
@@ -13,12 +14,12 @@ const Sidebar = ({
   addFolder,
   folders,
 }: {
-  selected: number;
-  setSelected: (id: number) => void;
+  selected: number | string;
+  setSelected: (id: number | string) => void;
   setIsAddFolder: (isAddFolder: boolean) => void;
   isAddFolder: boolean;
   addFolder: (name: string) => void;
-  folders: string[];
+  folders: Folder[];
 }) => {
   const { disconnect } = useCloudSync();
   const [newFolder, setNewFolder] = useState("");
@@ -112,14 +113,14 @@ const Sidebar = ({
               </button>
             </div>
           )}
-          {folders.map((dir, index) => (
+          {folders.map((f, index) => (
             <Button
               key={defaults.length + tools.length + footers.length + index}
-              id={defaults.length + tools.length + footers.length + index}
+              id={f.id}
               selectedId={selected}
-              title={dir}
+              title={`/${f.name}`}
               setSelected={setSelected}
-              icon={<Folder size={20} />}
+              icon={<FolderIcon size={20} />}
             />
           ))}
         </div>

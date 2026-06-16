@@ -55,3 +55,26 @@ export type DecryptedVault = {
   folders: Folder[];
   entries: VaultEntry[];
 };
+
+export type EncryptedData = {
+  iv: string;
+  tag: string;
+  ciphertext: string;
+};
+
+export type KdfConfig = {
+  salt: string;
+  memory: number;
+  iterations: number;
+  parallelism: number;
+};
+
+export type EncryptedVault = {
+  version: string;
+  kdf: KdfConfig;
+  encrypted_dek: EncryptedData;
+  folders: EncryptedData;
+  entries: {
+    [uuid: string]: EncryptedData;
+  };
+};

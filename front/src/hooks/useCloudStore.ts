@@ -1,8 +1,16 @@
 import type { DecryptedVault } from "@/types/vault";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { wrap } from "comlink";
+import type { CryptoService } from "../utils/worker";
 
 export type StorageProvider = "google" | "github" | null;
+
+const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
+  type: "module",
+});
+
+const cryptoService = wrap<CryptoService>(worker);
 
 type CloudState = {
   vault: null | DecryptedVault;
@@ -22,6 +30,7 @@ type CloudState = {
   setExpiresIn: (expiresIn: number | null) => void;
   isTokenValid: boolean;
   setIsTokenValid: (isValid: boolean) => void;
+  cryptoService: typeof cryptoService;
 };
 
 export const useCloudStore = create<CloudState>()(
@@ -45,7 +54,10 @@ export const useCloudStore = create<CloudState>()(
       loginRepoNotFound: undefined,
       setLoginRepoNotFound: (fn) => set({ loginRepoNotFound: fn }),
 
-      clearSession: () =>
+      cryptoService,
+
+      clearSession: () => {
+        cryptoService.destroyKey();
         set({
           accessToken: null,
           refreshToken: null,
@@ -53,7 +65,8 @@ export const useCloudStore = create<CloudState>()(
           isTokenValid: false,
           vault: null,
           activeProvider: null,
-        }),
+        });
+      },
 
       expiresIn: null,
       setExpiresIn: (expiresIn) => set({ expiresIn }),

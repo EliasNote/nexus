@@ -6,10 +6,10 @@ export const Button = ({
   icon,
   onClick,
 }: {
-  id: number;
-  selectedId: number;
+  id: number | string;
+  selectedId: number | string;
   title: string;
-  setSelected: (id: number) => void;
+  setSelected: (id: number | string) => void;
   icon: React.ReactNode;
   onClick?: () => void;
 }) => {

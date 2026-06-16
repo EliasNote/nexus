@@ -7,7 +7,16 @@ import { IconButton } from "./components/IconButton";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { dashboardRoute } from "@/App";
-import { createInitialVault } from "@/utils/crypto";
+import {
+  createInitialVault,
+  decryptDek,
+  decryptVault,
+  derivateKek,
+  generateDek,
+  encryptDek,
+  encryptVault,
+  uint8ArrayToBase64,
+} from "@/utils/crypto";
 import { useGoogle } from "@/hooks/useGoogle";
 
 const TextsButtonsArchives = [
@@ -69,28 +78,65 @@ export const Home = () => {
 
   const handleConcluir = async () => {
     try {
+      const password = inputRef.current?.value || "";
+
       const data = await find();
 
       if (data && (data.id || data.sha)) {
         console.log("Vault existe");
-        const cloudVault = await download();
-        setVault(cloudVault);
+        const encryptedVault = await download();
+
+        const salt = encryptedVault.kdf.salt;
+        const kek = await derivateKek(password, salt);
+
+        const encryptedDek = JSON.stringify(encryptedVault.encrypted_dek);
+        const dek = await decryptDek(encryptedDek, kek);
+
+        const decryptedVault = await decryptVault(dek, encryptedVault);
+
+        setVault(decryptedVault);
       } else {
         console.log("Vault não existe, fazendo upload");
-        // COLOCAR VAULT PADRÃO
-        const vault = await createInitialVault(password);
-        await uploadVault(vault);
+
+        const vault = await createInitialVault();
+
+        const dek = generateDek();
+
+        const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+        const salt = uint8ArrayToBase64(saltBytes);
+        const kek = await derivateKek(password, salt);
+
+        const encryptedDek = JSON.parse(await encryptDek(dek, kek));
+        const encryptedContent = await encryptVault(
+          dek,
+          vault.entries,
+          vault.folders,
+        );
+
+        const cofreFinal = {
+          version: "1.0",
+          kdf: {
+            salt,
+            memory: 65536,
+            iterations: 3,
+            parallelism: 1,
+          },
+          encrypted_dek: encryptedDek,
+          folders: encryptedContent.folders,
+          entries: encryptedContent.entries,
+        };
+
+        await uploadVault(cofreFinal);
         setVault(vault);
       }
+
+      if (inputRef.current) inputRef.current.value = "";
+      setPassword("");
 
       navigate(dashboardRoute, { state: { texto: password } });
     } catch (error) {
       console.error("Erro: ", error);
     }
-  };
-
-  const handlePasswordChange = () => {
-    setPassword(inputRef.current!.value);
   };
 
   const nextButtonStyle =
