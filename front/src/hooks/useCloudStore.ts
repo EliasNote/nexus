@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { wrap } from "comlink";
 import type { CryptoService } from "../utils/worker";
-import type { VaultSummarizedData } from "@/types/vault";
+import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
 
 export type StorageProvider = "google" | "github" | null;
 
@@ -13,10 +13,10 @@ const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
 const cryptoService = wrap<CryptoService>(worker);
 
 type CloudState = {
-  vault: null | VaultSummarizedData;
-  setVault: (vault: null | VaultSummarizedData) => void;
-  encryptedVault: null | any;
-  setEncryptedVault: (vault: null) => void;
+  vault: null | EncryptedVault;
+  setVault: (vault: null | EncryptedVault) => void;
+  summaryVault: null | VaultSummarizedData;
+  setSummaryVault: (summary: VaultSummarizedData) => void;
   activeProvider: StorageProvider;
   setActiveProvider: (provider: StorageProvider) => void;
   accessToken: string | null;
@@ -41,8 +41,8 @@ export const useCloudStore = create<CloudState>()(
       vault: null,
       setVault: (vault) => set({ vault: vault }),
 
-      encryptedVault: null,
-      setEncryptedVault: (vault) => set({ encryptedVault: vault }),
+      summaryVault: null,
+      setSummaryVault: (summary) => set({ summaryVault: summary }),
 
       accessToken: null,
       setAccessToken: (token) => set({ accessToken: token }),
@@ -69,7 +69,7 @@ export const useCloudStore = create<CloudState>()(
           expiresIn: null,
           isTokenValid: false,
           vault: null,
-          encryptedVault: null,
+          summaryVault: null,
           activeProvider: null,
         });
       },

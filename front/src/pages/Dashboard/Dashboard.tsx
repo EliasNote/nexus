@@ -12,43 +12,46 @@ const Dashboard = () => {
   const [isAddFolder, setIsAddFolder] = useState(false);
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
-  const setVault = useCloudStore((state) => state.setVault);
   const vault = useCloudStore((state) => state.vault);
+  const setVault = useCloudStore((state) => state.setVault);
+  const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
+  const summaryVault = useCloudStore((state) => state.summaryVault);
   const [selectedSideCredential, setSelectedSideCredential] = useState<
     string | null
   >(null);
+  const cryptoService = useCloudStore.getState().cryptoService;
 
   const folders = useMemo(() => {
-    return vault?.folders || [];
-  }, [vault]);
+    return summaryVault?.folders || [];
+  }, [summaryVault]);
 
   const { download } = useCloudSync();
 
-  const allFolders = useMemo(() => vault?.folders || [], [vault]);
+  const allFolders = useMemo(() => summaryVault?.folders || [], [summaryVault]);
   const credentials = useMemo(() => {
-    if (!vault?.entries) return [];
+    if (!summaryVault?.entries) return [];
 
     if (selected === 0) {
-      return vault.entries;
+      return summaryVault.entries;
     } else if (selected === 1) {
-      return vault.entries.filter((credential) => credential.isFavorite);
+      return summaryVault.entries.filter((credential) => credential.isFavorite);
     } else if (selected === 2) {
-      return vault.entries.filter((credential) => credential.isDeleted);
+      return summaryVault.entries.filter((credential) => credential.isDeleted);
     } else if (selected as string) {
       const targetFolder = allFolders.find((f) => f.id === selected);
 
       if (!targetFolder) return [];
 
-      return vault.entries.filter((c) =>
+      return summaryVault.entries.filter((c) =>
         c.foldersIds?.includes(targetFolder.id),
       );
     } else {
       return [];
     }
-  }, [selected, vault]);
+  }, [selected, summaryVault]);
 
   useEffect(() => {
-    if (isTokenValid && !vault) {
+    if (isTokenValid && !summaryVault) {
       download()
         .then((result) => {
           if (result) {
@@ -58,11 +61,11 @@ const Dashboard = () => {
         })
         .catch((err) => console.error("Erro ao baixar cofre:", err));
     }
-  }, [isTokenValid, download, setVault, vault]);
+  }, [isTokenValid, download, setVault, summaryVault]);
 
   const addFolder = useCallback(
     (name: string) => {
-      if (name.trim() === "" || !vault) return;
+      if (name.trim() === "" || !summaryVault) return;
 
       const newFolder = {
         id: crypto.randomUUID(),
@@ -70,19 +73,26 @@ const Dashboard = () => {
       };
 
       const updatedVault = {
-        ...vault,
-        folders: [...(vault.folders || []), newFolder],
+        ...summaryVault,
+        folders: [...(summaryVault.folders || []), newFolder],
       };
 
-      setVault(updatedVault);
+      cryptoService.updateVaultFromSummary(vault!, updatedVault);
+      setSummaryVault(updatedVault);
       setIsAddFolder(false);
     },
-    [vault, setVault],
+    [vault, setVault, summaryVault, setSummaryVault],
   );
 
-  const selectedCredential = useMemo(() => {
-    return vault?.entries.find((x) => x.id === selectedSideCredential);
-  }, [vault?.entries, selectedSideCredential]);
+  const selectedCredentialId = useMemo(() => {
+    return summaryVault?.entries.find((x) => x.id === selectedSideCredential)
+      ?.id;
+  }, [summaryVault?.entries, selectedSideCredential]);
+
+  const getCredential = (() => {
+    cryptoService.
+  }, [summaryVault?.entries, selectedCredentialId]);
+
 
   return (
     <main className="flex bg-[#0A0A0A] max-h-screen w-screen">
@@ -99,7 +109,7 @@ const Dashboard = () => {
         setSelectedSideCredential={setSelectedSideCredential}
         credentials={credentials}
       />
-      {/*{credentials && <Credential credential={selectedCredential} />}*/}
+      {credentials && <Credential credential={selectedCredential} />}
     </main>
   );
 };

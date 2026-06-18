@@ -1,4 +1,5 @@
-import type { Credential } from "@/types/vault";
+import { useCloudStore } from "@/hooks/useCloudStore";
+import type { EntrySummary } from "@/types/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
@@ -10,9 +11,11 @@ const Credentials = ({
 }: {
   selected: boolean;
   setSelectedSideCredential: (id: string | null) => void;
-  credential: Credential;
+  credential: EntrySummary;
 }) => {
   const [copied, setCopied] = useState(false);
+  const cryptoService = useCloudStore.getState().cryptoService;
+  const vault = useCloudStore.getState().encryptedVault;
 
   const getSubtitle = () => {
     switch (credential.type) {
@@ -27,12 +30,28 @@ const Credentials = ({
     }
   };
 
-  const handleCopy = (value: string) => {
-    copyToClipboard(value);
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, 1000);
+  const handleCopy = (type: string, value: string) => {
+    switch (type) {
+      case "login":
+        cryptoService.getPassword(e, credential.id)
+          .then((password) => {
+            copyToClipboard(password ?? value);
+          })
+          .finally(() => {
+            setCopied(true);
+            setTimeout(() => {
+              setCopied(false);
+            }, 1000);
+          });
+        break;
+      case "card":
+      case "note":
+        copyToClipboard(value);
+        setCopied(true);
+        setTimeout(() => {
+          setCopied(false);
+        }, 1000);
+      });
   };
 
   return (
@@ -52,9 +71,7 @@ const Credentials = ({
         className="flex text-transparent group-hover:text-zinc-500 justify-end items-center cursor-pointer hover:text-brand"
         onClick={(e) => {
           e.stopPropagation();
-          handleCopy(
-            credential.type === "login" ? (credential.password ?? "") : "",
-          );
+          handleCopy();
         }}
       >
         {copied ? (

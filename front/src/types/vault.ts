@@ -9,7 +9,9 @@ export interface EntrySummary {
   id: string;
   type: "login" | "card" | "note";
   title: string;
-  username: string | null | undefined;
+  username?: string | null | undefined;
+  holderName?: string | null | undefined;
+  name?: string | null | undefined;
   foldersIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;

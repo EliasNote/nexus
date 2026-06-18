@@ -2,8 +2,6 @@ import type {
   DecryptedVault,
   EncryptedData,
   EncryptedVault,
-  EntrySummary,
-  Folder,
   VaultSummarizedData,
 } from "@/types/vault";
 import { expose } from "comlink";
@@ -194,6 +192,8 @@ const cryptoService = {
         type: v.type,
         title: v.title,
         username: v.type === "login" ? v.username : null,
+        holderName: v.type === "card" ? v.holderName : null,
+        name: v.type === "note" ? v.name : null,
         foldersIds: v.foldersIds,
         isFavorite: v.isFavorite,
         isDeleted: v.isDeleted,
@@ -226,6 +226,78 @@ const cryptoService = {
     };
 
     return await this.getFolderAndEntryData(tempDecryptedVault);
+  },
+
+  async getPassword(
+    encryptedVault: EncryptedVault,
+    id: string,
+  ): Promise<string | null> {
+    const encryptedEntry = encryptedVault.entries[id];
+    if (!encryptedEntry) return null;
+
+    const decryptedStr = await this.getSingleEntry(encryptedEntry);
+    const entry = JSON.parse(decryptedStr);
+
+    return entry.password || null;
+  },
+
+  async updateVaultFromSummary(
+    encryptedVault: EncryptedVault,
+    summary: VaultSummarizedData,
+  ): Promise<EncryptedVault> {
+    const foldersResult = await this.encrypt(JSON.stringify(summary.folders));
+    const newFolders: EncryptedData = {
+      ciphertext: uint8ArrayToBase64(foldersResult.ciphertext),
+      iv: uint8ArrayToBase64(foldersResult.iv),
+      tag: uint8ArrayToBase64(foldersResult.tag),
+    };
+
+    const newEntries: { [uuid: string]: EncryptedData } = {};
+    const summaryMap = new Map(summary.entries.map((e) => [e.id, e]));
+
+    for (const [id, encryptedEntry] of Object.entries(encryptedVault.entries)) {
+      const summaryEntry = summaryMap.get(id);
+
+      if (!summaryEntry) {
+        continue;
+      }
+
+      const decryptedStr = await this.getSingleEntry(encryptedEntry);
+      const decryptedEntry = JSON.parse(decryptedStr);
+
+      const mergedEntry = {
+        ...decryptedEntry,
+        title: summaryEntry.title,
+        username:
+          summaryEntry.type === "login"
+            ? summaryEntry.username
+            : decryptedEntry.username,
+        holderName:
+          summaryEntry.type === "card"
+            ? summaryEntry.holderName
+            : decryptedEntry.holderName,
+        name:
+          summaryEntry.type === "note"
+            ? summaryEntry.name
+            : decryptedEntry.name,
+        foldersIds: summaryEntry.foldersIds,
+        isFavorite: summaryEntry.isFavorite,
+        isDeleted: summaryEntry.isDeleted,
+      };
+
+      const encryptedResult = await this.encrypt(JSON.stringify(mergedEntry));
+      newEntries[id] = {
+        ciphertext: uint8ArrayToBase64(encryptedResult.ciphertext),
+        iv: uint8ArrayToBase64(encryptedResult.iv),
+        tag: uint8ArrayToBase64(encryptedResult.tag),
+      };
+    }
+
+    return {
+      ...encryptedVault,
+      folders: newFolders,
+      entries: newEntries,
+    };
   },
 };
 

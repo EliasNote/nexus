@@ -58,7 +58,7 @@ export const Home = () => {
   const setToken = useCloudStore((state) => state.setAccessToken);
   const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
   const setVault = useCloudStore((state) => state.setVault);
-  const setEncryptedVault = useCloudStore((state) => state.setEncryptedVault);
+  const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
 
   const { deleteVault } = useGoogle();
 
@@ -95,8 +95,8 @@ export const Home = () => {
 
           console.log("Cofre: ", decryptedVault);
 
-          setVault(decryptedVault);
-          setEncryptedVault(encryptedVault);
+          setSummaryVault(decryptedVault);
+          setVault(encryptedVault);
         }
       } else {
         console.log("Vault não existe, fazendo upload");
@@ -121,7 +121,7 @@ export const Home = () => {
         };
 
         await uploadVault(cofreFinal);
-        setVault(await cryptoService.getFolderAndEntryData(vault));
+        setSummaryVault(await cryptoService.getFolderAndEntryData(vault));
       }
 
       if (inputRef.current) inputRef.current.value = "";

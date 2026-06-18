@@ -2,27 +2,6 @@ import type { DecryptedVault } from "@/types/vault";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { argon2id } from "hash-wasm";
 
-export interface EncryptedData {
-  iv: string;
-  tag: string;
-  ciphertext: string;
-}
-
-export interface EncryptedVault {
-  version: string;
-  kdf: {
-    salt: string;
-    memory: number;
-    iterations: number;
-    parallelism: number;
-  };
-  encrypted_dek: EncryptedData;
-  folders: EncryptedData;
-  entries: {
-    [uuid: string]: EncryptedData;
-  };
-}
-
 export const base64ToUint8Array = (base64: string): Uint8Array => {
   const binaryString = atob(base64);
   const bytes = new Uint8Array(binaryString.length);
