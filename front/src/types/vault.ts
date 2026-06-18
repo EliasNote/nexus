@@ -5,6 +5,21 @@ export type Folder = {
   colorHex?: string;
 };
 
+export interface EntrySummary {
+  id: string;
+  type: "login" | "card" | "note";
+  title: string;
+  username: string | null | undefined;
+  foldersIds?: string[];
+  isFavorite: boolean;
+  isDeleted: boolean;
+}
+
+export interface VaultSummarizedData {
+  folders: Folder[];
+  entries: EntrySummary[];
+}
+
 export type CommonMetadata = {
   id: string;
   title: string;
@@ -38,7 +53,7 @@ export type NoteCredential = CommonMetadata & {
   content: string;
 };
 
-export type VaultEntry =
+export type Credential =
   | LoginCredential
   | CreditCardCredential
   | NoteCredential;
@@ -53,7 +68,7 @@ export type Audit = {
 export type DecryptedVault = {
   version: string;
   folders: Folder[];
-  entries: VaultEntry[];
+  entries: Credential[];
 };
 
 export type EncryptedData = {

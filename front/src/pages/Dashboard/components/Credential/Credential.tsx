@@ -1,4 +1,4 @@
-import type { LoginCredential, VaultEntry } from "@/types/vault";
+import type { LoginCredential, Credential } from "@/types/vault";
 import { Login } from "./Login";
 import {
   Trash2,
@@ -16,7 +16,7 @@ import { useState } from "react";
 import { updateVaultCredential } from "@/utils/utils";
 import { useCloudSync } from "@/hooks/useCloudSync";
 
-export const Credential = ({ credential }: { credential?: VaultEntry }) => {
+export const Credential = ({ credential }: { credential?: Credential }) => {
   const iconsSize = 18;
   const isWeak = credential?.audit?.weak;
   const vault = useCloudStore((state) => state.vault);
@@ -25,7 +25,7 @@ export const Credential = ({ credential }: { credential?: VaultEntry }) => {
 
   const folders = vault?.folders ?? [];
   const [isEdit, setIsEdit] = useState(false);
-  const [tempVault, setTempVault] = useState<VaultEntry | null>(null);
+  const [tempVault, setTempVault] = useState<Credential | null>(null);
   const isFavorite = isEdit
     ? (tempVault?.isFavorite ?? false)
     : (credential?.isFavorite ?? false);

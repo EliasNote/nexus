@@ -5,7 +5,7 @@ import { TextArea } from "./components/TextArea";
 import type {
   Folder as FolderType,
   LoginCredential,
-  VaultEntry,
+  Credential,
 } from "@/types/vault";
 
 export const Login = ({
@@ -17,7 +17,7 @@ export const Login = ({
   folders: FolderType[];
   isEdit: boolean;
   credential: LoginCredential;
-  setCredential: React.Dispatch<React.SetStateAction<VaultEntry | null>>;
+  setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
 }) => {
   const handleChange = (
     field: keyof LoginCredential,

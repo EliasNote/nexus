@@ -2,6 +2,9 @@ import type {
   DecryptedVault,
   EncryptedData,
   EncryptedVault,
+  EntrySummary,
+  Folder,
+  VaultSummarizedData,
 } from "@/types/vault";
 import { expose } from "comlink";
 import { argon2id } from "hash-wasm";
@@ -175,7 +178,9 @@ const cryptoService = {
     );
   },
 
-  async getFolderAndEntryData(vault: DecryptedVault) {
+  async getFolderAndEntryData(
+    vault: DecryptedVault,
+  ): Promise<VaultSummarizedData> {
     const foldersData = vault.folders.map((f) => ({
       id: f.id,
       name: f.name,
@@ -186,6 +191,7 @@ const cryptoService = {
     const entriesData = vault.entries.map((v) => {
       const entryData = {
         id: v.id,
+        type: v.type,
         title: v.title,
         username: v.type === "login" ? v.username : null,
         foldersIds: v.foldersIds,

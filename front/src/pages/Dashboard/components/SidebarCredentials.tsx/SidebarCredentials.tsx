@@ -1,4 +1,4 @@
-import type { VaultEntry } from "@/types/vault";
+import type { EntrySummary } from "@/types/vault";
 import Credentials from "./Credentials";
 
 const SidebarCredentials = ({
@@ -8,7 +8,7 @@ const SidebarCredentials = ({
 }: {
   selectedSideCredential: string | null;
   setSelectedSideCredential: (id: string | null) => void;
-  credentials: VaultEntry[];
+  credentials: EntrySummary[];
 }) => {
   return (
     <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[320px] w-full">

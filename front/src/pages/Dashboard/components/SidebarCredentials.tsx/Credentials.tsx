@@ -1,4 +1,4 @@
-import type { VaultEntry } from "@/types/vault";
+import type { Credential } from "@/types/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
@@ -10,7 +10,7 @@ const Credentials = ({
 }: {
   selected: boolean;
   setSelectedSideCredential: (id: string | null) => void;
-  credential: VaultEntry;
+  credential: Credential;
 }) => {
   const [copied, setCopied] = useState(false);
 

@@ -9,11 +9,6 @@ import { useCloudStore } from "@/hooks/useCloudStore";
 import { dashboardRoute } from "@/App";
 import {
   createInitialVault,
-  decryptDek,
-  decryptVault,
-  derivateKek,
-  generateDek,
-  encryptDek,
   encryptVault,
   uint8ArrayToBase64,
 } from "@/utils/crypto";
@@ -126,7 +121,7 @@ export const Home = () => {
         };
 
         await uploadVault(cofreFinal);
-        setVault(vault);
+        setVault(await cryptoService.getFolderAndEntryData(vault));
       }
 
       if (inputRef.current) inputRef.current.value = "";

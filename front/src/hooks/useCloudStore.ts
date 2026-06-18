@@ -1,8 +1,8 @@
-import type { DecryptedVault } from "@/types/vault";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { wrap } from "comlink";
 import type { CryptoService } from "../utils/worker";
+import type { VaultSummarizedData } from "@/types/vault";
 
 export type StorageProvider = "google" | "github" | null;
 
@@ -13,8 +13,8 @@ const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
 const cryptoService = wrap<CryptoService>(worker);
 
 type CloudState = {
-  vault: null | any;
-  setVault: (vault: null | any) => void;
+  vault: null | VaultSummarizedData;
+  setVault: (vault: null | VaultSummarizedData) => void;
   encryptedVault: null | any;
   setEncryptedVault: (vault: null) => void;
   activeProvider: StorageProvider;

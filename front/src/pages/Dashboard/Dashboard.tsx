@@ -99,7 +99,7 @@ const Dashboard = () => {
         setSelectedSideCredential={setSelectedSideCredential}
         credentials={credentials}
       />
-      {credentials && <Credential credential={selectedCredential} />}
+      {/*{credentials && <Credential credential={selectedCredential} />}*/}
     </main>
   );
 };
