@@ -13,8 +13,10 @@ const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
 const cryptoService = wrap<CryptoService>(worker);
 
 type CloudState = {
-  vault: null | DecryptedVault;
-  setVault: (vault: null | DecryptedVault) => void;
+  vault: null | any;
+  setVault: (vault: null | any) => void;
+  encryptedVault: null | any;
+  setEncryptedVault: (vault: null) => void;
   activeProvider: StorageProvider;
   setActiveProvider: (provider: StorageProvider) => void;
   accessToken: string | null;
@@ -38,6 +40,9 @@ export const useCloudStore = create<CloudState>()(
     (set) => ({
       vault: null,
       setVault: (vault) => set({ vault: vault }),
+
+      encryptedVault: null,
+      setEncryptedVault: (vault) => set({ encryptedVault: vault }),
 
       accessToken: null,
       setAccessToken: (token) => set({ accessToken: token }),
@@ -64,6 +69,7 @@ export const useCloudStore = create<CloudState>()(
           expiresIn: null,
           isTokenValid: false,
           vault: null,
+          encryptedVault: null,
           activeProvider: null,
         });
       },
@@ -77,9 +83,6 @@ export const useCloudStore = create<CloudState>()(
     {
       name: "cloud-sync-store",
       partialize: (state) => ({
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        expiresIn: state.expiresIn,
         activeProvider: state.activeProvider,
       }),
     },

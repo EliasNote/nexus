@@ -63,7 +63,10 @@ export const useGitHub = (): StorageProviderInterface => {
 
     const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
 
-    const GITHUB_URL = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}`;
+    const oauthState = crypto.randomUUID();
+    sessionStorage.setItem("github_oauth_state", oauthState);
+
+    const GITHUB_URL = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&state=${oauthState}`;
 
     const popup = window.open(
       GITHUB_URL,
@@ -82,8 +85,19 @@ export const useGitHub = (): StorageProviderInterface => {
         if (popup.location.origin === window.location.origin) {
           const urlParams = new URLSearchParams(popup.location.search);
           const code = urlParams.get("code");
+          const returnedState = urlParams.get("state");
+
           popup.close();
           clearInterval(interval);
+
+          const savedState = sessionStorage.getItem("github_oauth_state");
+          sessionStorage.removeItem("github_oauth_state");
+
+          if (returnedState !== savedState) {
+            console.error("Ataque CSRF detectado! State não confere.");
+            resolvePromise(null);
+            return;
+          }
 
           if (code) {
             exchangeGitHubCode(code);

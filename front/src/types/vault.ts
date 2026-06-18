@@ -13,8 +13,8 @@ export type CommonMetadata = {
   audit: Audit;
   isFavorite: boolean;
   isDeleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type LoginCredential = CommonMetadata & {

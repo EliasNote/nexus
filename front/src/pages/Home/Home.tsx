@@ -63,6 +63,7 @@ export const Home = () => {
   const setToken = useCloudStore((state) => state.setAccessToken);
   const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
   const setVault = useCloudStore((state) => state.setVault);
+  const setEncryptedVault = useCloudStore((state) => state.setEncryptedVault);
 
   const { deleteVault } = useGoogle();
 
@@ -79,48 +80,46 @@ export const Home = () => {
   const handleConcluir = async () => {
     try {
       const password = inputRef.current?.value || "";
-
       const data = await find();
+      const cryptoService = useCloudStore.getState().cryptoService;
 
       if (data && (data.id || data.sha)) {
         console.log("Vault existe");
         const encryptedVault = await download();
-
         const salt = encryptedVault.kdf.salt;
-        const kek = await derivateKek(password, salt);
 
-        const encryptedDek = JSON.stringify(encryptedVault.encrypted_dek);
-        const dek = await decryptDek(encryptedDek, kek);
+        const unlocked = await cryptoService.unlockVaultKeys(
+          password,
+          salt,
+          encryptedVault.encrypted_dek,
+        );
 
-        const decryptedVault = await decryptVault(dek, encryptedVault);
+        if (unlocked) {
+          const decryptedVault =
+            await cryptoService.getInitialData(encryptedVault);
 
-        setVault(decryptedVault);
+          console.log("Cofre: ", decryptedVault);
+
+          setVault(decryptedVault);
+          setEncryptedVault(encryptedVault);
+        }
       } else {
         console.log("Vault não existe, fazendo upload");
 
         const vault = await createInitialVault();
-
-        const dek = generateDek();
-
         const saltBytes = crypto.getRandomValues(new Uint8Array(16));
         const salt = uint8ArrayToBase64(saltBytes);
-        const kek = await derivateKek(password, salt);
 
-        const encryptedDek = JSON.parse(await encryptDek(dek, kek));
+        const encryptedDek = await cryptoService.setupVaultKeys(password, salt);
+
         const encryptedContent = await encryptVault(
-          dek,
           vault.entries,
           vault.folders,
         );
 
         const cofreFinal = {
           version: "1.0",
-          kdf: {
-            salt,
-            memory: 65536,
-            iterations: 3,
-            parallelism: 1,
-          },
+          kdf: { salt, memory: 65536, iterations: 3, parallelism: 1 },
           encrypted_dek: encryptedDek,
           folders: encryptedContent.folders,
           entries: encryptedContent.entries,
@@ -133,9 +132,10 @@ export const Home = () => {
       if (inputRef.current) inputRef.current.value = "";
       setPassword("");
 
-      navigate(dashboardRoute, { state: { texto: password } });
+      navigate(dashboardRoute);
     } catch (error) {
       console.error("Erro: ", error);
+      alert("Falha ao abrir cofre. Senha incorreta?");
     }
   };
 

@@ -150,15 +150,10 @@ export const decryptDek = async (
 };
 
 export const encryptVault = async (
-  dekBase64: string,
   vaultEntries: any[],
   folders: any[] = [],
 ): Promise<any> => {
   const cryptoService = useCloudStore.getState().cryptoService;
-
-  const rawDek = base64ToUint8Array(dekBase64);
-  await cryptoService.importKey(rawDek);
-  rawDek.fill(0);
 
   const foldersString = JSON.stringify(folders);
   const encryptedFolders = await cryptoService.encrypt(foldersString);
@@ -179,21 +174,11 @@ export const encryptVault = async (
     };
   }
 
-  return {
-    folders: encryptedFoldersData,
-    entries,
-  };
+  return { folders: encryptedFoldersData, entries };
 };
 
-export const decryptVault = async (
-  dekBase64: string,
-  vault: any,
-): Promise<any> => {
+export const decryptVault = async (vault: any): Promise<any> => {
   const cryptoService = useCloudStore.getState().cryptoService;
-
-  const rawDek = base64ToUint8Array(dekBase64);
-  await cryptoService.importKey(rawDek);
-  rawDek.fill(0);
 
   const decryptedFoldersString = await cryptoService.decrypt(
     base64ToUint8Array(vault.folders.ciphertext),
@@ -213,11 +198,7 @@ export const decryptVault = async (
     entries.push(JSON.parse(decryptedEntryString));
   }
 
-  return {
-    version: vault.version || "1.0",
-    folders,
-    entries,
-  };
+  return { version: vault.version || "1.0", folders, entries };
 };
 
 export const createInitialVault = async (): Promise<DecryptedVault> => {
@@ -253,8 +234,8 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         audit: { leak: false, weak: true, reused: false, renewal: false },
         isFavorite: true,
         isDeleted: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         username: "meu.email@exemplo.com",
         password: "uma-senha-forte-123",
         url: "https://mail.google.com",
@@ -268,8 +249,8 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         audit: { leak: false, weak: true, reused: false, renewal: false },
         isFavorite: true,
         isDeleted: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         username: "meu.email@exemplo.com",
         password: "uma-senha-forte-123",
         url: "https://mail.google.com",
