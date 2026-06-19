@@ -28,6 +28,7 @@ const SidebarCredentials = ({
           <Credentials
             key={credential.id}
             selected={selectedSideCredential === credential.id}
+            selectedSideCredential={selectedSideCredential}
             setSelectedSideCredential={setSelectedSideCredential}
             credential={credential}
           />

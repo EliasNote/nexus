@@ -1,4 +1,7 @@
-import type { LoginCredential, Credential } from "@/types/vault";
+import type {
+  LoginCredential,
+  Credential as CredentialType,
+} from "@/types/vault";
 import { Login } from "./Login";
 import {
   Trash2,
@@ -13,19 +16,23 @@ import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { AddButton } from "./AddButton";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { useState } from "react";
-import { updateVaultCredential } from "@/utils/utils";
 import { useCloudSync } from "@/hooks/useCloudSync";
+import { updateSummaryVaultCredential } from "@/utils/utils";
 
-export const Credential = ({ credential }: { credential?: Credential }) => {
+export const Credential = ({ credential }: { credential?: CredentialType }) => {
   const iconsSize = 18;
   const isWeak = credential?.audit?.weak;
   const vault = useCloudStore((state) => state.vault);
+  const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
+
+  const summaryVault = useCloudStore((state) => state.summaryVault);
   const setVault = useCloudStore((state) => state.setVault);
   const { uploadVault } = useCloudSync();
+  const cryptoService = useCloudStore.getState().cryptoService;
 
-  const folders = vault?.folders ?? [];
+  const folders = summaryVault?.folders ?? [];
   const [isEdit, setIsEdit] = useState(false);
-  const [tempVault, setTempVault] = useState<Credential | null>(null);
+  const [tempVault, setTempVault] = useState<CredentialType | null>(null);
   const isFavorite = isEdit
     ? (tempVault?.isFavorite ?? false)
     : (credential?.isFavorite ?? false);
@@ -37,11 +44,19 @@ export const Credential = ({ credential }: { credential?: Credential }) => {
 
   const handleSave = async () => {
     try {
-      const newVault = updateVaultCredential(vault!, tempVault!);
+      const newVault = await cryptoService.updateVaultFromCredential(
+        vault,
+        tempVault!,
+      );
+      const updatedSummaryVault = updateSummaryVaultCredential(
+        summaryVault!,
+        tempVault!,
+      );
 
       await uploadVault(newVault);
 
       setVault(newVault);
+      setSummaryVault(updatedSummaryVault);
       setIsEdit(false);
       console.log("Salvo com sucesso na nuvem e localmente!");
     } catch (error) {

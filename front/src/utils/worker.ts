@@ -1,4 +1,5 @@
 import type {
+  Credential,
   DecryptedVault,
   EncryptedData,
   EncryptedVault,
@@ -298,6 +299,45 @@ const cryptoService = {
       folders: newFolders,
       entries: newEntries,
     };
+  },
+
+  async getCredential(
+    id: string,
+    encryptedVault: EncryptedVault,
+  ): Promise<Credential | null> {
+    const encryptedEntry = encryptedVault.entries[id];
+    if (!encryptedEntry) return null;
+    const decryptedStr = await this.getSingleEntry(encryptedEntry);
+    return JSON.parse(decryptedStr);
+  },
+
+  async updateVaultFromCredential(
+    encryptedVault: EncryptedVault,
+    credential: Credential,
+  ): Promise<EncryptedVault> {
+    const updatedEntries = await this.updateEntries(encryptedVault, credential);
+    return {
+      ...encryptedVault,
+      entries: updatedEntries,
+    };
+  },
+
+  async updateEntries(
+    encryptedVault: EncryptedVault,
+    credential: Credential,
+  ): Promise<{ [uuid: string]: EncryptedData }> {
+    const updatedEntries = { ...encryptedVault.entries };
+
+    if (credential) {
+      const encryptedResult = await this.encrypt(JSON.stringify(credential));
+
+      updatedEntries[credential.id] = {
+        ciphertext: uint8ArrayToBase64(encryptedResult.ciphertext),
+        iv: uint8ArrayToBase64(encryptedResult.iv),
+        tag: uint8ArrayToBase64(encryptedResult.tag),
+      };
+    }
+    return updatedEntries;
   },
 };
 

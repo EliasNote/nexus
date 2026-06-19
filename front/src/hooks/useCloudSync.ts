@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useCloudStore } from "./useCloudStore";
 import { useGoogle } from "./useGoogle";
 import { useGitHub } from "./useGithub";
-import type { DecryptedVault } from "@/types/vault";
+import type { EncryptedVault } from "@/types/vault";
 
 export const useCloudSync = () => {
   const activeProvider = useCloudStore((state) => state.activeProvider);
@@ -35,7 +35,7 @@ export const useCloudSync = () => {
   }, [activeProvider, token]);
 
   const uploadVault = useCallback(
-    async (content: DecryptedVault) => {
+    async (content: EncryptedVault) => {
       return getActiveService()?.uploadVault(content) ?? null;
     },
     [activeProvider, token],

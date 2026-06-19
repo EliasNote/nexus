@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useCloudStore } from "./useCloudStore";
 import type { StorageProviderInterface } from "./interface";
-import type { DecryptedVault } from "@/types/vault";
+import type { EncryptedVault } from "@/types/vault";
 
 export const useGitHub = (): StorageProviderInterface => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -106,7 +106,8 @@ export const useGitHub = (): StorageProviderInterface => {
           }
         }
       } catch (e) {
-        console.error("Erro ao renovar a sessão:", e);
+        console.error(e);
+        resolvePromise(null);
       }
     }, 500);
   };
@@ -261,7 +262,7 @@ export const useGitHub = (): StorageProviderInterface => {
     }
   };
 
-  const uploadVault = async (vault: DecryptedVault) => {
+  const uploadVault = async (vault: EncryptedVault) => {
     if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
 

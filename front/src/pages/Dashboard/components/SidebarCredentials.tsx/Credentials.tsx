@@ -6,16 +6,18 @@ import { useState } from "react";
 
 const Credentials = ({
   selected,
+  selectedSideCredential,
   setSelectedSideCredential,
   credential,
 }: {
   selected: boolean;
+  selectedSideCredential: string | null;
   setSelectedSideCredential: (id: string | null) => void;
   credential: EntrySummary;
 }) => {
   const [copied, setCopied] = useState(false);
   const cryptoService = useCloudStore.getState().cryptoService;
-  const vault = useCloudStore.getState().encryptedVault;
+  const vault = useCloudStore.getState().vault;
 
   const getSubtitle = () => {
     switch (credential.type) {
@@ -30,12 +32,13 @@ const Credentials = ({
     }
   };
 
-  const handleCopy = (type: string, value: string) => {
-    switch (type) {
+  const handleCopy = () => {
+    switch (credential.type) {
       case "login":
-        cryptoService.getPassword(e, credential.id)
+        cryptoService
+          .getPassword(vault, credential.id)
           .then((password) => {
-            copyToClipboard(password ?? value);
+            copyToClipboard(password);
           })
           .finally(() => {
             setCopied(true);
@@ -46,19 +49,18 @@ const Credentials = ({
         break;
       case "card":
       case "note":
-        copyToClipboard(value);
-        setCopied(true);
-        setTimeout(() => {
-          setCopied(false);
-        }, 1000);
-      });
+    }
   };
 
   return (
     <div
       key={credential.id}
       className={`group flex gap-[14px] bg-transparent p-[14px] w-full max-h-[63px] border-b border-b-zinc-800 cursor-pointer hover:bg-[#111113] ${selected ? "bg-zinc-900" : ""}`}
-      onClick={() => setSelectedSideCredential(credential.id)}
+      onClick={() => {
+        setSelectedSideCredential(
+          selectedSideCredential !== credential.id ? credential.id : null,
+        );
+      }}
     >
       <div className="min-w-[35px] min-h-[35px] flex items-center justify-center text-[20px] bg-zinc-900 border border-zinc-800 text-zinc-300">
         {credential.title[0].toUpperCase()}

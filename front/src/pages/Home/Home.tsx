@@ -13,6 +13,7 @@ import {
   uint8ArrayToBase64,
 } from "@/utils/crypto";
 import { useGoogle } from "@/hooks/useGoogle";
+import type { EncryptedVault } from "@/types/vault";
 
 const TextsButtonsArchives = [
   {
@@ -112,7 +113,7 @@ export const Home = () => {
           vault.folders,
         );
 
-        const cofreFinal = {
+        const cofreFinal: EncryptedVault = {
           version: "1.0",
           kdf: { salt, memory: 65536, iterations: 3, parallelism: 1 },
           encrypted_dek: encryptedDek,

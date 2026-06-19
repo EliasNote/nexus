@@ -44,7 +44,9 @@ export const DirectorySelect = ({
     setSelectedFoldersIds(newIds);
   };
 
-  const selectedFolders = folders.filter((f) =>
+  const safeFolders = Array.isArray(folders) ? folders : [];
+
+  const selectedFolders = safeFolders.filter((f) =>
     selectedFoldersIds.includes(f.id),
   );
 

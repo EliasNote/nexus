@@ -4,6 +4,7 @@ import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCrede
 import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
+import type { Credential as CredentialType, Folder } from "@/types/vault";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -20,14 +21,13 @@ const Dashboard = () => {
     string | null
   >(null);
   const cryptoService = useCloudStore.getState().cryptoService;
+  const [credential, setCredential] = useState<CredentialType | null>(null);
 
-  const folders = useMemo(() => {
+  const folders: Folder[] = useMemo(() => {
     return summaryVault?.folders || [];
   }, [summaryVault]);
 
   const { download } = useCloudSync();
-
-  const allFolders = useMemo(() => summaryVault?.folders || [], [summaryVault]);
   const credentials = useMemo(() => {
     if (!summaryVault?.entries) return [];
 
@@ -38,7 +38,7 @@ const Dashboard = () => {
     } else if (selected === 2) {
       return summaryVault.entries.filter((credential) => credential.isDeleted);
     } else if (selected as string) {
-      const targetFolder = allFolders.find((f) => f.id === selected);
+      const targetFolder = folders.find((f) => f.id === selected);
 
       if (!targetFolder) return [];
 
@@ -84,15 +84,15 @@ const Dashboard = () => {
     [vault, setVault, summaryVault, setSummaryVault],
   );
 
-  const selectedCredentialId = useMemo(() => {
-    return summaryVault?.entries.find((x) => x.id === selectedSideCredential)
-      ?.id;
-  }, [summaryVault?.entries, selectedSideCredential]);
-
-  const getCredential = (() => {
-    cryptoService.
-  }, [summaryVault?.entries, selectedCredentialId]);
-
+  useEffect(() => {
+    if (selectedSideCredential && vault) {
+      cryptoService
+        .getCredential(selectedSideCredential, vault)
+        .then((data) => {
+          setCredential(data);
+        });
+    }
+  }, [selectedSideCredential, vault, cryptoService]);
 
   return (
     <main className="flex bg-[#0A0A0A] max-h-screen w-screen">
@@ -109,7 +109,7 @@ const Dashboard = () => {
         setSelectedSideCredential={setSelectedSideCredential}
         credentials={credentials}
       />
-      {credentials && <Credential credential={selectedCredential} />}
+      {selectedSideCredential && <Credential credential={credential} />}
     </main>
   );
 };
