@@ -43,6 +43,7 @@ export const Credential = ({ credential }: { credential?: CredentialType }) => {
   };
 
   const handleSave = async () => {
+    if (!tempVault || !vault) return;
     try {
       const newVault = await cryptoService.updateVaultFromCredential(
         vault,
