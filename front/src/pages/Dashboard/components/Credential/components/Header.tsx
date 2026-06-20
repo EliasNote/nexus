@@ -99,7 +99,7 @@ export const Header = ({
               ) : (
                 <>
                   <Save size={iconsSize} />
-                  <span>{isCreate ? "CRIAR" : "SALVAR"}</span>
+                  <span>SALVAR</span>
                 </>
               )}
             </button>
