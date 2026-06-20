@@ -17,13 +17,16 @@ export const Login = ({
   folders: FolderType[];
   isEdit: boolean;
   credential: LoginCredential;
-  setCredential: React.Dispatch<React.SetStateAction<Credential>>;
+  setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
 }) => {
   const handleChange = (
     field: keyof LoginCredential,
     value: string | string[],
   ) => {
-    setCredential({ ...credential, [field]: value });
+    setCredential((prev) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value };
+    });
   };
 
   return (

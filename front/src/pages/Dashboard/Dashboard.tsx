@@ -5,6 +5,7 @@ import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
 import type { Credential as CredentialType, Folder } from "@/types/vault";
+import { AddButton } from "./components/Credential/AddButton";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -22,6 +23,9 @@ const Dashboard = () => {
   >(null);
   const cryptoService = useCloudStore.getState().cryptoService;
   const [credential, setCredential] = useState<CredentialType | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [isCreate, setIsCreate] = useState<CredentialType["type"] | null>(null);
+  const [tempVault, setTempVault] = useState<CredentialType | null>(credential);
 
   const folders: Folder[] = useMemo(() => {
     return summaryVault?.folders || [];
@@ -34,7 +38,9 @@ const Dashboard = () => {
     if (selected === 0) {
       return summaryVault.entries.filter((credential) => !credential.isDeleted);
     } else if (selected === 1) {
-      return summaryVault.entries.filter((credential) => credential.isFavorite);
+      return summaryVault.entries.filter(
+        (credential) => credential.isFavorite && !credential.isDeleted,
+      );
     } else if (selected === 2) {
       return summaryVault.entries.filter((credential) => credential.isDeleted);
     } else if (selected as string) {
@@ -90,9 +96,39 @@ const Dashboard = () => {
         .getCredential(selectedSideCredential, vault)
         .then((data) => {
           setCredential(data);
+          setTempVault(data);
+          setIsEdit(false);
+          setIsCreate(null);
         });
     }
   }, [selectedSideCredential, vault, cryptoService]);
+
+  const newEntry = (type: CredentialType["type"]) =>
+    ({
+      id: crypto.randomUUID(),
+      type: type,
+      title: "Nova Credencial",
+      isFavorite: false,
+      isDeleted: false,
+      foldersIds: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      audit: { leak: false, weak: false, reused: false, renewal: false },
+      ...(type === "login" && { username: "", password: "", url: "" }),
+      ...(type === "card" && {
+        holderName: "",
+        cardNumber: "",
+        expirationDate: "",
+        cvv: "",
+      }),
+      ...(type === "note" && { name: "", content: "" }),
+    }) as CredentialType;
+
+  const handleStartCreate = (type: CredentialType["type"]) => {
+    setTempVault(newEntry(type));
+    setIsCreate(type);
+    setIsEdit(false);
+  };
 
   return (
     <main className="flex bg-[#0A0A0A] max-h-screen w-screen">
@@ -109,12 +145,23 @@ const Dashboard = () => {
         setSelectedSideCredential={setSelectedSideCredential}
         credentials={credentials}
       />
-      {selectedSideCredential && credential && (
+      {(selectedSideCredential && credential && tempVault) || isCreate ? (
         <Credential
-          key={credential.id}
+          key={credential ? credential.id || isCreate : null}
+          tempVault={tempVault ? tempVault : newEntry(isCreate!)}
+          setTempVault={setTempVault}
+          isEdit={isEdit}
+          setIsEdit={setIsEdit}
+          isCreate={isCreate}
+          setIsCreate={setIsCreate}
           setSelectedSideCredential={setSelectedSideCredential}
           credential={credential!}
+          handleStartCreate={handleStartCreate}
         />
+      ) : (
+        <div className="absolute bottom-10 right-10">
+          <AddButton handleStartCreate={handleStartCreate} />
+        </div>
       )}
     </main>
   );

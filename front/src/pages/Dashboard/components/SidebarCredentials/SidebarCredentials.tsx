@@ -1,5 +1,6 @@
 import type { EntrySummary } from "@/types/vault";
-import Credentials from "./Credentials";
+import Credential from "./Credential";
+import { useState, useMemo } from "react";
 
 const SidebarCredentials = ({
   selectedSideCredential,
@@ -10,18 +11,20 @@ const SidebarCredentials = ({
   setSelectedSideCredential: (id: string | null) => void;
   credentials: EntrySummary[];
 }) => {
-  // const selectedCredentials = useMemo(() => {
-  //   switch (selected) {
-  //     case 0:
-  //       return credentials.filter((credential) => credential.isDeleted);
-  //     case 1:
-  //       return credentials.filter((credential) => crede@ntial.isFavorite);
-  //     case 2:
-  //       return credentials.filter((credential) => credential.isDeleted);
-  //     default:
-  //       return credentials;
-  //   }
-  // }, [selected, credentials]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredCredentials = useMemo(() => {
+    if (!searchTerm.trim()) return credentials;
+
+    const lowerTerm = searchTerm.toLowerCase();
+
+    return credentials.filter((c) => {
+      return (
+        c.title.toLowerCase().includes(lowerTerm) ||
+        c.username?.toLowerCase().includes(lowerTerm)
+      );
+    });
+  }, [searchTerm, credentials]);
   return (
     <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[320px] w-full">
       <div className="flex flex-col w-full p-[14px] gap-[14px]">
@@ -30,21 +33,28 @@ const SidebarCredentials = ({
         </span>
         <input
           type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="bg-zinc-900 text-white px-2 py-2 outline-none border border-zinc-700 focus:border-brand text-sm w-full"
-          placeholder="Procurar..."
+          placeholder="Procurar título ou usuário..."
         />
       </div>
       <hr className="w-full text-zinc-800" />
       <div className="w-full h-full">
-        {credentials.map((credential) => (
-          <Credentials
-            key={credential.id}
-            selected={selectedSideCredential === credential.id}
-            selectedSideCredential={selectedSideCredential}
-            setSelectedSideCredential={setSelectedSideCredential}
-            credential={credential}
-          />
-        ))}
+        {filteredCredentials.length > 0 ? (
+          filteredCredentials.map((credential) => (
+            <Credential
+              key={credential.id}
+              selected={selectedSideCredential === credential.id}
+              setSelectedSideCredential={setSelectedSideCredential}
+              credential={credential}
+            />
+          ))
+        ) : (
+          <div className="p-4 text-zinc-500 text-center text-sm">
+            Nenhum resultado encontrado.
+          </div>
+        )}
       </div>
     </section>
   );

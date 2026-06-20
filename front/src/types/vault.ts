@@ -1,3 +1,12 @@
+export const CREDENTIAL_TYPES = {
+  LOGIN: "login",
+  CARD: "card",
+  NOTE: "note",
+} as const;
+
+export type CredentialType =
+  (typeof CREDENTIAL_TYPES)[keyof typeof CREDENTIAL_TYPES];
+
 export type Folder = {
   id: string;
   name: string;
@@ -35,14 +44,14 @@ export type CommonMetadata = {
 };
 
 export type LoginCredential = CommonMetadata & {
-  type: "login";
+  type: typeof CREDENTIAL_TYPES.LOGIN;
   username?: string;
   password?: string;
   url?: string;
 };
 
 export type CreditCardCredential = CommonMetadata & {
-  type: "card";
+  type: typeof CREDENTIAL_TYPES.CARD;
   holderName: string;
   cardNumber: string;
   expirationDate: string;
@@ -50,7 +59,7 @@ export type CreditCardCredential = CommonMetadata & {
 };
 
 export type NoteCredential = CommonMetadata & {
-  type: "note";
+  type: typeof CREDENTIAL_TYPES.NOTE;
   name: string;
   content: string;
 };

@@ -1,3 +1,4 @@
+import { useCloudStore } from "@/hooks/useCloudStore";
 import type { EntrySummary, VaultSummarizedData } from "@/types/vault";
 
 export const getGithubUserData = async (token: string) => {
@@ -30,10 +31,27 @@ export const updateSummaryVaultCredential = (
   vault: VaultSummarizedData,
   updatedCredential: EntrySummary,
 ): VaultSummarizedData => {
-  return {
-    ...vault,
-    entries: vault.entries.map((entry) =>
+  const setSummaryVault = useCloudStore.getState().setSummaryVault;
+
+  const exists = vault.entries.some(
+    (entry) => entry.id === updatedCredential.id,
+  );
+
+  let newEntries;
+
+  if (exists) {
+    newEntries = vault.entries.map((entry) =>
       entry.id === updatedCredential.id ? { ...updatedCredential } : entry,
-    ),
+    );
+  } else {
+    newEntries = [updatedCredential, ...vault.entries];
+  }
+
+  const result = {
+    ...vault,
+    entries: newEntries,
   };
+
+  setSummaryVault(result);
+  return result;
 };
