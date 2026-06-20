@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
-import SidebarCredentials from "./components/SidebarCredentials.tsx/SidebarCredentials";
+import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
 import { useCloudSync } from "../../hooks/useCloudSync";
 import { useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
@@ -32,7 +32,7 @@ const Dashboard = () => {
     if (!summaryVault?.entries) return [];
 
     if (selected === 0) {
-      return summaryVault.entries;
+      return summaryVault.entries.filter((credential) => !credential.isDeleted);
     } else if (selected === 1) {
       return summaryVault.entries.filter((credential) => credential.isFavorite);
     } else if (selected === 2) {
@@ -109,7 +109,13 @@ const Dashboard = () => {
         setSelectedSideCredential={setSelectedSideCredential}
         credentials={credentials}
       />
-      {selectedSideCredential && <Credential credential={credential} />}
+      {selectedSideCredential && credential && (
+        <Credential
+          key={credential.id}
+          setSelectedSideCredential={setSelectedSideCredential}
+          credential={credential!}
+        />
+      )}
     </main>
   );
 };

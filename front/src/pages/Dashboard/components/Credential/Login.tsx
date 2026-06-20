@@ -17,7 +17,7 @@ export const Login = ({
   folders: FolderType[];
   isEdit: boolean;
   credential: LoginCredential;
-  setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
+  setCredential: React.Dispatch<React.SetStateAction<Credential>>;
 }) => {
   const handleChange = (
     field: keyof LoginCredential,

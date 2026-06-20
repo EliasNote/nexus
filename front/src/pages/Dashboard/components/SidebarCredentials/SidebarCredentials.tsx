@@ -10,6 +10,18 @@ const SidebarCredentials = ({
   setSelectedSideCredential: (id: string | null) => void;
   credentials: EntrySummary[];
 }) => {
+  // const selectedCredentials = useMemo(() => {
+  //   switch (selected) {
+  //     case 0:
+  //       return credentials.filter((credential) => credential.isDeleted);
+  //     case 1:
+  //       return credentials.filter((credential) => crede@ntial.isFavorite);
+  //     case 2:
+  //       return credentials.filter((credential) => credential.isDeleted);
+  //     default:
+  //       return credentials;
+  //   }
+  // }, [selected, credentials]);
   return (
     <section className="flex flex-col items-start border-r border-zinc-800 h-screen max-w-[320px] w-full">
       <div className="flex flex-col w-full p-[14px] gap-[14px]">

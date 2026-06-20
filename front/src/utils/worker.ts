@@ -76,7 +76,7 @@ const cryptoService = {
     };
   },
 
-  async unlockVaultKeys(
+  async verifyUnlockVaultKeys(
     password: string,
     saltBase64: string,
     encryptedDek: any,

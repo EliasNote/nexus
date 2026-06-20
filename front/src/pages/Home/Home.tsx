@@ -84,7 +84,7 @@ export const Home = () => {
         const encryptedVault = await download();
         const salt = encryptedVault.kdf.salt;
 
-        const unlocked = await cryptoService.unlockVaultKeys(
+        const unlocked = await cryptoService.verifyUnlockVaultKeys(
           password,
           salt,
           encryptedVault.encrypted_dek,

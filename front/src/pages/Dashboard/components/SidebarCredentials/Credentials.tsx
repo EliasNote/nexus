@@ -36,9 +36,9 @@ const Credentials = ({
     switch (credential.type) {
       case "login":
         cryptoService
-          .getPassword(vault, credential.id)
+          .getPassword(vault!, credential.id)
           .then((password) => {
-            copyToClipboard(password);
+            copyToClipboard(password || "");
           })
           .finally(() => {
             setCopied(true);
@@ -63,7 +63,7 @@ const Credentials = ({
       }}
     >
       <div className="min-w-[35px] min-h-[35px] flex items-center justify-center text-[20px] bg-zinc-900 border border-zinc-800 text-zinc-300">
-        {credential.title[0].toUpperCase()}
+        {credential.title ? credential.title[0].toUpperCase() : "?"}
       </div>
       <div className="flex w-full flex-col justify-center items-start">
         <span className="text-white text-[14px]">{credential.title}</span>

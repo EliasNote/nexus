@@ -25,7 +25,7 @@ export const defaults = (iconsSize: number) => [
 
 export const tools = (iconsSize: number) => [
   {
-    title: "FERRAMENTAS",
+    title: "GERADOR",
     icon: <Binary size={iconsSize} />,
   },
   {

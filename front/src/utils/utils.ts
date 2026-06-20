@@ -1,9 +1,4 @@
-import type {
-  DecryptedVault,
-  Credential,
-  EntrySummary,
-  VaultSummarizedData,
-} from "@/types/vault";
+import type { EntrySummary, VaultSummarizedData } from "@/types/vault";
 
 export const getGithubUserData = async (token: string) => {
   const userRes = await fetch("https://api.github.com/user", {
