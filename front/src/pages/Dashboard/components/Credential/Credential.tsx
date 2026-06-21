@@ -1,11 +1,11 @@
-import { type Credential as CredentialType } from "@/types/vault";
+import {
+  type Credential as CredentialType,
+  type VaultSummarizedData,
+} from "@/types/vault";
 import { Login } from "./Login";
 import { useCloudStore } from "@/hooks/useCloudStore";
-import { useState } from "react";
-import { useCloudSync } from "@/hooks/useCloudSync";
-import { updateSummaryVaultCredential } from "@/utils/utils";
 import { Footer } from "./components/Footer";
-import { Header } from "./components/Header";
+import { Header } from "./components/Header/Header";
 
 export const Credential = ({
   credential,
@@ -17,6 +17,9 @@ export const Credential = ({
   isCreate,
   setIsCreate,
   handleStartCreate,
+  handleSave,
+  isLoadingCredential,
+  setIsLoadingCredential,
 }: {
   credential: CredentialType;
   setSelectedSideCredential: (id: string | null) => void;
@@ -27,18 +30,18 @@ export const Credential = ({
   isCreate: CredentialType["type"] | null;
   setIsCreate: (isCreate: CredentialType["type"] | null) => void;
   handleStartCreate: (type: CredentialType["type"]) => void;
+  handleSave: (
+    newTempVault: CredentialType,
+    newSummaryVault: VaultSummarizedData,
+  ) => Promise<void>;
+  isLoadingCredential: boolean;
+  setIsLoadingCredential: (isLoading: boolean) => void;
 }) => {
   const iconsSize = 18;
-  const vault = useCloudStore((state) => state.vault);
-  const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
 
   const summaryVault = useCloudStore((state) => state.summaryVault);
-  const setVault = useCloudStore((state) => state.setVault);
-  const { uploadVault } = useCloudSync();
-  const cryptoService = useCloudStore.getState().cryptoService;
 
   const folders = summaryVault?.folders ?? [];
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleEditClick = () => {
     setTempVault(credential || null);
@@ -46,56 +49,6 @@ export const Credential = ({
   };
 
   const isEditable = isEdit || isCreate !== null;
-
-  const handleSaveAndDelete = async () => {
-    const baseData = isEdit || isCreate ? tempVault : credential;
-
-    if (!baseData || !vault) return;
-
-    const updatedCredential = {
-      ...baseData,
-      isDeleted: isEdit || isCreate ? false : true,
-      updatedAt: new Date().toISOString(),
-    };
-
-    try {
-      try {
-        const newVault = await cryptoService.updateVaultFromCredential(
-          vault,
-          updatedCredential,
-        );
-        setIsLoading(true);
-        await uploadVault(newVault);
-
-        const updatedSummaryVault = updateSummaryVaultCredential(
-          summaryVault!,
-          updatedCredential,
-        );
-
-        setSummaryVault(updatedSummaryVault);
-        setVault(newVault);
-      } catch (error) {
-        console.error("Erro ao sincronizar com a nuvem.", error);
-      } finally {
-        setIsLoading(false);
-      }
-
-      if (isCreate) {
-        setIsCreate(null);
-        setSelectedSideCredential(null);
-      } else if (isEdit) {
-        setIsEdit(false);
-      } else {
-        setSelectedSideCredential(null);
-      }
-      console.log("Salvo com sucesso na nuvem e localmente!");
-    } catch (error) {
-      console.error("Erro ao salvar. Tentando recuperar...", error);
-      alert(
-        "Erro ao sincronizar. Verifique sua conexão ou tente salvar novamente.",
-      );
-    }
-  };
 
   const handleCancel = () => {
     if (isCreate) {
@@ -112,8 +65,9 @@ export const Credential = ({
         tempVault={tempVault}
         setTempVault={setTempVault}
         iconsSize={iconsSize}
-        handleSaveAndDelete={handleSaveAndDelete}
-        isLoading={isLoading}
+        handleSave={handleSave}
+        isLoadingCredential={isLoadingCredential}
+        setIsLoadingCredential={setIsLoadingCredential}
         isEdit={isEdit}
         isCreate={isCreate}
         handleEditClick={handleEditClick}

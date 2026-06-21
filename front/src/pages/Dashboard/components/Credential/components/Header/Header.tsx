@@ -1,15 +1,20 @@
-import type { Credential, CredentialType } from "@/types/vault";
-import { Trash2, Pencil, X, Save, RefreshCcw } from "lucide-react";
+import type {
+  Credential,
+  CredentialType,
+  VaultSummarizedData,
+} from "@/types/vault";
+import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
+import { Button } from "./components/Button";
 
 export const Header = ({
   tempVault,
   setTempVault,
   iconsSize,
-  handleSaveAndDelete,
-  isLoading,
+  handleSave,
+  isLoadingCredential,
   isEdit,
   isCreate,
   handleEditClick,
@@ -18,8 +23,11 @@ export const Header = ({
   tempVault: Credential;
   setTempVault: React.Dispatch<React.SetStateAction<Credential | null>>;
   iconsSize: number;
-  handleSaveAndDelete: () => void;
-  isLoading: boolean;
+  handleSave: (
+    newTempVault: Credential,
+    newSummaryVault: VaultSummarizedData,
+  ) => Promise<void>;
+  isLoadingCredential: boolean;
   isEdit: boolean;
   isCreate: CredentialType | null;
   handleEditClick: () => void;
@@ -84,55 +92,79 @@ export const Header = ({
       <div className="flex gap-2.5 items-center justify-center text-[14px]">
         {isWriting ? (
           <>
-            <button
-              disabled={isLoading}
-              onClick={handleSaveAndDelete}
-              className="flex gap-1.25 items-center px-3.5 py-2 border-2 font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer disabled:opacity-50"
-            >
-              {isLoading ? (
+            {isLoadingCredential ? (
+              <Button color="brand" disabled={isLoadingCredential}>
                 <motion.div
-                  animate={{ rotate: 360 }}
+                  initial={{ scaleX: -1 }}
+                  animate={{ rotate: -360 }}
                   transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                 >
-                  <RefreshCcw size={iconsSize} />
+                  <RefreshCcw size={22} />
                 </motion.div>
-              ) : (
-                <>
-                  <Save size={iconsSize} />
-                  <span>SALVAR</span>
-                </>
-              )}
-            </button>
-
-            {!isLoading && (
-              <button
-                onClick={handleCancel}
-                className="flex gap-1.25 items-center px-3.5 py-2 border-2 font-bold border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white cursor-pointer"
-              >
-                <X size={iconsSize} />
-                <span>CANCELAR</span>
-              </button>
+              </Button>
+            ) : (
+              <Button
+                iconsSize={iconsSize}
+                icon={Save}
+                color="border-brand text-brand hover:bg-brand"
+                label={"SALVAR"}
+                onClick={handleSave}
+                disabled={isLoadingCredential}
+              />
             )}
+
+            {!isLoadingCredential && (
+              <Button
+                iconsSize={iconsSize}
+                icon={X}
+                color="border-zinc-700 text-zinc-300 hover:bg-zinc-700"
+                label={"CANCELAR"}
+                onClick={handleCancel}
+              />
+            )}
+          </>
+        ) : !tempVault.isDeleted ? (
+          <>
+            <Button
+              iconsSize={iconsSize}
+              icon={Pencil}
+              color="border-brand text-brand hover:bg-brand"
+              label={"EDITAR"}
+              onClick={handleEditClick}
+            />
+
+            <Button
+              iconsSize={iconsSize}
+              icon={Trash2}
+              color="border-red-alert text-red-alert hover:bg-red-alert"
+              label={"APAGAR"}
+              onClick={() =>
+                window.confirm("Mover para a lixeira?") && handleSave()
+              }
+            />
           </>
         ) : (
           <>
-            <button
-              onClick={handleEditClick}
-              className="flex gap-1.25 items-center px-3.5 py-2 border-2 font-bold border-brand text-brand hover:bg-brand hover:text-white cursor-pointer"
-            >
-              <Pencil size={iconsSize} />
-              <span>EDITAR</span>
-            </button>
+            <Button
+              iconsSize={iconsSize}
+              icon={Undo2}
+              color="border-green-500 text-green-500 hover:bg-green-600"
+              label={"RESTAURAR"}
+              onClick={() => {
+                setTempVault({ ...tempVault, isDeleted: false });
+                handleSave(tempVault);
+              }}
+            />
 
-            <button
+            <Button
+              iconsSize={iconsSize}
+              icon={Trash2}
+              color="border-red-alert text-red-alert hover:bg-red-alert"
+              label={"DELETAR"}
               onClick={() =>
-                confirm("Mover para a lixeira?") && handleSaveAndDelete()
+                window.confirm("Deletar permanentemente?") && handleSave()
               }
-              className="flex gap-1.25 items-center px-3.5 py-2 border-2 font-bold border-red-alert text-red-alert hover:bg-red-alert hover:text-white cursor-pointer"
-            >
-              <Trash2 size={iconsSize} />
-              <span>APAGAR</span>
-            </button>
+            />
           </>
         )}
       </div>
