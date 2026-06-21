@@ -40,7 +40,7 @@ const SidebarCredentials = ({
         />
       </div>
       <hr className="w-full text-zinc-800" />
-      <div className="w-full h-full">
+      <div className="w-full h-full overflow-y-auto overflow-x-hidden">
         {filteredCredentials.length > 0 ? (
           filteredCredentials.map((credential) => (
             <Credential

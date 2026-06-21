@@ -1,7 +1,4 @@
-import {
-  type Credential as CredentialType,
-  type VaultSummarizedData,
-} from "@/types/vault";
+import { type Credential as CredentialType } from "@/types/vault";
 import { Login } from "./Login";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { Footer } from "./components/Footer";
@@ -16,10 +13,8 @@ export const Credential = ({
   setIsEdit,
   isCreate,
   setIsCreate,
-  handleStartCreate,
-  handleSave,
   isLoadingCredential,
-  setIsLoadingCredential,
+  handleStartCreate,
 }: {
   credential: CredentialType;
   setSelectedSideCredential: (id: string | null) => void;
@@ -29,13 +24,8 @@ export const Credential = ({
   setIsEdit: (isEdit: boolean) => void;
   isCreate: CredentialType["type"] | null;
   setIsCreate: (isCreate: CredentialType["type"] | null) => void;
-  handleStartCreate: (type: CredentialType["type"]) => void;
-  handleSave: (
-    newTempVault: CredentialType,
-    newSummaryVault: VaultSummarizedData,
-  ) => Promise<void>;
   isLoadingCredential: boolean;
-  setIsLoadingCredential: (isLoading: boolean) => void;
+  handleStartCreate: (type: CredentialType["type"]) => void;
 }) => {
   const iconsSize = 18;
 
@@ -65,11 +55,11 @@ export const Credential = ({
         tempVault={tempVault}
         setTempVault={setTempVault}
         iconsSize={iconsSize}
-        handleSave={handleSave}
         isLoadingCredential={isLoadingCredential}
-        setIsLoadingCredential={setIsLoadingCredential}
         isEdit={isEdit}
+        setIsEdit={setIsEdit}
         isCreate={isCreate}
+        setIsCreate={setIsCreate}
         handleEditClick={handleEditClick}
         handleCancel={handleCancel}
       />

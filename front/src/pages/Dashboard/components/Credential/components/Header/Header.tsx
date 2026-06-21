@@ -1,39 +1,42 @@
-import type {
-  Credential,
-  CredentialType,
-  VaultSummarizedData,
-} from "@/types/vault";
+import type { Credential, CredentialType } from "@/types/vault";
 import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
 import { Button } from "./components/Button";
+import { useVaultActions } from "@/hooks/useVaultActions";
 
 export const Header = ({
   tempVault,
   setTempVault,
   iconsSize,
-  handleSave,
   isLoadingCredential,
   isEdit,
+  setIsEdit,
   isCreate,
+  setIsCreate,
   handleEditClick,
   handleCancel,
 }: {
   tempVault: Credential;
   setTempVault: React.Dispatch<React.SetStateAction<Credential | null>>;
   iconsSize: number;
-  handleSave: (
-    newTempVault: Credential,
-    newSummaryVault: VaultSummarizedData,
-  ) => Promise<void>;
   isLoadingCredential: boolean;
   isEdit: boolean;
+  setIsEdit: (isEdit: boolean) => void;
   isCreate: CredentialType | null;
+  setIsCreate: (isCreate: CredentialType | null) => void;
   handleEditClick: () => void;
   handleCancel: () => void;
 }) => {
   const isWriting = isEdit || isCreate;
+  const { saveCredential } = useVaultActions();
+  const onSave = async () => {
+    await saveCredential(tempVault, isEdit, !!isCreate);
+
+    setIsEdit(false);
+    setIsCreate(null);
+  };
 
   return (
     <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-zinc-800">
@@ -108,7 +111,7 @@ export const Header = ({
                 icon={Save}
                 color="border-brand text-brand hover:bg-brand"
                 label={"SALVAR"}
-                onClick={handleSave}
+                onClick={onSave}
                 disabled={isLoadingCredential}
               />
             )}
@@ -138,9 +141,7 @@ export const Header = ({
               icon={Trash2}
               color="border-red-alert text-red-alert hover:bg-red-alert"
               label={"APAGAR"}
-              onClick={() =>
-                window.confirm("Mover para a lixeira?") && handleSave()
-              }
+              onClick={() => window.confirm("Mover para a lixeira?") && onSave}
             />
           </>
         ) : (
@@ -152,7 +153,7 @@ export const Header = ({
               label={"RESTAURAR"}
               onClick={() => {
                 setTempVault({ ...tempVault, isDeleted: false });
-                handleSave(tempVault);
+                onSave();
               }}
             />
 
@@ -162,7 +163,7 @@ export const Header = ({
               color="border-red-alert text-red-alert hover:bg-red-alert"
               label={"DELETAR"}
               onClick={() =>
-                window.confirm("Deletar permanentemente?") && handleSave()
+                window.confirm("Deletar permanentemente?") && onSave()
               }
             />
           </>

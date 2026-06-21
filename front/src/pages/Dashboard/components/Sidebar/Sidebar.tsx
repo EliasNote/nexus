@@ -5,27 +5,30 @@ import { useCloudSync } from "@/hooks/useCloudSync";
 import { useState } from "react";
 import { getAllButtons } from "./Buttons";
 import type { Folder } from "@/types/vault";
+import { useVaultActions } from "@/hooks/useVaultActions";
 
 const Sidebar = ({
   selected,
   setSelected,
-  setIsAddFolder,
-  isAddFolder,
-  addFolder,
   folders,
 }: {
   selected: number | string;
   setSelected: (id: number | string) => void;
-  setIsAddFolder: (isAddFolder: boolean) => void;
-  isAddFolder: boolean;
-  addFolder: (name: string) => void;
   folders: Folder[];
 }) => {
   const { disconnect } = useCloudSync();
   const [newFolder, setNewFolder] = useState("");
+  const [isAddFolder, setIsAddFolder] = useState(false);
 
   const iconsSize = 20;
   const { defaults, tools, footers } = getAllButtons(iconsSize);
+
+  const { createFolder } = useVaultActions();
+  const onSave = async () => {
+    await createFolder(newFolder);
+
+    setIsAddFolder(false);
+  };
 
   const handleLogout = () => {
     disconnect();
@@ -96,7 +99,7 @@ const Sidebar = ({
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    addFolder(newFolder);
+                    onSave();
                   } else if (e.key === "Escape") {
                     setIsAddFolder(false);
                     setNewFolder("");
@@ -105,9 +108,7 @@ const Sidebar = ({
               />
               <button
                 className="px-5 py-1.5 rounded bg-brand text-white font-medium hover:bg-blue-700 transition-colors text-sm cursor-pointer"
-                onClick={() => {
-                  addFolder(newFolder);
-                }}
+                onClick={onSave}
               >
                 Confirmar
               </button>
