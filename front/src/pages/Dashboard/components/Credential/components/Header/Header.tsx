@@ -30,10 +30,16 @@ export const Header = ({
   handleCancel: () => void;
 }) => {
   const isWriting = isEdit || isCreate;
-  const { saveCredential } = useVaultActions();
-  const onSave = async () => {
-    await saveCredential(tempVault, isEdit, !!isCreate);
+  const { saveCredential, deleteCredential } = useVaultActions();
+  const onSave = async (isTrashed: boolean, isRestore: boolean) => {
+    await saveCredential(tempVault, isTrashed, isRestore);
 
+    setIsEdit(false);
+    setIsCreate(null);
+  };
+
+  const onDelete = async () => {
+    await deleteCredential(tempVault?.id);
     setIsEdit(false);
     setIsCreate(null);
   };
@@ -111,7 +117,7 @@ export const Header = ({
                 icon={Save}
                 color="border-brand text-brand hover:bg-brand"
                 label={"SALVAR"}
-                onClick={onSave}
+                onClick={() => onSave(false, false)}
                 disabled={isLoadingCredential}
               />
             )}
@@ -141,7 +147,9 @@ export const Header = ({
               icon={Trash2}
               color="border-red-alert text-red-alert hover:bg-red-alert"
               label={"APAGAR"}
-              onClick={() => window.confirm("Mover para a lixeira?") && onSave}
+              onClick={() =>
+                window.confirm("Mover para a lixeira?") && onSave(true, false)
+              }
             />
           </>
         ) : (
@@ -153,7 +161,7 @@ export const Header = ({
               label={"RESTAURAR"}
               onClick={() => {
                 setTempVault({ ...tempVault, isDeleted: false });
-                onSave();
+                onSave(false, true);
               }}
             />
 
@@ -163,7 +171,7 @@ export const Header = ({
               color="border-red-alert text-red-alert hover:bg-red-alert"
               label={"DELETAR"}
               onClick={() =>
-                window.confirm("Deletar permanentemente?") && onSave()
+                window.confirm("Deletar permanentemente?") && onDelete()
               }
             />
           </>

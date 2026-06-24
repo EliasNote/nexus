@@ -63,10 +63,10 @@ const Credential = ({
       </div>
 
       <div className="flex flex-col justify-center items-start flex-1 min-w-0">
-        <span className="text-white text-[14px] w-full truncate">
+        <span className="text-white text-[14px] w-[90%] truncate">
           {credential.title}
         </span>
-        <span className="text-zinc-400 text-[12px] w-full truncate">
+        <span className="text-zinc-400 text-[12px] w-[90%] truncate">
           {getSubtitle()}
         </span>
       </div>
