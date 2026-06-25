@@ -13,8 +13,8 @@ export const useVaultActions = () => {
 
   const saveCredential = async (
     credentialData: Credential,
-    isEdit: boolean,
-    isCreate: boolean,
+    isTrashed?: boolean,
+    isRestore?: boolean,
     setIsLoading?: (isLoading: boolean) => void,
   ) => {
     if (!vault || !summaryVault) return;
@@ -23,7 +23,7 @@ export const useVaultActions = () => {
       setIsLoading?.(true);
       const finalData: Credential = {
         ...credentialData,
-        isDeleted: isEdit || isCreate ? false : true,
+        isDeleted: isTrashed ?? isRestore ?? false,
         updatedAt: new Date().toISOString(),
       };
 
@@ -47,6 +47,24 @@ export const useVaultActions = () => {
     } finally {
       setIsLoading?.(false);
     }
+  };
+
+  const deleteCredential = async (credentialId: string) => {
+    if (!vault || !summaryVault) return;
+
+    const updatedSummaryVault: VaultSummarizedData = {
+      ...summaryVault,
+      entries: summaryVault.entries.filter((e) => e.id !== credentialId),
+    };
+
+    const newVault = await cryptoService.updateVaultFromSummary(
+      vault,
+      updatedSummaryVault,
+    );
+
+    await uploadVault(newVault);
+    setVault(newVault);
+    setSummaryVault(updatedSummaryVault);
   };
 
   const createFolder = async (folderName: string) => {
@@ -74,5 +92,5 @@ export const useVaultActions = () => {
     return newFolder;
   };
 
-  return { saveCredential, createFolder };
+  return { saveCredential, createFolder, deleteCredential };
 };
