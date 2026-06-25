@@ -1,5 +1,5 @@
 import type { DecryptedVault } from "@/types/vault";
-import { useCloudStore } from "@/hooks/useCloudStore";
+import { cryptoService } from "@/hooks/useCloudStore";
 import { argon2id } from "hash-wasm";
 
 export const base64ToUint8Array = (base64: string): Uint8Array => {
@@ -132,8 +132,6 @@ export const encryptVault = async (
   vaultEntries: any[],
   folders: any[] = [],
 ): Promise<any> => {
-  const cryptoService = useCloudStore.getState().cryptoService;
-
   const foldersString = JSON.stringify(folders);
   const encryptedFolders = await cryptoService.encrypt(foldersString);
   const encryptedFoldersData = {
@@ -157,8 +155,6 @@ export const encryptVault = async (
 };
 
 export const decryptVault = async (vault: any): Promise<any> => {
-  const cryptoService = useCloudStore.getState().cryptoService;
-
   const decryptedFoldersString = await cryptoService.decrypt(
     base64ToUint8Array(vault.folders.ciphertext),
     base64ToUint8Array(vault.folders.iv),

@@ -97,6 +97,7 @@ export type KdfConfig = {
 
 export type EncryptedVault = {
   version: string;
+  autoSaveInterval?: number;
   kdf: KdfConfig;
   encrypted_dek: EncryptedData;
   folders: EncryptedData;

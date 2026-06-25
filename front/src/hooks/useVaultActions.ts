@@ -1,13 +1,12 @@
 import type { Credential, Folder, VaultSummarizedData } from "@/types/vault";
 import { useCloudStore } from "./useCloudStore";
-import { useCloudSync } from "./useCloudSync";
 import { updateSummaryVaultCredential } from "@/utils/utils";
+import { cryptoService } from "@/hooks/useCloudStore";
 
 export const useVaultActions = () => {
   const vault = useCloudStore((s) => s.vault);
   const summaryVault = useCloudStore((s) => s.summaryVault);
-  const { uploadVault } = useCloudSync();
-  const cryptoService = useCloudStore.getState().cryptoService;
+  const setIsPendingSync = useCloudStore((s) => s.setIsPendingSync);
 
   const setVault = useCloudStore.getState().setVault;
   const setSummaryVault = useCloudStore.getState().setSummaryVault;
@@ -32,7 +31,8 @@ export const useVaultActions = () => {
         vault,
         finalData,
       );
-      await uploadVault(newVault);
+
+      setIsPendingSync(true);
 
       const updatedSummary = updateSummaryVaultCredential(
         summaryVault,
@@ -67,7 +67,7 @@ export const useVaultActions = () => {
       updatedSummaryVault,
     );
 
-    await uploadVault(newVault);
+    setIsPendingSync(true);
     setVault(newVault);
     setSummaryVault(updatedSummaryVault);
 

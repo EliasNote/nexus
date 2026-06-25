@@ -1,4 +1,4 @@
-import { useCloudStore } from "@/hooks/useCloudStore";
+import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import type { EntrySummary } from "@/types/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
@@ -14,7 +14,6 @@ const Credential = ({
   credential: EntrySummary;
 }) => {
   const [copied, setCopied] = useState(false);
-  const cryptoService = useCloudStore.getState().cryptoService;
   const vault = useCloudStore.getState().vault;
 
   const getSubtitle = () => {

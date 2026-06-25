@@ -2,14 +2,17 @@ import { useState, useEffect, useMemo } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
 import { useCloudSync } from "../../hooks/useCloudSync";
-import { useCloudStore } from "../../hooks/useCloudStore";
+import { cryptoService, useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
 import type { Credential as CredentialType, Folder } from "@/types/vault";
 import { AddButton } from "./components/Credential/AddButton";
+import { useAutoSave } from "@/hooks/useAutoSave";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
 const Dashboard = () => {
+  useAutoSave();
+
   const [selected, setSelected] = useState<number | string>(0);
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
@@ -19,7 +22,6 @@ const Dashboard = () => {
   const [selectedSideCredential, setSelectedSideCredential] = useState<
     string | null
   >(null);
-  const cryptoService = useCloudStore.getState().cryptoService;
   const [credential, setCredential] = useState<CredentialType | null>(null);
   const [isEdit, setIsEdit] = useState(false);
   const [isCreate, setIsCreate] = useState<CredentialType["type"] | null>(null);
@@ -58,10 +60,16 @@ const Dashboard = () => {
   useEffect(() => {
     if (isTokenValid && !summaryVault) {
       download()
-        .then((result) => {
+        .then(async (result) => {
           if (result) {
+            const initialData = await cryptoService.getInitialData(result);
+
+            const interval = result.autoSaveInterval!;
+
+            useCloudStore.getState().setAutoSaveInterval(interval);
             setVault(result);
-            console.log("Vault baixado real", result);
+            useCloudStore.getState().setSummaryVault(initialData);
+            console.log("Vault baixado e descriptografado real", result);
           }
         })
         .catch((err) => console.error("Erro ao baixar cofre:", err));

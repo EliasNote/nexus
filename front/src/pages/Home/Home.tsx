@@ -5,7 +5,7 @@ import { FileUp } from "lucide-react";
 import { Step } from "./components/Step";
 import { IconButton } from "./components/IconButton";
 import { useCloudSync } from "@/hooks/useCloudSync";
-import { useCloudStore } from "@/hooks/useCloudStore";
+import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { dashboardRoute } from "@/App";
 import {
   createInitialVault,
@@ -77,7 +77,6 @@ export const Home = () => {
     try {
       const password = inputRef.current?.value || "";
       const data = await find();
-      const cryptoService = useCloudStore.getState().cryptoService;
 
       if (data && (data.id || data.sha)) {
         console.log("Vault existe");
@@ -95,6 +94,10 @@ export const Home = () => {
             await cryptoService.getInitialData(encryptedVault);
 
           console.log("Cofre: ", decryptedVault);
+
+          // CORREÇÃO: Carrega o tempo de salvamento do usuário para o Zustand
+          const interval = encryptedVault.autoSaveInterval ?? 1;
+          useCloudStore.getState().setAutoSaveInterval(interval);
 
           setSummaryVault(decryptedVault);
           setVault(encryptedVault);
@@ -115,6 +118,7 @@ export const Home = () => {
 
         const cofreFinal: EncryptedVault = {
           version: "1.0",
+          autoSaveInterval: 1,
           kdf: { salt, memory: 65536, iterations: 3, parallelism: 1 },
           encrypted_dek: encryptedDek,
           folders: encryptedContent.folders,
@@ -122,6 +126,9 @@ export const Home = () => {
         };
 
         await uploadVault(cofreFinal);
+
+        useCloudStore.getState().setAutoSaveInterval(1);
+        setVault(cofreFinal);
         setSummaryVault(await cryptoService.getFolderAndEntryData(vault));
       }
 
