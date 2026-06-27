@@ -1,13 +1,19 @@
 import { Button } from "./Button";
-import { Dot, Folder as FolderIcon, Plus, Minus } from "lucide-react";
-import { motion } from "framer-motion";
+import {
+  Dot,
+  Folder as FolderIcon,
+  Plus,
+  Minus,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useState } from "react";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { getAllButtons } from "./Buttons";
 import type { Folder } from "@/types/vault";
 import { useVaultActions } from "@/hooks/useVaultActions";
-import { save } from "@tauri-apps/plugin-dialog";
 
 const Sidebar = ({
   selected,
@@ -21,9 +27,11 @@ const Sidebar = ({
   const { disconnect } = useCloudSync();
   const [newFolder, setNewFolder] = useState("");
   const [isAddFolder, setIsAddFolder] = useState(false);
-  const { isPendingSync } = useCloudStore((state) => state);
+  const { isPendingSync, setIsPendingSync } = useCloudStore((state) => state);
   const [isLogoutPending, setIsLogoutPending] = useState(false);
-  const { saveCredential } = useVaultActions();
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState(false);
+  const { saveVault } = useVaultActions();
 
   const iconsSize = 20;
   const { defaults, tools, footers } = getAllButtons(iconsSize);
@@ -32,13 +40,37 @@ const Sidebar = ({
 
   const onSave = async () => {
     await createFolder(newFolder);
-
     setIsAddFolder(false);
   };
 
-  const handleLogout = () => {
+  const verifyLogout = () => {
     if (isPendingSync) setIsLogoutPending(true);
     else disconnect();
+  };
+
+  const handleLogout = async () => {
+    setIsSyncing(true);
+    setSyncSuccess(false);
+
+    try {
+      if (isPendingSync) {
+        await saveVault();
+        setIsPendingSync(false);
+        setSyncSuccess(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+      disconnect();
+    } catch (e) {
+      console.error(e);
+      setIsSyncing(false);
+      setSyncSuccess(false);
+    }
+  };
+
+  const handleLogoutWithoutSync = () => {
+    setIsPendingSync(false);
+    disconnect();
   };
 
   return (
@@ -114,7 +146,7 @@ const Sidebar = ({
                 }}
               />
               <button
-                className="px-5 py-1.5 rounded bg-brand text-white font-medium hover:bg-blue-700 transition-colors text-sm cursor-pointer"
+                className="px-5 py-1.5 bg-brand text-white font-medium hover:bg-blue-700 transition-colors text-sm cursor-pointer"
                 onClick={onSave}
               >
                 Confirmar
@@ -143,31 +175,126 @@ const Sidebar = ({
             selectedId={selected}
             title={item.title}
             onClick={() => {
-              if (footers.length - 1 === index) handleLogout();
+              if (footers.length - 1 === index) verifyLogout();
             }}
             setSelected={setSelected}
             icon={item.icon}
           />
         ))}
       </div>
-      {isLogoutPending && (
-        <div className="w-full h-full flex items-center backdrop-blur-md justify-center absolute z-999">
-          <div>
-            <button
-              className="px-5 py-1.5 rounded bg-brand text-white font-medium hover:bg-blue-700 transition-colors text-sm cursor-pointer"
-              onClick={saveCredential}
+
+      <AnimatePresence>
+        {isLogoutPending && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={() => !isSyncing && setIsLogoutPending(false)}
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
             >
-              Alterações pendentes, deseja sincronizar?
-            </button>
-            <button
-              className="px-5 py-1.5 rounded bg-red-alert text-white font-medium hover:bg-red-alert transition-colors text-sm cursor-pointer"
-              onClick={handleLogout}
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-      )}
+              <div
+                className="pointer-events-auto flex flex-col gap-4 p-5 bg-zinc-900 border border-zinc-700 shadow-xl w-full max-w-sm mx-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {isSyncing ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center gap-4 py-6"
+                  >
+                    <div className="flex gap-3 items-center">
+                      {syncSuccess && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1.25 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 20,
+                          }}
+                        >
+                          <CheckCircle2 size={24} className="text-green-500" />
+                        </motion.div>
+                      )}
+                      {!syncSuccess && (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                        >
+                          <Loader2 size={24} className="text-blue-500" />
+                        </motion.div>
+                      )}
+                      <span className="text-white font-medium">
+                        {syncSuccess
+                          ? "Sincronizado com sucesso!"
+                          : "Sincronizando..."}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-500 text-center">
+                      {syncSuccess
+                        ? "Preparando para sair..."
+                        : "Salvando suas alterações"}
+                    </p>
+                  </motion.div>
+                ) : (
+                  <>
+                    <div className="flex flex-col gap-1">
+                      <h2 className="text-white font-semibold text-base">
+                        Sincronizar antes de sair?
+                      </h2>
+                      <p className="text-sm text-zinc-400">
+                        Você possui alterações pendentes que não foram
+                        sincronizadas.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <motion.button
+                        className="w-full px-4 py-2.5 border border-brand bg-brand/60 text-white font-medium text-sm cursor-pointer  hover:bg-brand"
+                        onClick={handleLogout}
+                        disabled={isSyncing}
+                      >
+                        Sincronizar e Sair
+                      </motion.button>
+
+                      <motion.button
+                        className="w-full px-4 py-2.5 border border-zinc-500 text-zinc-100 bg-zinc-700 hover:bg-zinc-500 text-sm  cursor-pointer font-medium  "
+                        onClick={handleLogoutWithoutSync}
+                        disabled={isSyncing}
+                      >
+                        Sair sem salvar
+                      </motion.button>
+
+                      <button
+                        className="w-full px-4 py-2.5 border border-zinc-700 text-zinc-100 hover:bg-zinc-700 text-sm font-medium cursor-pointer"
+                        onClick={() => setIsLogoutPending(false)}
+                        disabled={isSyncing}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

@@ -2,6 +2,7 @@ import type { Credential, Folder, VaultSummarizedData } from "@/types/vault";
 import { useCloudStore } from "./useCloudStore";
 import { updateSummaryVaultCredential } from "@/utils/utils";
 import { cryptoService } from "@/hooks/useCloudStore";
+import { useCloudSync } from "./useCloudSync";
 
 export const useVaultActions = () => {
   const vault = useCloudStore((s) => s.vault);
@@ -10,6 +11,18 @@ export const useVaultActions = () => {
 
   const setVault = useCloudStore.getState().setVault;
   const setSummaryVault = useCloudStore.getState().setSummaryVault;
+
+  const { uploadVault } = useCloudSync();
+
+  const saveVault = async () => {
+    if (!vault) return;
+
+    console.log("Sincronizando modificações com a nuvem...");
+    await uploadVault(vault);
+    console.log("Cofre salvo.");
+
+    setIsPendingSync(false);
+  };
 
   const saveCredential = async (
     credentialData: Credential,
@@ -92,5 +105,5 @@ export const useVaultActions = () => {
     return newFolder;
   };
 
-  return { saveCredential, createFolder, deleteCredential };
+  return { saveCredential, createFolder, deleteCredential, saveVault };
 };
