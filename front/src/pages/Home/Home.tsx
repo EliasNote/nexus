@@ -95,7 +95,6 @@ export const Home = () => {
 
           console.log("Cofre: ", decryptedVault);
 
-          // CORREÇÃO: Carrega o tempo de salvamento do usuário para o Zustand
           const interval = encryptedVault.autoSaveInterval ?? 1;
           useCloudStore.getState().setAutoSaveInterval(interval);
 

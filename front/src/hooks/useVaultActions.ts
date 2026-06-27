@@ -62,7 +62,7 @@ export const useVaultActions = () => {
       updatedSummaryVault,
     );
 
-    await uploadVault(newVault);
+    setIsPendingSync(true);
     setVault(newVault);
     setSummaryVault(updatedSummaryVault);
   };

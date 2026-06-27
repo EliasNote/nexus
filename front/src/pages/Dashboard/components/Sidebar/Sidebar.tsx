@@ -3,9 +3,11 @@ import { Dot, Folder as FolderIcon, Plus, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useState } from "react";
+import { useCloudStore } from "@/hooks/useCloudStore";
 import { getAllButtons } from "./Buttons";
 import type { Folder } from "@/types/vault";
 import { useVaultActions } from "@/hooks/useVaultActions";
+import { save } from "@tauri-apps/plugin-dialog";
 
 const Sidebar = ({
   selected,
@@ -19,11 +21,15 @@ const Sidebar = ({
   const { disconnect } = useCloudSync();
   const [newFolder, setNewFolder] = useState("");
   const [isAddFolder, setIsAddFolder] = useState(false);
+  const { isPendingSync } = useCloudStore((state) => state);
+  const [isLogoutPending, setIsLogoutPending] = useState(false);
+  const { saveCredential } = useVaultActions();
 
   const iconsSize = 20;
   const { defaults, tools, footers } = getAllButtons(iconsSize);
 
   const { createFolder } = useVaultActions();
+
   const onSave = async () => {
     await createFolder(newFolder);
 
@@ -31,7 +37,8 @@ const Sidebar = ({
   };
 
   const handleLogout = () => {
-    disconnect();
+    if (isPendingSync) setIsLogoutPending(true);
+    else disconnect();
   };
 
   return (
@@ -143,6 +150,24 @@ const Sidebar = ({
           />
         ))}
       </div>
+      {isLogoutPending && (
+        <div className="w-full h-full flex items-center backdrop-blur-md justify-center absolute z-999">
+          <div>
+            <button
+              className="px-5 py-1.5 rounded bg-brand text-white font-medium hover:bg-blue-700 transition-colors text-sm cursor-pointer"
+              onClick={saveCredential}
+            >
+              Alterações pendentes, deseja sincronizar?
+            </button>
+            <button
+              className="px-5 py-1.5 rounded bg-red-alert text-white font-medium hover:bg-red-alert transition-colors text-sm cursor-pointer"
+              onClick={handleLogout}
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
