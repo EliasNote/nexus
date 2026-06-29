@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { getAllButtons } from "./Buttons";
 import type { Folder } from "@/types/vault";

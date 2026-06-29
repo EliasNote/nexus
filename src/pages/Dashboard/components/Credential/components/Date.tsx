@@ -1,4 +1,4 @@
-import { MONTH_OPTIONS } from "@/types/other";
+import { MONTH_OPTIONS } from "@/types/constants";
 import { ChevronDown, Check, type LucideIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 

@@ -1,16 +1,14 @@
+// nexus-main/front/src/hooks/useGithub.ts (Versão PAT para Web sem Servidor)
 import { useState, useRef } from "react";
 import { useCloudStore } from "./useCloudStore";
 import type { StorageProviderInterface } from "./interface";
 import type { EncryptedVault } from "@/types/vault";
 
 export const useGitHub = (): StorageProviderInterface => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const REPO_NAME = "nexus-vault";
 
   const token = useCloudStore((state) => state.accessToken);
   const setToken = useCloudStore((state) => state.setAccessToken);
-  const refreshToken = useCloudStore((state) => state.refreshToken);
-  const setRefreshToken = useCloudStore((state) => state.setRefreshToken);
   const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
   const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
   const clearSession = useCloudStore((state) => state.clearSession);
@@ -29,87 +27,36 @@ export const useGitHub = (): StorageProviderInterface => {
     }
   };
 
-  const exchangeGitHubCode = async (code: string) => {
+  // Solicita o token de acesso pessoal diretamente ao usuário
+  const login = async () => {
+    setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/auth/github`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
+      const pat = window.prompt(
+        "Por favor, insira o seu Personal Access Token (PAT) do GitHub.\n\nEle deve ter a permissão de escopo 'repo' para que o cofre possa ser lido e salvo.",
+      );
 
-      if (!response.ok) throw new Error("Erro na troca de tokens");
-      const data = await response.json();
+      if (!pat) {
+        resolvePromise(null);
+        return;
+      }
 
-      if (data.expires_in)
-        setExpiresIn(Date.now() + data.expires_in * 1000 - 300000);
-
-      setIsTokenValid(true);
-      setToken(data.access_token);
-
-      if (data.refresh_token) setRefreshToken(data.refresh_token);
-
-      resolvePromise(data.access_token);
-    } catch (error) {
-      console.error("Erro na autenticação do GitHub:", error);
-      resolvePromise(null);
-    }
-  };
-
-  const login = () => {
-    const width = 600;
-    const height = 600;
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-
-    const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
-
-    const oauthState = crypto.randomUUID();
-    sessionStorage.setItem("github_oauth_state", oauthState);
-
-    const GITHUB_URL = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&state=${oauthState}`;
-
-    const popup = window.open(
-      GITHUB_URL,
-      "github-oauth",
-      `width=${width},height=${height},left=${left},top=${top}`,
-    );
-
-    const interval = setInterval(() => {
-      try {
-        if (!popup || popup.closed) {
-          clearInterval(interval);
-          resolvePromise(null);
-          return;
-        }
-
-        if (popup.location.origin === window.location.origin) {
-          const urlParams = new URLSearchParams(popup.location.search);
-          const code = urlParams.get("code");
-          const returnedState = urlParams.get("state");
-
-          popup.close();
-          clearInterval(interval);
-
-          const savedState = sessionStorage.getItem("github_oauth_state");
-          sessionStorage.removeItem("github_oauth_state");
-
-          if (returnedState !== savedState) {
-            console.error("Ataque CSRF detectado! State não confere.");
-            resolvePromise(null);
-            return;
-          }
-
-          if (code) {
-            exchangeGitHubCode(code);
-          } else {
-            resolvePromise(null);
-          }
-        }
-      } catch (e) {
-        console.error(e);
+      // Valida o Token buscando o perfil do usuário
+      const username = await getUsername(pat);
+      if (username) {
+        setToken(pat);
+        setExpiresIn(null); // Tokens PAT não expiram sozinhos em 1 hora
+        setIsTokenValid(true);
+        resolvePromise(pat);
+      } else {
         resolvePromise(null);
       }
-    }, 500);
+    } catch (error) {
+      console.error("Erro ao validar token do GitHub:", error);
+      alert("Token inválido ou sem permissões necessárias.");
+      resolvePromise(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const loginWithPromise = (): Promise<string | null> => {
@@ -121,71 +68,13 @@ export const useGitHub = (): StorageProviderInterface => {
 
   const loginRepoNotFound = () => {
     const GITHUB_PUBLIC_URL = import.meta.env.VITE_GITHUB_PUBLIC_URL;
-
-    const width = 600;
-    const height = 600;
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-
-    const popup = window.open(
-      GITHUB_PUBLIC_URL,
-      "github-configure",
-      `width=${width},height=${height},left=${left},top=${top}`,
-    );
-
-    const interval = setInterval(async () => {
-      try {
-        if (!popup || popup.closed) {
-          clearInterval(interval);
-          return;
-        }
-
-        if (popup.location.origin === window.location.origin) {
-          popup.close();
-          clearInterval(interval);
-          setNeedsRepoFix(false);
-
-          const token = await loginWithPromise();
-          if (token) {
-            console.log("Sessão reconfigurada e conectada com sucesso!");
-          }
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }, 500);
-
-    return;
+    window.open(GITHUB_PUBLIC_URL, "_blank");
+    setNeedsRepoFix(false);
   };
 
   const refresh = async (): Promise<string | null> => {
-    if (!refreshToken) {
-      clearSession();
-      return null;
-    }
-    try {
-      const response = await fetch(`${API_URL}/api/auth/github/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-      });
-
-      if (!response.ok) throw new Error();
-      const data = await response.json();
-
-      setExpiresIn(Date.now() + data.expires_in * 1000 - 300000);
-
-      setIsTokenValid(true);
-      setToken(data.access_token);
-
-      if (data.refresh_token) setRefreshToken(data.refresh_token);
-
-      return data.access_token;
-    } catch (error) {
-      clearSession();
-      console.error("Erro ao renovar a sessão:", error);
-      return null;
-    }
+    clearSession();
+    return null;
   };
 
   const getUsername = async (accessToken: string): Promise<string> => {

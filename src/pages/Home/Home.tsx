@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import LetterGlitch from "./components/LetterGlitch";
-import { FileUp } from "lucide-react";
 import { Step } from "./components/Step";
 import { IconButton } from "./components/IconButton";
 import { useCloudSync } from "@/hooks/useCloudSync";
@@ -14,35 +13,7 @@ import {
 } from "@/utils/crypto";
 import { useGoogle } from "@/hooks/useGoogle";
 import type { EncryptedVault } from "@/types/vault";
-
-const TextsButtonsArchives = [
-  {
-    id: "github",
-    title: "GITHUB",
-    subtitle: "Usar GitHub como cofre",
-    icon: (
-      <FileUp
-        width={22}
-        height={22}
-        strokeWidth={1.5}
-        className="text-zinc-400"
-      />
-    ),
-  },
-  {
-    id: "google",
-    title: "GOOGLE DRIVE",
-    subtitle: "Usar cofre do Google Drive",
-    icon: (
-      <FileUp
-        width={22}
-        height={22}
-        strokeWidth={1.5}
-        className="text-zinc-400"
-      />
-    ),
-  },
-];
+import { CLOUD_OPTIONS } from "@/types/constants";
 
 export const Home = () => {
   const { uploadVault, download, find } = useCloudSync();
@@ -190,12 +161,19 @@ export const Home = () => {
           <Step key="step1" direction={direction}>
             <div className="flex flex-col items-center gap-[10px]">
               <div className="w-full max-w-[384px] flex flex-col gap-[10px] items-start">
-                {TextsButtonsArchives.map((text, index) => {
+                {CLOUD_OPTIONS.map((text, index) => {
                   return (
                     <IconButton
                       id={text.id}
                       key={index}
-                      icon={text.icon}
+                      icon={
+                        <text.icon
+                          width={22}
+                          height={22}
+                          strokeWidth={1.5}
+                          className="text-zinc-400"
+                        />
+                      }
                       title={text.title}
                       subtitle={text.subtitle}
                     />

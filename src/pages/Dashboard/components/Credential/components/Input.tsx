@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { Check, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import { copyToClipboard } from "../../../../../utils/utils";
-import type { iconsInputProp } from "@/types/other";
+import type { iconsInputProp } from "@/types/types";
 
 export const Input = ({
   iconsInput,
