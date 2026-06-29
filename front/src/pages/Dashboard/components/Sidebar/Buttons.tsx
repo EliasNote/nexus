@@ -4,9 +4,12 @@ import {
   Trash2,
   Binary,
   Shield,
-  Cloud,
+  CloudCheck,
+  CloudOff,
+  CloudUpload,
   LogOut,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export const defaults = (iconsSize: number) => [
   {
@@ -34,10 +37,40 @@ export const tools = (iconsSize: number) => [
   },
 ];
 
-export const footers = (iconsSize: number) => [
+const cloudIcons = (iconsSize: number) => ({
+  synced: <CloudCheck size={iconsSize} />,
+  unsynced: (
+    <motion.div
+      animate={{ x: [0, -2, 2, -2, 0] }}
+      transition={{
+        repeat: Infinity,
+        repeatDelay: 4,
+        duration: 0.4,
+      }}
+    >
+      <CloudOff size={iconsSize} />
+    </motion.div>
+  ),
+  isSaving: (
+    <motion.div
+      animate={{ y: [0, -3, 0] }}
+      transition={{ repeat: Infinity, duration: 1 }}
+    >
+      <CloudUpload size={iconsSize} />
+    </motion.div>
+  ),
+});
+
+export const footers = (
+  iconsSize: number,
+  isPendingSync: boolean,
+  isSaving: boolean,
+) => [
   {
     title: "SINCRONIZAR",
-    icon: <Cloud size={iconsSize} />,
+    icon: cloudIcons(iconsSize)[
+      isSaving ? "isSaving" : isPendingSync ? "unsynced" : "synced"
+    ],
   },
   {
     title: "SAIR",
@@ -45,8 +78,12 @@ export const footers = (iconsSize: number) => [
   },
 ];
 
-export const getAllButtons = (iconsSize: number) => ({
+export const getAllButtons = (
+  iconsSize: number,
+  isPendingSync: boolean,
+  isSaving: boolean,
+) => ({
   defaults: defaults(iconsSize),
   tools: tools(iconsSize),
-  footers: footers(iconsSize),
+  footers: footers(iconsSize, isPendingSync, isSaving),
 });

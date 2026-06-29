@@ -1,7 +1,7 @@
 import { Copy, User, Eye, Key, Globe, Folder, NotepadText } from "lucide-react";
-import { Input } from "./components/Input";
-import { DirectorySelect } from "./components/DirectorySelect";
-import { TextArea } from "./components/TextArea";
+import { Input } from "./../components/Input";
+import { DirectorySelect } from "./../components/DirectorySelect";
+import { TextArea } from "./../components/TextArea";
 import type {
   Folder as FolderType,
   LoginCredential,

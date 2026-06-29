@@ -33,6 +33,8 @@ type CloudState = {
   setIsTokenValid: (isValid: boolean) => void;
   isPendingSync: boolean;
   setIsPendingSync: (isPendingSync: boolean) => void;
+  isSaving: boolean;
+  setIsSaving: (isSaving: boolean) => void;
   autoSaveInterval: number;
   setAutoSaveInterval: (interval: number) => void;
 };
@@ -80,6 +82,9 @@ export const useCloudStore = create<CloudState>()((set) => ({
 
   isPendingSync: false,
   setIsPendingSync: (isPendingSync) => set({ isPendingSync }),
+
+  isSaving: false,
+  setIsSaving: (isSaving) => set({ isSaving }),
 
   autoSaveInterval: 1,
   setAutoSaveInterval: (interval) => set({ autoSaveInterval: interval }),

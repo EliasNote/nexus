@@ -9,11 +9,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { getAllButtons } from "./Buttons";
 import type { Folder } from "@/types/vault";
 import { useVaultActions } from "@/hooks/useVaultActions";
+import { useSaveNow } from "@/hooks/useSave";
 
 const Sidebar = ({
   selected,
@@ -27,14 +28,21 @@ const Sidebar = ({
   const { disconnect } = useCloudSync();
   const [newFolder, setNewFolder] = useState("");
   const [isAddFolder, setIsAddFolder] = useState(false);
-  const { isPendingSync, setIsPendingSync } = useCloudStore((state) => state);
+  const { isPendingSync, setIsPendingSync, isSaving } = useCloudStore(
+    (state) => state,
+  );
   const [isLogoutPending, setIsLogoutPending] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
   const { saveVault } = useVaultActions();
+  const saveNow = useSaveNow();
 
   const iconsSize = 20;
-  const { defaults, tools, footers } = getAllButtons(iconsSize);
+  const { defaults, tools, footers } = getAllButtons(
+    iconsSize,
+    isPendingSync,
+    isSaving,
+  );
 
   const { createFolder } = useVaultActions();
 
@@ -176,9 +184,13 @@ const Sidebar = ({
             title={item.title}
             onClick={() => {
               if (footers.length - 1 === index) verifyLogout();
+              if (isPendingSync && !isSaving && item.title === "SINCRONIZAR")
+                saveNow();
             }}
             setSelected={setSelected}
             icon={item.icon}
+            isSyncButton={item.title === "SINCRONIZAR"}
+            isSyncButtonAllowed={isPendingSync && !isSaving}
           />
         ))}
       </div>

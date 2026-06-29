@@ -6,7 +6,7 @@ import { cryptoService, useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
 import type { Credential as CredentialType, Folder } from "@/types/vault";
 import { AddButton } from "./components/Credential/AddButton";
-import { useAutoSave } from "@/hooks/useAutoSave";
+import { useAutoSave } from "@/hooks/useSave";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -111,6 +111,7 @@ const Dashboard = () => {
     }) as CredentialType;
 
   const handleStartCreate = (type: CredentialType["type"]) => {
+    setSelectedSideCredential(null);
     setTempVault(newEntry(type));
     setIsCreate(type);
     setIsEdit(false);

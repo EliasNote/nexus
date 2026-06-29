@@ -1,16 +1,12 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState, useRef } from "react";
 import { useCloudStore } from "./useCloudStore";
+import type { EncryptedVault } from "@/types/vault";
 import type { StorageProviderInterface } from "./interface";
-import type { DecryptedVault } from "@/types/vault";
 
 export const useGoogle = (): StorageProviderInterface => {
-  const API_URL = import.meta.env.VITE_API_URL;
-
   const token = useCloudStore((state) => state.accessToken);
   const setToken = useCloudStore((state) => state.setAccessToken);
-  const refreshToken = useCloudStore((state) => state.refreshToken);
-  const setRefreshToken = useCloudStore((state) => state.setRefreshToken);
   const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
   const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
   const clearSession = useCloudStore((state) => state.clearSession);
@@ -29,29 +25,18 @@ export const useGoogle = (): StorageProviderInterface => {
 
   const login = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/drive.appdata",
-    flow: "auth-code",
-    onSuccess: async (res) => {
+    onSuccess: async (tokenResponse) => {
       try {
-        const response = await fetch(`${API_URL}/api/auth/google`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: res.code }),
-        });
+        const accessToken = tokenResponse.access_token;
+        const expiresInSec = tokenResponse.expires_in;
 
-        if (!response.ok) throw new Error("Erro na troca de tokens");
-        const data = await response.json();
-
-        setExpiresIn(Date.now() + data.expires_in * 1000 - 300000);
+        setToken(accessToken);
+        setExpiresIn(Date.now() + expiresInSec * 1000 - 300000);
         setIsTokenValid(true);
-        setToken(data.access_token);
 
-        if (data.refresh_token) {
-          setRefreshToken(data.refresh_token);
-        }
-
-        resolvePromise(data.access_token);
+        resolvePromise(accessToken);
       } catch (error) {
-        console.error(error);
+        console.error("Erro ao definir access token do Google:", error);
         resolvePromise(null);
       }
     },
@@ -73,27 +58,14 @@ export const useGoogle = (): StorageProviderInterface => {
   };
 
   const refresh = async (): Promise<string | null> => {
-    if (!refreshToken) {
-      clearSession();
-      return null;
-    }
     try {
-      const response = await fetch(`${API_URL}/api/auth/google/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-      });
+      console.log("Renovando sessão do Google...");
 
-      if (!response.ok) throw new Error();
-      const data = await response.json();
-
-      setExpiresIn(Date.now() + data.expires_in * 1000 - 300000);
-      setIsTokenValid(true);
-      setToken(data.access_token);
-      return data.access_token;
+      const newToken = await loginWithPromise();
+      return newToken;
     } catch (error) {
+      console.error("Erro ao renovar a sessão do Google:", error);
       clearSession();
-      console.error("Erro ao renovar a sessão:", error);
       return null;
     }
   };
@@ -138,7 +110,7 @@ export const useGoogle = (): StorageProviderInterface => {
     }
   };
 
-  const uploadVault = async (vault: DecryptedVault, idParam?: string) => {
+  const uploadVault = async (vault: EncryptedVault, idParam?: string) => {
     if (!token) throw new Error("Não autenticado");
     setIsLoading(true);
 
@@ -187,7 +159,7 @@ export const useGoogle = (): StorageProviderInterface => {
     }
 
     try {
-      const file = await find(); // Isso busca o arquivo na appDataFolder
+      const file = await find();
       if (!file || !file.id) {
         alert("Arquivo não encontrado no Google Drive.");
         return;

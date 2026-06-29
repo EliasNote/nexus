@@ -1,8 +1,10 @@
 import { type Credential as CredentialType } from "@/types/vault";
-import { Login } from "./Login";
+import { Login } from "./CredentialTypes/Login";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header/Header";
+import { Card } from "./CredentialTypes/Card";
+import { Note } from "./CredentialTypes/Note";
 
 export const Credential = ({
   credential,
@@ -66,6 +68,24 @@ export const Credential = ({
       <div className="flex-1 h-full w-full flex flex-col">
         {tempVault?.type === "login" && (
           <Login
+            key={isCreate ? "new" : tempVault.id}
+            folders={folders}
+            isEdit={isEditable}
+            credential={tempVault}
+            setCredential={setTempVault}
+          />
+        )}
+        {tempVault?.type === "card" && (
+          <Card
+            key={isCreate ? "new" : tempVault.id}
+            folders={folders}
+            isEdit={isEditable}
+            credential={tempVault}
+            setCredential={setTempVault}
+          />
+        )}
+        {tempVault?.type === "note" && (
+          <Note
             key={isCreate ? "new" : tempVault.id}
             folders={folders}
             isEdit={isEditable}

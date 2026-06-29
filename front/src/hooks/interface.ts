@@ -11,7 +11,7 @@ export interface StorageProviderInterface {
   login: () => void;
   loginWithPromise: () => Promise<string | null>;
   download: () => Promise<any>;
-  uploadVault: (content: EncryptedVault) => Promise<any>;
+  uploadVault: (vault: EncryptedVault) => Promise<any>;
   disconnect: () => void;
   deleteVault: () => Promise<any>;
 }
