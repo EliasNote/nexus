@@ -7,6 +7,8 @@ import { Credential } from "./components/Credential/Credential";
 import type { Credential as CredentialType, Folder } from "@/types/vault";
 import { AddButton } from "./components/Credential/AddButton";
 import { useAutoSave } from "@/hooks/useSave";
+import { SIDEBAR_BUTTONS_IDS } from "./components/Sidebar/Buttons";
+import { Generator } from "./components/Generator/Generator";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -36,26 +38,35 @@ const Dashboard = () => {
   const credentials = useMemo(() => {
     if (!summaryVault?.entries) return [];
 
-    if (selected === 0) {
-      return summaryVault.entries.filter((credential) => !credential.isDeleted);
-    } else if (selected === 1) {
-      return summaryVault.entries.filter(
-        (credential) => credential.isFavorite && !credential.isDeleted,
-      );
-    } else if (selected === 2) {
-      return summaryVault.entries.filter((credential) => credential.isDeleted);
-    } else if (selected as string) {
-      const targetFolder = folders.find((f) => f.id === selected);
-
-      if (!targetFolder) return [];
-
-      return summaryVault.entries.filter((c) =>
-        c.foldersIds?.includes(targetFolder.id),
-      );
-    } else {
-      return [];
+    switch (selected) {
+      case SIDEBAR_BUTTONS_IDS.all:
+        return summaryVault.entries.filter(
+          (credential) => !credential.isDeleted,
+        );
+      case SIDEBAR_BUTTONS_IDS.favorites:
+        return summaryVault.entries.filter(
+          (credential) => credential.isFavorite && !credential.isDeleted,
+        );
+      case SIDEBAR_BUTTONS_IDS.trash:
+        return summaryVault.entries.filter(
+          (credential) => credential.isDeleted,
+        );
+      case SIDEBAR_BUTTONS_IDS.generator:
+        return;
+      case SIDEBAR_BUTTONS_IDS.auditoria:
+        return;
+      default:
+        if (selected as string) {
+          const targetFolder = folders.find((f) => f.id === selected);
+          return targetFolder
+            ? summaryVault.entries.filter((c) =>
+                c.foldersIds?.includes(targetFolder.id),
+              )
+            : [];
+        }
+        return [];
     }
-  }, [selected, summaryVault]);
+  }, [selected, summaryVault, folders]);
 
   useEffect(() => {
     if (isTokenValid && !summaryVault) {
@@ -124,28 +135,34 @@ const Dashboard = () => {
         setSelected={setSelected}
         folders={folders}
       />
-      <SidebarCredentials
-        selectedSideCredential={selectedSideCredential}
-        setSelectedSideCredential={setSelectedSideCredential}
-        credentials={credentials}
-      />
-      {(selectedSideCredential && credential && tempVault) || isCreate ? (
-        <Credential
-          tempVault={tempVault || newEntry(isCreate!)}
-          setTempVault={setTempVault}
-          isEdit={isEdit}
-          setIsEdit={setIsEdit}
-          isCreate={isCreate}
-          setIsCreate={setIsCreate}
-          setSelectedSideCredential={setSelectedSideCredential}
-          credential={credential!}
-          isLoadingCredential={isLoadingCredential}
-          handleStartCreate={handleStartCreate}
-        />
+      {selected === SIDEBAR_BUTTONS_IDS.generator ? (
+        <Generator />
       ) : (
-        <div className="absolute bottom-10 right-10">
-          <AddButton handleStartCreate={handleStartCreate} />
-        </div>
+        <>
+          <SidebarCredentials
+            selectedSideCredential={selectedSideCredential}
+            setSelectedSideCredential={setSelectedSideCredential}
+            credentials={credentials}
+          />
+          {(selectedSideCredential && credential && tempVault) || isCreate ? (
+            <Credential
+              tempVault={tempVault || newEntry(isCreate!)}
+              setTempVault={setTempVault}
+              isEdit={isEdit}
+              setIsEdit={setIsEdit}
+              isCreate={isCreate}
+              setIsCreate={setIsCreate}
+              setSelectedSideCredential={setSelectedSideCredential}
+              credential={credential!}
+              isLoadingCredential={isLoadingCredential}
+              handleStartCreate={handleStartCreate}
+            />
+          ) : (
+            <div className="absolute bottom-10 right-10">
+              <AddButton handleStartCreate={handleStartCreate} />
+            </div>
+          )}
+        </>
       )}
     </main>
   );

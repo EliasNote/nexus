@@ -3,7 +3,7 @@ import { wrap } from "comlink";
 import type { CryptoService } from "../utils/worker";
 import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
 
-export type StorageProvider = "google" | "github" | null;
+export type StorageProvider = "google" | null;
 
 const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
   type: "module",

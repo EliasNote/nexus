@@ -11,16 +11,27 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
+export const SIDEBAR_BUTTONS_IDS = {
+  all: "all",
+  favorites: "favorites",
+  trash: "trash",
+  generator: "generator",
+  auditoria: "auditoria",
+};
+
 export const defaults = (iconsSize: number) => [
   {
+    id: SIDEBAR_BUTTONS_IDS.all,
     title: "TODOS OS ITENS",
     icon: <LayoutGrid size={iconsSize} />,
   },
   {
+    id: SIDEBAR_BUTTONS_IDS.favorites,
     title: "FAVORITOS",
     icon: <Star size={iconsSize} />,
   },
   {
+    id: SIDEBAR_BUTTONS_IDS.trash,
     title: "LIXEIRA",
     icon: <Trash2 size={iconsSize} />,
   },
@@ -28,10 +39,12 @@ export const defaults = (iconsSize: number) => [
 
 export const tools = (iconsSize: number) => [
   {
+    id: SIDEBAR_BUTTONS_IDS.generator,
     title: "GERADOR",
     icon: <Binary size={iconsSize} />,
   },
   {
+    id: SIDEBAR_BUTTONS_IDS.auditoria,
     title: "AUDITORIA",
     icon: <Shield size={iconsSize} />,
   },
@@ -67,12 +80,14 @@ export const footers = (
   isSaving: boolean,
 ) => [
   {
+    id: "sync",
     title: "SINCRONIZAR",
     icon: cloudIcons(iconsSize)[
       isSaving ? "isSaving" : isPendingSync ? "unsynced" : "synced"
     ],
   },
   {
+    id: "logout",
     title: "SAIR",
     icon: <LogOut size={iconsSize} />,
   },

@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { useCloudStore } from "./useCloudStore";
 import { useGoogle } from "./useGoogle";
-import { useGitHub } from "./useGithub";
 import type { EncryptedVault } from "@/types/vault";
 
 export const useCloudSync = () => {
@@ -10,11 +9,11 @@ export const useCloudSync = () => {
   const token = useCloudStore((state) => state.accessToken);
 
   const googleService = useGoogle();
-  const githubService = useGitHub();
+  // const githubService = useGitHub();
 
   const services = {
     google: googleService,
-    github: githubService,
+    // github: githubService,
   };
 
   const getActiveService = () => {
@@ -72,6 +71,6 @@ export const useCloudSync = () => {
     find,
     needsRepoFix,
     setNeedsRepoFix,
-    loginRepoNotFound: githubService.loginRepoNotFound,
+    // loginRepoNotFound: githubService.loginRepoNotFound,
   };
 };

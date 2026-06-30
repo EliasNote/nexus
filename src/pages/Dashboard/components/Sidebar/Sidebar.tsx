@@ -93,8 +93,8 @@ const Sidebar = ({
       <div className="flex flex-col gap-[5px]">
         {defaults.map((button, index) => (
           <Button
-            key={index}
-            id={index}
+            key={button.id}
+            id={button.id}
             selectedId={selected}
             title={button.title}
             setSelected={setSelected}
@@ -110,8 +110,8 @@ const Sidebar = ({
         <div className="flex flex-col gap-[5px]">
           {tools.map((button, index) => (
             <Button
-              key={defaults.length + index}
-              id={defaults.length + index}
+              key={button.id}
+              id={button.id}
               selectedId={selected}
               title={button.title}
               setSelected={setSelected}
@@ -163,7 +163,7 @@ const Sidebar = ({
           )}
           {folders.map((f, index) => (
             <Button
-              key={defaults.length + tools.length + footers.length + index}
+              key={index}
               id={f.id}
               selectedId={selected}
               title={`/${f.name}`}
@@ -178,8 +178,8 @@ const Sidebar = ({
       <div className="flex flex-col w-full gap-2 ">
         {footers.map((item, index) => (
           <Button
-            key={defaults.length + tools.length + index}
-            id={defaults.length + tools.length + index}
+            key={item.id}
+            id={item.id}
             selectedId={selected}
             title={item.title}
             onClick={() => {

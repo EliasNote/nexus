@@ -1,4 +1,4 @@
-import { FileUp } from "lucide-react";
+import { Server } from "lucide-react";
 
 export const MONTH_OPTIONS = [
   "01 - Janeiro",
@@ -16,16 +16,16 @@ export const MONTH_OPTIONS = [
 ];
 
 export const CLOUD_OPTIONS = [
-  {
-    id: "github",
-    title: "GITHUB",
-    subtitle: "Usar GitHub como cofre",
-    icon: FileUp,
-  },
+  // {
+  //   id: "github",
+  //   title: "GITHUB",
+  //   subtitle: "Usar GitHub como cofre",
+  //   icon: Server,
+  // },
   {
     id: "google",
     title: "GOOGLE DRIVE",
     subtitle: "Usar cofre do Google Drive",
-    icon: FileUp,
+    icon: Server,
   },
 ];

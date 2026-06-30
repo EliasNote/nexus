@@ -9,7 +9,7 @@ const SidebarCredentials = ({
 }: {
   selectedSideCredential: string | null;
   setSelectedSideCredential: (id: string | null) => void;
-  credentials: EntrySummary[];
+  credentials: EntrySummary[] | undefined;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -18,7 +18,7 @@ const SidebarCredentials = ({
 
     const lowerTerm = searchTerm.toLowerCase();
 
-    return credentials.filter((c) => {
+    return credentials?.filter((c) => {
       return (
         c.title.toLowerCase().includes(lowerTerm) ||
         c.username?.toLowerCase().includes(lowerTerm)
@@ -41,8 +41,8 @@ const SidebarCredentials = ({
       </div>
       <hr className="w-full text-zinc-800" />
       <div className="w-full h-full overflow-y-auto overflow-x-hidden">
-        {filteredCredentials.length > 0 ? (
-          filteredCredentials.map((credential) => (
+        {credentials && filteredCredentials!.length > 0 ? (
+          filteredCredentials!.map((credential) => (
             <Credential
               key={credential.id}
               selected={selectedSideCredential === credential.id}
