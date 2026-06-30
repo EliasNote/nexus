@@ -22,6 +22,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "comlink": "^4.4.2",
+    "generate-password": "^1.7.1",
     "hash-wasm": "^4.12.0",
     "lucide-react": "^1.11.0",
     "motion": "^12.38.0",
