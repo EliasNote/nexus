@@ -14,7 +14,7 @@ export const Input = ({
   isPassword,
   onChange,
 }: {
-  iconsInput: iconsInputProp[];
+  iconsInput?: iconsInputProp[];
   iconTop: LucideIcon;
   topName: string;
   placeholder: string;
@@ -53,7 +53,7 @@ export const Input = ({
             value={value}
             onChange={(e) => onChange?.(e.target.value)}
           />
-          {iconsInput.map((icon, index) => (
+          {iconsInput?.map((icon, index) => (
             <button
               key={index}
               onClick={() => {
