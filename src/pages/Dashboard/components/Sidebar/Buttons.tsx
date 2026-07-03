@@ -16,7 +16,7 @@ export const SIDEBAR_BUTTONS_IDS = {
   favorites: "favorites",
   trash: "trash",
   generator: "generator",
-  auditoria: "auditoria",
+  audit: "audit",
 };
 
 export const defaults = (iconsSize: number) => [
@@ -44,7 +44,7 @@ export const tools = (iconsSize: number) => [
     icon: <Binary size={iconsSize} />,
   },
   {
-    id: SIDEBAR_BUTTONS_IDS.auditoria,
+    id: SIDEBAR_BUTTONS_IDS.audit,
     title: "AUDITORIA",
     icon: <Shield size={iconsSize} />,
   },

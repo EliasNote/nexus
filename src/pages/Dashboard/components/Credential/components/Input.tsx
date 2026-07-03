@@ -15,9 +15,9 @@ export const Input = ({
   onChange,
 }: {
   iconsInput?: iconsInputProp[];
-  iconTop: LucideIcon;
-  topName: string;
-  placeholder: string;
+  iconTop?: LucideIcon;
+  topName?: string;
+  placeholder?: string;
   disabled?: boolean;
   value?: string;
   isPassword?: boolean;
@@ -41,7 +41,7 @@ export const Input = ({
     <div className="flex w-full items-center justify-center">
       <div className="flex gap-0.5 flex-col w-full max-w-[760px]">
         <div className="flex items-start font-medium gap-1 text-[12px] text-zinc-400">
-          <Icontop size={16} strokeWidth={1.5} />
+          {Icontop && <Icontop size={16} strokeWidth={1.5} />}
           <span>{topName}</span>
         </div>
         <div className="group flex items-center focus-within:border-zinc-600 bg-zinc-900 border border-zinc-800 h-[45px]">

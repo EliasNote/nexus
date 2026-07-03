@@ -21,6 +21,7 @@ export interface EntrySummary {
   username?: string | null | undefined;
   holderName?: string | null | undefined;
   name?: string | null | undefined;
+  integrityType?: "compromissed" | "weak" | "reused" | "renewal";
   foldersIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;
@@ -40,6 +41,7 @@ export type CommonMetadata = {
   isFavorite: boolean;
   isDeleted: boolean;
   createdAt: string;
+  lastPasswordChange?: string;
   updatedAt: string;
 };
 

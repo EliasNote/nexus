@@ -3,10 +3,13 @@ import type {
   DecryptedVault,
   EncryptedData,
   EncryptedVault,
+  LoginCredential,
   VaultSummarizedData,
 } from "@/types/vault";
 import { expose } from "comlink";
 import { argon2id } from "hash-wasm";
+import { sha1 } from "js-sha1";
+import { zxcvbn } from "@zxcvbn-ts/core";
 
 let secureKey: CryptoKey | null = null;
 
@@ -338,6 +341,42 @@ const cryptoService = {
       };
     }
     return updatedEntries;
+  },
+
+  async verifyCompromised(password: string): Promise<boolean> {
+    const hash = sha1(password).toUpperCase();
+    const prefix = hash.slice(0, 5);
+    const suffix = hash.slice(5);
+
+    const compromisedPasswords = await fetch(
+      `https://api.pwnedpasswords.com/range/${prefix}`,
+    ).then((res) => res.text());
+
+    const compromised = compromisedPasswords.includes(suffix);
+
+    return !compromised;
+  },
+
+  async verifyWeak(password: string): Promise<boolean> {
+    const result = zxcvbn(password);
+    return result.score < 3;
+  },
+
+  async verifyReused(
+    password: string,
+    decryptedVault: DecryptedVault,
+  ): Promise<boolean> {
+    const reused = Object.values(decryptedVault.entries).some(
+      (entry) => (entry as LoginCredential).password === password,
+    );
+    return reused;
+  },
+
+  async verifyReneval(lastPasswordChange: Date): Promise<boolean> {
+    const days = 30;
+    const timeSinceLastChange =
+      new Date().getTime() - lastPasswordChange.getTime();
+    return timeSinceLastChange < days * 24 * 60 * 60 * 1000;
   },
 };
 

@@ -9,6 +9,7 @@ import { AddButton } from "./components/Credential/AddButton";
 import { useAutoSave } from "@/hooks/useSave";
 import { SIDEBAR_BUTTONS_IDS } from "./components/Sidebar/Buttons";
 import { Generator } from "./components/Generator/Generator";
+import { Audit } from "./components/Audit/Audit";
 
 // import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
 
@@ -51,10 +52,6 @@ const Dashboard = () => {
         return summaryVault.entries.filter(
           (credential) => credential.isDeleted,
         );
-      case SIDEBAR_BUTTONS_IDS.generator:
-        return;
-      case SIDEBAR_BUTTONS_IDS.auditoria:
-        return;
       default:
         if (selected as string) {
           const targetFolder = folders.find((f) => f.id === selected);
@@ -135,9 +132,10 @@ const Dashboard = () => {
         setSelected={setSelected}
         folders={folders}
       />
-      {selected === SIDEBAR_BUTTONS_IDS.generator ? (
-        <Generator />
-      ) : (
+      {{
+        [SIDEBAR_BUTTONS_IDS.generator]: <Generator />,
+        [SIDEBAR_BUTTONS_IDS.audit]: <Audit />,
+      }[selected] || (
         <>
           <SidebarCredentials
             selectedSideCredential={selectedSideCredential}

@@ -1,5 +1,5 @@
 import type { EntrySummary } from "@/types/vault";
-import Credential from "./Credential";
+import SideCredential from "./SideCredential";
 import { useState, useMemo } from "react";
 
 const SidebarCredentials = ({
@@ -43,7 +43,7 @@ const SidebarCredentials = ({
       <div className="w-full h-full overflow-y-auto overflow-x-hidden">
         {credentials && filteredCredentials!.length > 0 ? (
           filteredCredentials!.map((credential) => (
-            <Credential
+            <SideCredential
               key={credential.id}
               selected={selectedSideCredential === credential.id}
               setSelectedSideCredential={setSelectedSideCredential}
