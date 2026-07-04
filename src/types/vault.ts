@@ -14,6 +14,13 @@ export type Folder = {
   colorHex?: string;
 };
 
+export type AuditData = {
+  isCompromised?: boolean;
+  isWeak?: boolean;
+  isReused?: boolean;
+  isRenewal?: boolean;
+};
+
 export interface EntrySummary {
   id: string;
   type: "login" | "card" | "note";
@@ -21,7 +28,7 @@ export interface EntrySummary {
   username?: string | null | undefined;
   holderName?: string | null | undefined;
   name?: string | null | undefined;
-  integrityType?: "compromissed" | "weak" | "reused" | "renewal";
+  auditData?: AuditData;
   foldersIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;
@@ -37,7 +44,6 @@ export type CommonMetadata = {
   title: string;
   notes?: string;
   foldersIds?: string[];
-  audit: Audit;
   isFavorite: boolean;
   isDeleted: boolean;
   createdAt: string;
@@ -56,6 +62,7 @@ export type CreditCardCredential = CommonMetadata & {
   type: typeof CREDENTIAL_TYPES.CARD;
   holderName: string;
   cardNumber: string;
+  password?: string;
   expirationDate: string;
   cvv: string;
 };
@@ -63,6 +70,7 @@ export type CreditCardCredential = CommonMetadata & {
 export type NoteCredential = CommonMetadata & {
   type: typeof CREDENTIAL_TYPES.NOTE;
   name: string;
+  password?: string;
   content: string;
 };
 
@@ -70,13 +78,6 @@ export type Credential =
   | LoginCredential
   | CreditCardCredential
   | NoteCredential;
-
-export type Audit = {
-  leak: boolean;
-  weak: boolean;
-  reused: boolean;
-  renewal: boolean;
-};
 
 export type DecryptedVault = {
   version: string;

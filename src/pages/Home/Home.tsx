@@ -61,15 +61,15 @@ export const Home = () => {
         );
 
         if (unlocked) {
-          const decryptedVault =
+          const summaryVault =
             await cryptoService.getInitialData(encryptedVault);
 
-          console.log("Cofre: ", decryptedVault);
+          console.log("Cofre: ", summaryVault);
 
           const interval = encryptedVault.autoSaveInterval ?? 1;
           useCloudStore.getState().setAutoSaveInterval(interval);
 
-          setSummaryVault(decryptedVault);
+          setSummaryVault(summaryVault);
           setVault(encryptedVault);
         }
       } else {

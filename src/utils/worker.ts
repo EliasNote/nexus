@@ -3,15 +3,20 @@ import type {
   DecryptedVault,
   EncryptedData,
   EncryptedVault,
+  EntrySummary,
   LoginCredential,
   VaultSummarizedData,
 } from "@/types/vault";
 import { expose } from "comlink";
 import { argon2id } from "hash-wasm";
 import { sha1 } from "js-sha1";
-import { zxcvbn } from "@zxcvbn-ts/core";
+import { ZxcvbnFactory } from "@zxcvbn-ts/core";
 
 let secureKey: CryptoKey | null = null;
+const zxcvbn = new ZxcvbnFactory({
+  dictionary: {},
+  graphs: {},
+});
 
 const base64ToUint8Array = (base64: string): Uint8Array => {
   const binaryString = atob(base64);
@@ -180,6 +185,37 @@ const cryptoService = {
     );
   },
 
+  async verifyCompromised(password: string): Promise<boolean> {
+    const hash = sha1(password).toUpperCase();
+    const prefix = hash.slice(0, 5);
+    const suffix = hash.slice(5);
+
+    const compromisedPasswords = await fetch(
+      `https://api.pwnedpasswords.com/range/${prefix}`,
+    ).then((res) => res.text());
+
+    return compromisedPasswords.includes(suffix);
+  },
+
+  verifyWeak(password: string): boolean {
+    const result = zxcvbn.check(password);
+    return result.score < 3;
+  },
+
+  verifyReused(password: string, decryptedVault: DecryptedVault): boolean {
+    const reused = Object.values(decryptedVault.entries).some(
+      (entry) => (entry as LoginCredential).password === password,
+    );
+    return reused;
+  },
+
+  verifyReneval(lastPasswordChange: Date): boolean {
+    const days = 30;
+    const timeSinceLastChange =
+      new Date().getTime() - lastPasswordChange.getTime();
+    return timeSinceLastChange < days * 24 * 60 * 60 * 1000;
+  },
+
   async getFolderAndEntryData(
     vault: DecryptedVault,
   ): Promise<VaultSummarizedData> {
@@ -190,25 +226,49 @@ const cryptoService = {
       colorHex: f.colorHex,
     }));
 
-    const entriesData = vault.entries.map((v) => {
-      const entryData = {
-        id: v.id,
-        type: v.type,
-        title: v.title,
-        username: v.type === "login" ? v.username : null,
-        holderName: v.type === "card" ? v.holderName : null,
-        name: v.type === "note" ? v.name : null,
-        foldersIds: v.foldersIds,
-        isFavorite: v.isFavorite,
-        isDeleted: v.isDeleted,
-      };
-      return entryData;
-    });
+    const entriesData: EntrySummary[] = await Promise.all(
+      vault.entries.map(async (v) => {
+        let isCompromised = false;
+        let isWeak = false;
+        let isReused = false;
+        let isRenewal = false;
+
+        const password = v.password;
+
+        if (password) {
+          isCompromised = await this.verifyCompromised(password);
+          isWeak = this.verifyWeak(password);
+          isReused = this.verifyReused(password, vault);
+          isRenewal = this.verifyReneval(new Date(v.lastPasswordChange!));
+        }
+
+        const entryData = {
+          id: v.id,
+          type: v.type,
+          title: v.title,
+          username: v.type === "login" ? v.username : null,
+          holderName: v.type === "card" ? v.holderName : null,
+          name: v.type === "note" ? v.name : null,
+          auditData: {
+            isCompromised: isCompromised,
+            isWeak: isWeak,
+            isReused: isReused,
+            isRenewal: isRenewal,
+          },
+          foldersIds: v.foldersIds,
+          isFavorite: v.isFavorite,
+          isDeleted: v.isDeleted,
+        };
+        return entryData;
+      }),
+    );
 
     return { folders: foldersData, entries: entriesData };
   },
 
-  async getInitialData(encryptedVault: EncryptedVault) {
+  async getInitialData(
+    encryptedVault: EncryptedVault,
+  ): Promise<VaultSummarizedData> {
     const decryptedFolders = await this.decrypt(
       base64ToUint8Array(encryptedVault.folders.ciphertext),
       base64ToUint8Array(encryptedVault.folders.iv),
@@ -216,7 +276,7 @@ const cryptoService = {
     );
     const folders = JSON.parse(decryptedFolders);
 
-    const entries = [];
+    const entries: Credential[] = [];
     for (const encryptedEntry of Object.values(encryptedVault.entries)) {
       const decryptedEntryStr = await this.getSingleEntry(encryptedEntry);
 
@@ -341,42 +401,6 @@ const cryptoService = {
       };
     }
     return updatedEntries;
-  },
-
-  async verifyCompromised(password: string): Promise<boolean> {
-    const hash = sha1(password).toUpperCase();
-    const prefix = hash.slice(0, 5);
-    const suffix = hash.slice(5);
-
-    const compromisedPasswords = await fetch(
-      `https://api.pwnedpasswords.com/range/${prefix}`,
-    ).then((res) => res.text());
-
-    const compromised = compromisedPasswords.includes(suffix);
-
-    return !compromised;
-  },
-
-  async verifyWeak(password: string): Promise<boolean> {
-    const result = zxcvbn(password);
-    return result.score < 3;
-  },
-
-  async verifyReused(
-    password: string,
-    decryptedVault: DecryptedVault,
-  ): Promise<boolean> {
-    const reused = Object.values(decryptedVault.entries).some(
-      (entry) => (entry as LoginCredential).password === password,
-    );
-    return reused;
-  },
-
-  async verifyReneval(lastPasswordChange: Date): Promise<boolean> {
-    const days = 30;
-    const timeSinceLastChange =
-      new Date().getTime() - lastPasswordChange.getTime();
-    return timeSinceLastChange < days * 24 * 60 * 60 * 1000;
   },
 };
 

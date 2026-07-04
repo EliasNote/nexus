@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
-import { useCloudSync } from "../../hooks/useCloudSync";
 import { cryptoService, useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
 import type { Credential as CredentialType, Folder } from "@/types/vault";
@@ -18,9 +17,7 @@ const Dashboard = () => {
 
   const [selected, setSelected] = useState<number | string>(0);
 
-  const isTokenValid = useCloudStore((state) => state.isTokenValid);
   const vault = useCloudStore((state) => state.vault);
-  const setVault = useCloudStore((state) => state.setVault);
   const summaryVault = useCloudStore((state) => state.summaryVault);
   const [selectedSideCredential, setSelectedSideCredential] = useState<
     string | null
@@ -35,7 +32,6 @@ const Dashboard = () => {
     return summaryVault?.folders || [];
   }, [summaryVault]);
 
-  const { download } = useCloudSync();
   const credentials = useMemo(() => {
     if (!summaryVault?.entries) return [];
 
@@ -64,25 +60,6 @@ const Dashboard = () => {
         return [];
     }
   }, [selected, summaryVault, folders]);
-
-  useEffect(() => {
-    if (isTokenValid && !summaryVault) {
-      download()
-        .then(async (result) => {
-          if (result) {
-            const initialData = await cryptoService.getInitialData(result);
-
-            const interval = result.autoSaveInterval!;
-
-            useCloudStore.getState().setAutoSaveInterval(interval);
-            setVault(result);
-            useCloudStore.getState().setSummaryVault(initialData);
-            console.log("Vault baixado e descriptografado real", result);
-          }
-        })
-        .catch((err) => console.error("Erro ao baixar cofre:", err));
-    }
-  }, [isTokenValid, download, setVault, summaryVault]);
 
   useEffect(() => {
     if (selectedSideCredential && vault) {
