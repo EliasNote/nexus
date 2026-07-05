@@ -67,7 +67,7 @@ export const Generator = () => {
   return (
     <section className="flex justify-center h-screen w-full p-10">
       <div className="flex items-center flex-col max-w-[700px] w-full">
-        <div className="flex items-center justify-center mb-[-20px]">
+        <div className="flex gap-1 items-center justify-center mb-[-20px]">
           <Binary size={32} className="text-brand" />
           <h2 className="text-[24px] text-white font-bold">
             GERADOR DE SENHAS
