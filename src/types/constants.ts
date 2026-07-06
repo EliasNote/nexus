@@ -1,4 +1,5 @@
-import { Server } from "lucide-react";
+import { Clock, Database, Lock, Server, TriangleAlert } from "lucide-react";
+import type { AuditType } from "./types";
 
 export const MONTH_OPTIONS = [
   "01 - Janeiro",

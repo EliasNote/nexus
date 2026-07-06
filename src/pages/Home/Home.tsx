@@ -14,6 +14,8 @@ import {
 import { useGoogle } from "@/hooks/useGoogle";
 import type { EncryptedVault } from "@/types/vault";
 import { CLOUD_OPTIONS } from "@/types/constants";
+import { Input } from "../Dashboard/components/Credential/components/Input";
+import { Eye } from "lucide-react";
 
 export const Home = () => {
   const { uploadVault, download, find } = useCloudSync();
@@ -46,7 +48,13 @@ export const Home = () => {
 
   const handleConcluir = async () => {
     try {
-      const password = inputRef.current?.value || "";
+      const masterPassword = password;
+
+      if (!masterPassword) {
+        alert("Por favor, digite a senha mestra.");
+        return;
+      }
+
       const data = await find();
 
       if (data && (data.id || data.sha)) {
@@ -55,7 +63,7 @@ export const Home = () => {
         const salt = encryptedVault.kdf.salt;
 
         const unlocked = await cryptoService.verifyUnlockVaultKeys(
-          password,
+          masterPassword,
           salt,
           encryptedVault.encrypted_dek,
         );
@@ -200,10 +208,16 @@ export const Home = () => {
             <div className="flex flex-col gap-2 items-center">
               <div className="w-full flex flex-col items-start">
                 <p className="text-sm font-bold">SENHA MESTRA</p>
-                <input
-                  className="bg-zinc-900 text-[16px] h-[40px] w-[384px] border border-zinc-800 px-2"
-                  ref={inputRef}
-                  type="password"
+                <Input
+                  isPassword={true}
+                  value={password}
+                  onChange={(val) => setPassword(val)}
+                  iconsInput={[
+                    {
+                      id: "eye",
+                      icon: Eye,
+                    },
+                  ]}
                 />
               </div>
               <div className="flex gap-3">

@@ -210,7 +210,7 @@ const cryptoService = {
   },
 
   verifyReneval(lastPasswordChange: Date): boolean {
-    const days = 30;
+    const days = 90;
     const timeSinceLastChange =
       new Date().getTime() - lastPasswordChange.getTime();
     return timeSinceLastChange < days * 24 * 60 * 60 * 1000;
