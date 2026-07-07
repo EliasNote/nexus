@@ -6,16 +6,13 @@ import { IconButton } from "./components/IconButton";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { dashboardRoute } from "@/App";
-import {
-  createInitialVault,
-  encryptVault,
-  uint8ArrayToBase64,
-} from "@/utils/crypto";
+import { createInitialVault } from "@/utils/initialVault";
 import { useGoogle } from "@/hooks/useGoogle";
 import type { EncryptedVault } from "@/types/vault";
 import { CLOUD_OPTIONS } from "@/types/constants";
 import { Input } from "../Dashboard/components/Credential/components/Input";
 import { Eye } from "lucide-react";
+import { uint8ArrayToBase64 } from "@/utils/worker";
 
 export const Home = () => {
   const { uploadVault, download, find } = useCloudSync();
@@ -60,6 +57,7 @@ export const Home = () => {
       if (data && (data.id || data.sha)) {
         console.log("Vault existe");
         const encryptedVault = await download();
+        if (!encryptedVault) return;
         const salt = encryptedVault.kdf.salt;
 
         const unlocked = await cryptoService.verifyUnlockVaultKeys(
@@ -89,7 +87,7 @@ export const Home = () => {
 
         const encryptedDek = await cryptoService.setupVaultKeys(password, salt);
 
-        const encryptedContent = await encryptVault(
+        const encryptedContent = await cryptoService.encryptVault(
           vault.entries,
           vault.folders,
         );

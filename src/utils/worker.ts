@@ -4,6 +4,7 @@ import type {
   EncryptedData,
   EncryptedVault,
   EntrySummary,
+  Folder,
   LoginCredential,
   VaultSummarizedData,
 } from "@/types/vault";
@@ -18,16 +19,24 @@ const zxcvbn = new ZxcvbnFactory({
   graphs: {},
 });
 
-const base64ToUint8Array = (base64: string): Uint8Array => {
+type CryptoBytes = Uint8Array<ArrayBuffer>;
+
+const createBytes = (length: number): CryptoBytes =>
+  new Uint8Array(length) as CryptoBytes;
+
+const bytesFromBuffer = (buffer: ArrayBuffer): CryptoBytes =>
+  new Uint8Array(buffer) as CryptoBytes;
+
+const base64ToUint8Array = (base64: string): CryptoBytes => {
   const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
+  const bytes = createBytes(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes;
 };
 
-const uint8ArrayToBase64 = (bytes: Uint8Array): string => {
+export const uint8ArrayToBase64 = (bytes: Uint8Array): string => {
   let binary = "";
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);
@@ -58,7 +67,7 @@ const cryptoService = {
     );
     kekBytes.fill(0);
 
-    const rawDek = crypto.getRandomValues(new Uint8Array(32));
+    const rawDek = crypto.getRandomValues(createBytes(32));
     secureKey = await crypto.subtle.importKey(
       "raw",
       rawDek.buffer as ArrayBuffer,
@@ -67,7 +76,7 @@ const cryptoService = {
       ["encrypt", "decrypt"],
     );
 
-    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const iv = crypto.getRandomValues(createBytes(12));
     const encryptedDekBuffer = await crypto.subtle.encrypt(
       { name: "AES-GCM", iv },
       KEK,
@@ -75,7 +84,7 @@ const cryptoService = {
     );
     rawDek.fill(0);
 
-    const encryptedDekBytes = new Uint8Array(encryptedDekBuffer);
+    const encryptedDekBytes = bytesFromBuffer(encryptedDekBuffer);
 
     return {
       iv: uint8ArrayToBase64(iv),
@@ -114,7 +123,7 @@ const cryptoService = {
     const ciphertext = base64ToUint8Array(encryptedDek.ciphertext);
     const tag = base64ToUint8Array(encryptedDek.tag);
 
-    const combined = new Uint8Array(ciphertext.length + tag.length);
+    const combined = createBytes(ciphertext.length + tag.length);
     combined.set(ciphertext);
     combined.set(tag, ciphertext.length);
 
@@ -141,13 +150,13 @@ const cryptoService = {
 
   async encrypt(plaintext: string) {
     if (!secureKey) throw new Error("Chave não importada no Worker");
-    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const iv = crypto.getRandomValues(createBytes(12));
     const encryptedBuffer = await crypto.subtle.encrypt(
       { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
       secureKey,
       new TextEncoder().encode(plaintext).buffer as ArrayBuffer,
     );
-    const encryptedBytes = new Uint8Array(encryptedBuffer);
+    const encryptedBytes = bytesFromBuffer(encryptedBuffer);
     return {
       ciphertext: encryptedBytes.slice(0, -16),
       tag: encryptedBytes.slice(-16),
@@ -156,12 +165,12 @@ const cryptoService = {
   },
 
   async decrypt(
-    ciphertext: Uint8Array,
-    iv: Uint8Array,
-    tag: Uint8Array,
+    ciphertext: CryptoBytes,
+    iv: CryptoBytes,
+    tag: CryptoBytes,
   ): Promise<string> {
     if (!secureKey) throw new Error("Chave não importada no Worker");
-    const combined = new Uint8Array(ciphertext.length + tag.length);
+    const combined = createBytes(ciphertext.length + tag.length);
     combined.set(ciphertext);
     combined.set(tag, ciphertext.length);
 
@@ -443,6 +452,35 @@ const cryptoService = {
       };
     }
     return updatedEntries;
+  },
+
+  async encryptVault(
+    vaultEntries: Credential[],
+    folders: Folder[] = [],
+  ): Promise<{
+    folders: EncryptedData;
+    entries: { [uuid: string]: EncryptedData };
+  }> {
+    const foldersString = JSON.stringify(folders);
+    const encryptedFolders = await this.encrypt(foldersString);
+    const encryptedFoldersData = {
+      iv: uint8ArrayToBase64(encryptedFolders.iv),
+      tag: uint8ArrayToBase64(encryptedFolders.tag),
+      ciphertext: uint8ArrayToBase64(encryptedFolders.ciphertext),
+    };
+
+    const entries: { [uuid: string]: EncryptedData } = {};
+    for (const entry of vaultEntries) {
+      const entryString = JSON.stringify(entry);
+      const result = await this.encrypt(entryString);
+      entries[entry.id] = {
+        iv: uint8ArrayToBase64(result.iv),
+        tag: uint8ArrayToBase64(result.tag),
+        ciphertext: uint8ArrayToBase64(result.ciphertext),
+      };
+    }
+
+    return { folders: encryptedFoldersData, entries };
   },
 };
 

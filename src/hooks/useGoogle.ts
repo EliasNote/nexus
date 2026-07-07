@@ -2,7 +2,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useState, useRef } from "react";
 import { useCloudStore } from "./useCloudStore";
 import type { EncryptedVault } from "@/types/vault";
-import type { StorageProviderInterface } from "./interface";
+import type { CloudFileMetadata, StorageProviderInterface } from "./interface";
 
 export const useGoogle = (): StorageProviderInterface => {
   const token = useCloudStore((state) => state.accessToken);
@@ -70,7 +70,7 @@ export const useGoogle = (): StorageProviderInterface => {
     }
   };
 
-  const find = async () => {
+  const find = async (): Promise<CloudFileMetadata | null> => {
     const query = encodeURIComponent("name = 'vault.json'");
     const url = `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${query}`;
 

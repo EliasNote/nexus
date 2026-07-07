@@ -3,7 +3,7 @@ import { Check, EyeClosed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { copyToClipboard } from "../../../../../utils/utils";
 import type { iconsInputProp } from "@/types/types";
-import { GeneratorOptions } from "../../Generator/Components/GeneratorOptions";
+import { Generator } from "../../Generator/Generator";
 
 export const Input = ({
   iconsInput,
@@ -30,16 +30,6 @@ export const Input = ({
   isEdit?: boolean;
   isCreate?: boolean;
 }) => {
-  const [passlength, setPasslength] = useState(10);
-  const minLength = 4;
-  const maxLength = 128;
-
-  const [password, setPassword] = useState("");
-  const [lowercase, setLowercase] = useState(true);
-  const [uppercase, setUppercase] = useState(true);
-  const [numbers, setNumbers] = useState(true);
-  const [symbols, setSymbols] = useState(true);
-
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -47,13 +37,6 @@ export const Input = ({
     setShowPassword(!showPassword);
   };
   const [isGenerate, setIsGenerate] = useState(false);
-
-  const values: Record<string, [boolean, (checked: boolean) => void]> = {
-    lowercase: [lowercase, setLowercase],
-    uppercase: [uppercase, setUppercase],
-    numbers: [numbers, setNumbers],
-    symbols: [symbols, setSymbols],
-  };
 
   useEffect(() => {
     if (autoFocus && !disabled) {
@@ -67,19 +50,6 @@ export const Input = ({
     setTimeout(() => {
       setCopied(false);
     }, 1000);
-  };
-
-  const handleToggle = (value: string) => {
-    const selected = values[value];
-    const othersSelected: boolean[] = [];
-
-    for (const v of Object.values(values)) {
-      if (v[0]) othersSelected.push(v[0]);
-    }
-
-    if (othersSelected.length === 1 && selected[0]) return;
-
-    selected[1](!selected[0]);
   };
 
   return (
@@ -143,20 +113,12 @@ export const Input = ({
           onClick={() => setIsGenerate(false)}
         >
           <div
-            className="w-full max-w-[700px] border border-zinc-800 bg-zinc-950 p-8 shadow-2xl"
+            className="w-full max-w-[700px] border border-zinc-800 bg-zinc-950 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <Input value={password} />
-            <GeneratorOptions
-              passlength={passlength}
-              setPasslength={setPasslength}
-              minLength={minLength}
-              maxLength={maxLength}
-              handleToggle={handleToggle}
-              lowercase={lowercase}
-              uppercase={uppercase}
-              numbers={numbers}
-              symbols={symbols}
+            <Generator
+              onChange={onChange}
+              onClick={() => setIsGenerate(false)}
             />
           </div>
         </div>

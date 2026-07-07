@@ -91,7 +91,7 @@ const Sidebar = ({
         <hr className="w-full text-zinc-800" />
       </div>
       <div className="flex flex-col gap-[5px]">
-        {defaults.map((button, index) => (
+        {defaults.map((button) => (
           <Button
             key={button.id}
             id={button.id}
@@ -108,7 +108,7 @@ const Sidebar = ({
           <span>FERRAMENTAS</span>
         </div>
         <div className="flex flex-col gap-[5px]">
-          {tools.map((button, index) => (
+          {tools.map((button) => (
             <Button
               key={button.id}
               id={button.id}

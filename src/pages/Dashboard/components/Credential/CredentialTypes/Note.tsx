@@ -3,7 +3,6 @@ import { DirectorySelect } from "./../components/DirectorySelect";
 import { TextArea } from "./../components/TextArea";
 import type {
   Folder as FolderType,
-  LoginCredential,
   Credential,
   NoteCredential,
 } from "@/types/vault";

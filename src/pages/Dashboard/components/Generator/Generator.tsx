@@ -1,11 +1,17 @@
-import { Binary, Check, Copy, RefreshCw } from "lucide-react";
+import { ArrowRight, Binary, Check, Copy, RefreshCw } from "lucide-react";
 import { Input } from "../Credential/components/Input";
 import generator from "generate-password-ts";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { GeneratorOptions } from "./Components/GeneratorOptions";
 
-export const Generator = () => {
+export const Generator = ({
+  onChange,
+  onClick,
+}: {
+  onChange?: (value: string) => void;
+  onClick?: () => void;
+}) => {
   const [passlength, setPasslength] = useState(10);
   const minLength = 4;
   const maxLength = 128;
@@ -64,15 +70,15 @@ export const Generator = () => {
   };
 
   return (
-    <section className="flex justify-center h-screen w-full p-10">
-      <div className="flex items-center flex-col max-w-[700px] w-full">
+    <section className="flex justify-center w-full p-7">
+      <div className="flex items-center flex-col max-w-[700px] w-full gap-10">
         <div className="flex gap-1 items-center justify-center mb-[-20px]">
           <Binary size={32} className="text-brand" />
           <h2 className="text-[24px] text-white font-bold">
             GERADOR DE SENHAS
           </h2>
         </div>
-        <div className="flex flex-col w-full gap-10 p-10">
+        <div className="flex flex-col w-full gap-10">
           <Input value={password} />
           <GeneratorOptions
             passlength={passlength}
@@ -86,17 +92,34 @@ export const Generator = () => {
             symbols={symbols}
           />
           <div className="flex items-center justify-center gap-4">
-            <button
-              className="flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 cursor-pointer"
-              onClick={handleCopy}
-            >
-              {copied ? (
-                <Check className="text-green-500" size={22} strokeWidth={2.5} />
-              ) : (
-                <Copy size={22} strokeWidth={2} />
-              )}
-              <span>COPIAR</span>
-            </button>
+            {onChange ? (
+              <button
+                className="group flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 cursor-pointer"
+                onClick={() => {
+                  onChange(password!);
+                  onClick?.();
+                }}
+              >
+                <span>UTILIZAR SENHA</span>
+                <ArrowRight size={22} strokeWidth={2.5} />
+              </button>
+            ) : (
+              <button
+                className="flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 cursor-pointer"
+                onClick={handleCopy}
+              >
+                {copied ? (
+                  <Check
+                    className="text-green-500"
+                    size={22}
+                    strokeWidth={2.5}
+                  />
+                ) : (
+                  <Copy size={22} strokeWidth={2} />
+                )}
+                <span>COPIAR</span>
+              </button>
+            )}
             <motion.button
               className="group flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 cursor-pointer"
               onClick={() => setSeed((s) => s + 1)}
