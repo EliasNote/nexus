@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.pwnedpasswords.com https://api.github.com; worker-src 'self' blob:; frame-src 'self' https://accounts.google.com; object-src 'none'; base-uri 'none'; form-action 'none'"
     }
   },
   "bundle": {
