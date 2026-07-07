@@ -1,4 +1,13 @@
-import { Copy, User, Eye, Key, Globe, Folder, NotepadText } from "lucide-react";
+import {
+  Copy,
+  User,
+  Eye,
+  Key,
+  Globe,
+  Folder,
+  NotepadText,
+  RotateCcwKey,
+} from "lucide-react";
 import { Input } from "./../components/Input";
 import { DirectorySelect } from "./../components/DirectorySelect";
 import { TextArea } from "./../components/TextArea";
@@ -11,13 +20,17 @@ import type {
 export const Login = ({
   folders,
   isEdit,
+  isCreate,
   credential,
   setCredential,
+  focusPassword,
 }: {
   folders: FolderType[];
   isEdit: boolean;
+  isCreate: Credential["type"] | null;
   credential: LoginCredential;
   setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
+  focusPassword?: boolean;
 }) => {
   const handleChange = (
     field: keyof LoginCredential,
@@ -57,11 +70,18 @@ export const Login = ({
             icon: Eye,
           },
           {
+            id: "generate",
+            icon: RotateCcwKey,
+          },
+          {
             id: "copy",
             icon: Copy,
           },
         ]}
         value={credential.password}
+        autoFocus={focusPassword}
+        isEdit={isEdit}
+        isCreate={Boolean(isCreate)}
         onChange={(val) => handleChange("password", val)}
       />
       <Input
@@ -98,3 +118,4 @@ export const Login = ({
     </section>
   );
 };
+

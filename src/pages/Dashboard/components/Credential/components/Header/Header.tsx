@@ -1,4 +1,8 @@
-import type { Credential, CredentialType } from "@/types/vault";
+import {
+  CREDENTIAL_TYPES_LABELS,
+  type Credential,
+  type CredentialType,
+} from "@/types/vault";
 import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
@@ -75,7 +79,7 @@ export const Header = ({
 
           <div className="flex">
             <span className="flex items-center justify-center px-3 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[14px] font-bold uppercase">
-              {tempVault?.type}
+              {CREDENTIAL_TYPES_LABELS[tempVault?.type ?? ""]}
             </span>
 
             <button

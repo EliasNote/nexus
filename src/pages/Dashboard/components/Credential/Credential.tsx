@@ -17,6 +17,7 @@ export const Credential = ({
   setIsCreate,
   isLoadingCredential,
   handleStartCreate,
+  focusPassword,
 }: {
   credential: CredentialType;
   setSelectedSideCredential: (id: string | null) => void;
@@ -28,6 +29,7 @@ export const Credential = ({
   setIsCreate: (isCreate: CredentialType["type"] | null) => void;
   isLoadingCredential: boolean;
   handleStartCreate: (type: CredentialType["type"]) => void;
+  focusPassword?: boolean;
 }) => {
   const iconsSize = 18;
 
@@ -71,8 +73,10 @@ export const Credential = ({
             key={isCreate ? "new" : tempVault.id}
             folders={folders}
             isEdit={isEditable}
+            isCreate={isCreate}
             credential={tempVault}
             setCredential={setTempVault}
+            focusPassword={focusPassword}
           />
         )}
         {tempVault?.type === "card" && (
@@ -80,6 +84,7 @@ export const Credential = ({
             key={isCreate ? "new" : tempVault.id}
             folders={folders}
             isEdit={isEditable}
+            isCreate={isCreate}
             credential={tempVault}
             setCredential={setTempVault}
           />
@@ -97,6 +102,9 @@ export const Credential = ({
       <Footer
         isCreate={isCreate}
         tempVault={tempVault}
+        summaryVault={
+          summaryVault?.entries.filter((x) => x.id === tempVault.id)[0]
+        }
         handleStartCreate={handleStartCreate}
       />
     </section>

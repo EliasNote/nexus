@@ -1,8 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 import { Check, EyeClosed } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { copyToClipboard } from "../../../../../utils/utils";
 import type { iconsInputProp } from "@/types/types";
+import { GeneratorOptions } from "../../Generator/Components/GeneratorOptions";
 
 export const Input = ({
   iconsInput,
@@ -13,6 +14,9 @@ export const Input = ({
   value,
   isPassword,
   onChange,
+  autoFocus,
+  isEdit,
+  isCreate,
 }: {
   iconsInput?: iconsInputProp[];
   iconTop?: LucideIcon;
@@ -22,12 +26,40 @@ export const Input = ({
   value?: string;
   isPassword?: boolean;
   onChange?: (val: string) => void;
+  autoFocus?: boolean;
+  isEdit?: boolean;
+  isCreate?: boolean;
 }) => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [passlength, setPasslength] = useState(10);
+  const minLength = 4;
+  const maxLength = 128;
+
+  const [password, setPassword] = useState("");
+  const [lowercase, setLowercase] = useState(true);
+  const [uppercase, setUppercase] = useState(true);
+  const [numbers, setNumbers] = useState(true);
+  const [symbols, setSymbols] = useState(true);
+
   const [copied, setCopied] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const [isGenerate, setIsGenerate] = useState(false);
+
+  const values: Record<string, [boolean, (checked: boolean) => void]> = {
+    lowercase: [lowercase, setLowercase],
+    uppercase: [uppercase, setUppercase],
+    numbers: [numbers, setNumbers],
+    symbols: [symbols, setSymbols],
+  };
+
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus, disabled]);
 
   const handleCopy = (value: string) => {
     copyToClipboard(value);
@@ -35,6 +67,19 @@ export const Input = ({
     setTimeout(() => {
       setCopied(false);
     }, 1000);
+  };
+
+  const handleToggle = (value: string) => {
+    const selected = values[value];
+    const othersSelected: boolean[] = [];
+
+    for (const v of Object.values(values)) {
+      if (v[0]) othersSelected.push(v[0]);
+    }
+
+    if (othersSelected.length === 1 && selected[0]) return;
+
+    selected[1](!selected[0]);
   };
 
   return (
@@ -46,6 +91,7 @@ export const Input = ({
         </div>
         <div className="group flex items-center focus-within:border-zinc-600 bg-zinc-900 border border-zinc-800 h-[45px]">
           <input
+            ref={inputRef}
             disabled={disabled}
             className="flex-1 bg-transparent px-3 text-[14px] text-white outline-none placeholder:text-zinc-500"
             type={isPassword ? (showPassword ? "text" : "password") : "text"}
@@ -53,35 +99,68 @@ export const Input = ({
             value={value}
             onChange={(e) => onChange?.(e.target.value)}
           />
-          {iconsInput?.map((icon, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                if (icon.id === "eye") togglePasswordVisibility();
-                if (icon.id === "copy") handleCopy(value!);
-              }}
-              className="flex items-center justify-center border-l border-zinc-800 group-focus-within:border-zinc-600 h-full w-12 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand"
-            >
-              {icon.id === "eye" &&
-                (showPassword ? (
-                  <EyeClosed size={20} strokeWidth={2} />
-                ) : (
+          {iconsInput?.map((icon, index) => {
+            if (icon.id === "generate" && !isEdit && !isCreate) return null;
+
+            return (
+              <button
+                type="button"
+                key={index}
+                onClick={() => {
+                  if (icon.id === "eye") togglePasswordVisibility();
+                  if (icon.id === "generate") setIsGenerate(!isGenerate);
+                  if (icon.id === "copy") handleCopy(value ?? "");
+                }}
+                className="flex items-center justify-center border-l border-zinc-800 group-focus-within:border-zinc-600 h-full w-12 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand"
+              >
+                {icon.id === "eye" &&
+                  (showPassword ? (
+                    <EyeClosed size={20} strokeWidth={2} />
+                  ) : (
+                    <icon.icon size={20} strokeWidth={2} />
+                  ))}
+                {icon.id === "generate" && (
                   <icon.icon size={20} strokeWidth={2} />
-                ))}
-              {icon.id === "copy" &&
-                (copied ? (
-                  <Check
-                    className="text-green-500"
-                    size={20}
-                    strokeWidth={2.5}
-                  />
-                ) : (
-                  <icon.icon size={20} strokeWidth={2} />
-                ))}
-            </button>
-          ))}
+                )}
+                {icon.id === "copy" &&
+                  (copied ? (
+                    <Check
+                      className="text-green-500"
+                      size={20}
+                      strokeWidth={2.5}
+                    />
+                  ) : (
+                    <icon.icon size={20} strokeWidth={2} />
+                  ))}
+              </button>
+            );
+          })}
         </div>
       </div>
+      {isGenerate && (
+        <div
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-md"
+          onClick={() => setIsGenerate(false)}
+        >
+          <div
+            className="w-full max-w-[700px] border border-zinc-800 bg-zinc-950 p-8 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Input value={password} />
+            <GeneratorOptions
+              passlength={passlength}
+              setPasslength={setPasslength}
+              minLength={minLength}
+              maxLength={maxLength}
+              handleToggle={handleToggle}
+              lowercase={lowercase}
+              uppercase={uppercase}
+              numbers={numbers}
+              symbols={symbols}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

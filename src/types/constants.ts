@@ -1,5 +1,4 @@
-import { Clock, Database, Lock, Server, TriangleAlert } from "lucide-react";
-import type { AuditType } from "./types";
+import { Server } from "lucide-react";
 
 export const MONTH_OPTIONS = [
   "01 - Janeiro",
@@ -29,4 +28,25 @@ export const CLOUD_OPTIONS = [
     subtitle: "Usar cofre do Google Drive",
     icon: Server,
   },
+];
+
+export const REUSED_GROUP_COLORS = [
+  "border-cyan-400/20 bg-cyan-900/10 text-cyan-200",
+  "border-emerald-400/20 bg-emerald-900/10 text-emerald-200",
+  "border-violet-400/20 bg-violet-900/10 text-violet-200",
+  "border-rose-400/20 bg-rose-900/10 text-rose-200",
+  "border-amber-400/20 bg-amber-900/10 text-amber-200",
+  "border-sky-400/20 bg-sky-900/10 text-sky-200",
+  "border-lime-400/20 bg-lime-900/10 text-lime-200",
+  "border-teal-400/20 bg-teal-900/10 text-teal-200",
+  "border-blue-400/20 bg-blue-900/10 text-blue-200",
+  "border-indigo-400/20 bg-indigo-900/10 text-indigo-200",
+  "border-fuchsia-400/20 bg-fuchsia-900/10 text-fuchsia-200",
+  "border-pink-400/20 bg-pink-900/10 text-pink-200",
+  "border-red-400/20 bg-red-900/10 text-red-200",
+  "border-orange-400/20 bg-orange-900/10 text-orange-200",
+  "border-yellow-400/20 bg-yellow-900/10 text-yellow-200",
+  "border-green-400/20 bg-green-900/10 text-green-200",
+  "border-purple-400/20 bg-purple-900/10 text-purple-200",
+  "border-slate-400/20 bg-slate-900/10 text-slate-200",
 ];

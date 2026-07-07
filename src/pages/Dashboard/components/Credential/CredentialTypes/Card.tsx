@@ -7,6 +7,7 @@ import {
   Calendar,
   Folder,
   NotepadText,
+  RotateCcwKey,
 } from "lucide-react";
 import { Input } from "../components/Input";
 import { DirectorySelect } from "../components/DirectorySelect";
@@ -21,11 +22,13 @@ import { Date } from "../components/Date";
 export const Card = ({
   folders,
   isEdit,
+  isCreate,
   credential,
   setCredential,
 }: {
   folders: FolderType[];
   isEdit: boolean;
+  isCreate: Credential["type"] | null;
   credential: CreditCardCredential;
   setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
 }) => {
@@ -100,6 +103,31 @@ export const Card = ({
         value={credential.cvv}
         onChange={(val) => handleChange("cvv", val)}
       />
+      <Input
+        disabled={!isEdit}
+        placeholder="Senha"
+        isPassword={true}
+        iconTop={Key}
+        topName="SENHA"
+        iconsInput={[
+          {
+            id: "eye",
+            icon: Eye,
+          },
+          {
+            id: "generate",
+            icon: RotateCcwKey,
+          },
+          {
+            id: "copy",
+            icon: Copy,
+          },
+        ]}
+        value={credential.password}
+        isEdit={isEdit}
+        isCreate={Boolean(isCreate)}
+        onChange={(val) => handleChange("password", val)}
+      />
       <DirectorySelect
         disabled={!isEdit}
         isEdit={isEdit}
@@ -120,3 +148,4 @@ export const Card = ({
     </section>
   );
 };
+

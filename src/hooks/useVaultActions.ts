@@ -34,22 +34,22 @@ export const useVaultActions = () => {
 
     try {
       setIsLoading?.(true);
-      const finalData: Credential = {
+      const credentialToSave: Credential = {
         ...credentialData,
         isDeleted: isTrashed ?? isRestore ?? false,
-        updatedAt: new Date().toISOString(),
       };
 
-      const newVault = await cryptoService.updateVaultFromCredential(
-        vault,
-        finalData,
-      );
+      const newVault =
+        await cryptoService.updateVaultFromCredentialAndTrackPasswordChange(
+          vault,
+          credentialToSave,
+        );
 
       setIsPendingSync(true);
 
       const updatedSummary = updateSummaryVaultCredential(
         summaryVault,
-        finalData,
+        credentialToSave,
       );
 
       setVault(newVault);
@@ -107,3 +107,4 @@ export const useVaultActions = () => {
 
   return { saveCredential, createFolder, deleteCredential, saveVault };
 };
+

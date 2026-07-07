@@ -16,6 +16,7 @@ const Dashboard = () => {
   useAutoSave();
 
   const [selected, setSelected] = useState<number | string>(0);
+  const [focusPassword, setFocusPassword] = useState(false);
 
   const vault = useCloudStore((state) => state.vault);
   const summaryVault = useCloudStore((state) => state.summaryVault);
@@ -24,6 +25,7 @@ const Dashboard = () => {
   >(null);
   const [credential, setCredential] = useState<CredentialType | null>(null);
   const [isEdit, setIsEdit] = useState(false);
+  const [isEditFromAudit, setIsEditFromAudit] = useState(false);
   const [isCreate, setIsCreate] = useState<CredentialType["type"] | null>(null);
   const [tempVault, setTempVault] = useState<CredentialType | null>(credential);
   const [isLoadingCredential] = useState(false);
@@ -68,8 +70,10 @@ const Dashboard = () => {
         .then((data) => {
           setCredential(data);
           setTempVault(data);
-          setIsEdit(false);
+          setIsEdit(!isEditFromAudit ? false : true);
+          setFocusPassword(isEditFromAudit);
           setIsCreate(null);
+          setIsEditFromAudit(false);
         });
     }
   }, [selectedSideCredential, vault, cryptoService]);
@@ -91,6 +95,7 @@ const Dashboard = () => {
         cardNumber: "",
         expirationDate: "",
         cvv: "",
+        password: "",
       }),
       ...(type === "note" && { name: "", content: "" }),
     }) as CredentialType;
@@ -102,6 +107,13 @@ const Dashboard = () => {
     setIsEdit(false);
   };
 
+  const handleChangeCredentialFromAudit = (credentialId: string) => {
+    setIsEditFromAudit(true);
+    setSelected(SIDEBAR_BUTTONS_IDS.all);
+    setSelectedSideCredential(credentialId);
+    setIsEdit(true);
+  };
+
   return (
     <main className="flex bg-[#0A0A0A] max-h-screen w-screen">
       <Sidebar
@@ -111,7 +123,9 @@ const Dashboard = () => {
       />
       {{
         [SIDEBAR_BUTTONS_IDS.generator]: <Generator />,
-        [SIDEBAR_BUTTONS_IDS.audit]: <Audit />,
+        [SIDEBAR_BUTTONS_IDS.audit]: (
+          <Audit onChangeCredential={handleChangeCredentialFromAudit} />
+        ),
       }[selected] || (
         <>
           <SidebarCredentials
@@ -129,6 +143,7 @@ const Dashboard = () => {
               setIsCreate={setIsCreate}
               setSelectedSideCredential={setSelectedSideCredential}
               credential={credential!}
+              focusPassword={focusPassword}
               isLoadingCredential={isLoadingCredential}
               handleStartCreate={handleStartCreate}
             />
@@ -144,3 +159,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

@@ -1,5 +1,5 @@
 import { useCloudStore } from "@/hooks/useCloudStore";
-import type { EntrySummary, VaultSummarizedData } from "@/types/vault";
+import type { Credential, EntrySummary, VaultSummarizedData } from "@/types/vault";
 
 export const getGithubUserData = async (token: string) => {
   const userRes = await fetch("https://api.github.com/user", {
@@ -22,30 +22,41 @@ export const copyToClipboard = (text: string) => {
   try {
     navigator.clipboard.writeText(text);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
 
 export const updateSummaryVaultCredential = (
   vault: VaultSummarizedData,
-  updatedCredential: EntrySummary,
+  updatedCredential: Credential,
 ): VaultSummarizedData => {
   const setSummaryVault = useCloudStore.getState().setSummaryVault;
 
-  const exists = vault.entries.some(
+  const currentEntry = vault.entries.find(
     (entry) => entry.id === updatedCredential.id,
   );
+  const summaryEntry: EntrySummary = {
+    id: updatedCredential.id,
+    type: updatedCredential.type,
+    title: updatedCredential.title,
+    username:
+      updatedCredential.type === "login" ? updatedCredential.username : null,
+    holderName:
+      updatedCredential.type === "card" ? updatedCredential.holderName : null,
+    name: updatedCredential.type === "note" ? updatedCredential.name : null,
+    auditData: currentEntry?.auditData,
+    reusedIds: currentEntry?.reusedIds,
+    foldersIds: updatedCredential.foldersIds,
+    isFavorite: updatedCredential.isFavorite,
+    isDeleted: updatedCredential.isDeleted,
+  };
 
-  let newEntries;
-
-  if (exists) {
-    newEntries = vault.entries.map((entry) =>
-      entry.id === updatedCredential.id ? { ...updatedCredential } : entry,
-    );
-  } else {
-    newEntries = [updatedCredential, ...vault.entries];
-  }
+  const newEntries = currentEntry
+    ? vault.entries.map((entry) =>
+        entry.id === updatedCredential.id ? summaryEntry : entry,
+      )
+    : [summaryEntry, ...vault.entries];
 
   const result = {
     ...vault,
@@ -55,3 +66,4 @@ export const updateSummaryVaultCredential = (
   setSummaryVault(result);
   return result;
 };
+

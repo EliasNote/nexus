@@ -4,6 +4,12 @@ export const CREDENTIAL_TYPES = {
   NOTE: "note",
 } as const;
 
+export const CREDENTIAL_TYPES_LABELS = {
+  [CREDENTIAL_TYPES.LOGIN]: "LOGIN",
+  [CREDENTIAL_TYPES.CARD]: "CARTÃO",
+  [CREDENTIAL_TYPES.NOTE]: "NOTA",
+};
+
 export type CredentialType =
   (typeof CREDENTIAL_TYPES)[keyof typeof CREDENTIAL_TYPES];
 
@@ -23,12 +29,13 @@ export type AuditData = {
 
 export interface EntrySummary {
   id: string;
-  type: "login" | "card" | "note";
+  type: CredentialType;
   title: string;
   username?: string | null | undefined;
   holderName?: string | null | undefined;
   name?: string | null | undefined;
   auditData?: AuditData;
+  reusedIds?: string[];
   foldersIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;
@@ -75,9 +82,7 @@ export type NoteCredential = CommonMetadata & {
 };
 
 export type Credential =
-  | LoginCredential
-  | CreditCardCredential
-  | NoteCredential;
+  LoginCredential | CreditCardCredential | NoteCredential;
 
 export type DecryptedVault = {
   version: string;

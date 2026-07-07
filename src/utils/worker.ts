@@ -87,7 +87,7 @@ const cryptoService = {
   async verifyUnlockVaultKeys(
     password: string,
     saltBase64: string,
-    encryptedDek: any,
+    encryptedDek: EncryptedData,
   ): Promise<boolean> {
     const saltBytes = base64ToUint8Array(saltBase64);
 
@@ -202,18 +202,31 @@ const cryptoService = {
     return result.score < 3;
   },
 
-  verifyReused(password: string, decryptedVault: DecryptedVault): boolean {
-    const reused = Object.values(decryptedVault.entries).some(
-      (entry) => (entry as LoginCredential).password === password,
-    );
-    return reused;
+  verifyReused(
+    id: string,
+    password: string,
+    decryptedVault: DecryptedVault,
+  ): { isTrue: boolean; reusedIds: string[] } {
+    const reusedIds = Object.values(decryptedVault.entries)
+      .filter(
+        (entry) =>
+          (entry as LoginCredential).password === password && entry.id !== id,
+      )
+      .map((entry) => entry.id);
+
+    const isTrue = reusedIds.length > 0;
+    const groupIds = isTrue
+      ? Array.from(new Set([id, ...reusedIds])).sort()
+      : [];
+
+    return { isTrue, reusedIds: groupIds };
   },
 
   verifyReneval(lastPasswordChange: Date): boolean {
     const days = 90;
     const timeSinceLastChange =
       new Date().getTime() - lastPasswordChange.getTime();
-    return timeSinceLastChange < days * 24 * 60 * 60 * 1000;
+    return timeSinceLastChange > days * 24 * 60 * 60 * 1000;
   },
 
   async getFolderAndEntryData(
@@ -232,13 +245,16 @@ const cryptoService = {
         let isWeak = false;
         let isReused = false;
         let isRenewal = false;
+        let reusedIds: string[] = [];
 
         const password = v.password;
 
         if (password) {
           isCompromised = await this.verifyCompromised(password);
           isWeak = this.verifyWeak(password);
-          isReused = this.verifyReused(password, vault);
+          const result = this.verifyReused(v.id, password, vault);
+          isReused = result.isTrue;
+          reusedIds = result.reusedIds;
           isRenewal = this.verifyReneval(new Date(v.lastPasswordChange!));
         }
 
@@ -255,6 +271,7 @@ const cryptoService = {
             isReused: isReused,
             isRenewal: isRenewal,
           },
+          reusedIds: reusedIds,
           foldersIds: v.foldersIds,
           isFavorite: v.isFavorite,
           isDeleted: v.isDeleted,
@@ -383,6 +400,31 @@ const cryptoService = {
       ...encryptedVault,
       entries: updatedEntries,
     };
+  },
+
+  async updateVaultFromCredentialAndTrackPasswordChange(
+    encryptedVault: EncryptedVault,
+    credential: Credential,
+  ): Promise<EncryptedVault> {
+    const previousCredential = await this.getCredential(
+      credential.id,
+      encryptedVault,
+    );
+    const now = new Date().toISOString();
+    const currentPassword = credential.password ?? "";
+    const previousPassword = previousCredential?.password ?? "";
+    const shouldTrackPasswordChange =
+      currentPassword.length > 0 || previousPassword.length > 0;
+    const passwordChanged =
+      shouldTrackPasswordChange && currentPassword !== previousPassword;
+
+    const updatedCredential: Credential = {
+      ...credential,
+      updatedAt: now,
+      lastPasswordChange: passwordChanged ? now : credential.lastPasswordChange,
+    };
+
+    return this.updateVaultFromCredential(encryptedVault, updatedCredential);
   },
 
   async updateEntries(

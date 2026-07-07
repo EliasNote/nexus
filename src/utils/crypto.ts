@@ -178,6 +178,9 @@ export const decryptVault = async (vault: any): Promise<any> => {
 
 export const createInitialVault = async (): Promise<DecryptedVault> => {
   const now = () => new Date().toISOString();
+  const passwordLastChangedAt = new Date(
+    Date.now() - 120 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   return {
     version: "1.0",
@@ -229,6 +232,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "dev.master@empresa.com",
         password: "gHp_vX982jK1lsK73mNqPzW41A0xLq4bZ",
         url: "https://github.com",
@@ -257,6 +261,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "colaborador.silva",
         password: "SenhaFraca123!",
         url: "https://atlassian.net",
@@ -313,6 +318,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "silva_legacy",
         password: "mypassword123",
         url: "https://bitbucket.org",
@@ -455,6 +461,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "gatinho_loko2010@hotmail.com",
         password: "senhafofinha123",
         url: "https://outlook.live.com",
@@ -511,6 +518,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "12345678909",
         password: "GovBr#S3nha#F0rt3!",
         url: "https://sso.acesso.gov.br",
@@ -779,6 +787,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "johndoe@mastodon.social",
         password: "mastodon_password_9",
         url: "https://mastodon.social",
@@ -963,6 +972,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "meu.email.pessoal@gmail.com",
         password: "W1s3_Tr4v3l_M0n3y",
         url: "https://wise.com",
@@ -1275,6 +1285,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         username: "john_polyglot",
         password: "duolingopassword",
         url: "https://duolingo.com",
@@ -1293,6 +1304,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         holderName: "JOHN DOE",
         cardNumber: "4532  1122  3344  5566",
         password: "9981",
@@ -1357,6 +1369,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         holderName: "JOHN DOE",
         cardNumber: "4211  5566  7788  9900",
         password: "1102",
@@ -1453,6 +1466,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
         isDeleted: false,
         createdAt: now(),
         updatedAt: now(),
+        lastPasswordChange: passwordLastChangedAt,
         holderName: "JOHN DOE",
         cardNumber: "4003  2233  4455  6677",
         password: "8821",
@@ -1668,4 +1682,5 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
       },
     ],
   };
+
 };

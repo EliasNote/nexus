@@ -1,17 +1,19 @@
-import type { Credential, CredentialType } from "@/types/vault";
+import type { Credential, CredentialType, EntrySummary } from "@/types/vault";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
 import { AddButton } from "../AddButton";
 
 export const Footer = ({
   isCreate,
   tempVault,
+  summaryVault,
   handleStartCreate,
 }: {
   isCreate: CredentialType | null;
   tempVault: Credential;
+  summaryVault: EntrySummary | undefined;
   handleStartCreate: (type: CredentialType) => void;
 }) => {
-  const isWeak = tempVault?.audit?.weak;
+  const isCompromised = summaryVault?.auditData?.isCompromised;
 
   return (
     <div
@@ -30,7 +32,7 @@ export const Footer = ({
             </span>
           </div>
           <div className="flex flex-col items-center justify-center gap-1 font-medium  min-w-[180px]">
-            {isWeak ? (
+            {isCompromised ? (
               <ShieldAlert className="text-red-600" strokeWidth={1} size={50} />
             ) : (
               <ShieldCheck
@@ -40,8 +42,8 @@ export const Footer = ({
               />
             )}
 
-            <span className={`text-${isWeak ? "red-600" : "green-500"}`}>
-              Senha {isWeak ? "Insegura" : "Segura"}
+            <span className={`text-${isCompromised ? "red-600" : "green-500"}`}>
+              Senha {isCompromised ? "Comprometida" : "Segura"}
             </span>
           </div>
         </>

@@ -1,20 +1,41 @@
-import { useCloudStore } from "@/hooks/useCloudStore";
+import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import {
   AlertCircle,
   Clock,
   Database,
   Files,
   Shield,
+  ShieldQuestionMark,
   TriangleAlert,
 } from "lucide-react";
 import { AuditTypeCard } from "./components/AuditTypeCard";
 import type { AuditType } from "@/types/types";
 import { useState } from "react";
 import { AuditCredential } from "./components/AuditCredential";
+import { REUSED_GROUP_COLORS } from "@/types/constants";
 
-export const Audit = () => {
+const getReusedColorClass = (ids?: string[]) => {
+  if (!ids?.length) return undefined;
+
+  const groupKey = [...ids].sort().join(":");
+  const colorIndex = [...groupKey].reduce(
+    (acc, char) => acc + char.charCodeAt(0),
+    0,
+  );
+
+  return REUSED_GROUP_COLORS[colorIndex % REUSED_GROUP_COLORS.length];
+};
+export const Audit = ({
+  onChangeCredential,
+}: {
+  onChangeCredential: (credentialId: string) => void;
+}) => {
+  const vault = useCloudStore((state) => state.vault);
   const summaryEntries = useCloudStore((state) => state.summaryVault?.entries);
+  const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
   const [selectedOptionId, setSelectedOptionId] = useState("compromised");
+  const [isChecking, setIsChecking] = useState(false);
+  const [checkError, setCheckError] = useState<string | null>(null);
   const auditTypesData: AuditType[] = [
     {
       id: "compromised",
@@ -90,15 +111,41 @@ export const Audit = () => {
     setSelectedOptionId(id);
   };
 
+  const handleCheckPasswords = async () => {
+    if (!vault || isChecking) return;
+
+    try {
+      setIsChecking(true);
+      setCheckError(null);
+      const updatedSummary = await cryptoService.getInitialData(vault);
+      setSummaryVault(updatedSummary);
+    } catch (error) {
+      console.error(error);
+      setCheckError("Não foi possível verificar as senhas agora.");
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
   return (
     <section className="flex flex-col items-center h-screen w-full p-10">
       <div className="max-w-[700px] w-full h-full flex flex-col gap-5">
         <div className="flex items-center flex-col w-full">
-          <div className="flex gap-1 items-center justify-center mb-8">
-            <Shield size={32} className="text-brand" />
-            <h2 className="text-[24px] text-white font-bold">
-              AUDITORIA DE SEGURANÇA
-            </h2>
+          <div className="flex items-center justify-between mb-8 w-full">
+            <div className="flex gap-1 items-center justify-center">
+              <Shield size={32} className="text-brand" />
+              <h2 className="text-[24px] text-white font-bold">
+                AUDITORIA DE SEGURANÇA
+              </h2>
+            </div>
+            <button
+              disabled={!vault || isChecking}
+              onClick={handleCheckPasswords}
+              className="flex items-center border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50 text-white h-fit gap-2 px-4 py-3 cursor-pointer"
+            >
+              {isChecking ? "VERIFICANDO..." : "VERIFICAR SENHAS"}
+              <ShieldQuestionMark className="ml-2" strokeWidth={2} size={22} />
+            </button>
           </div>
           <div className="flex flex-row w-full border border-zinc-800">
             {auditTypesData.map((data, index) => (
@@ -120,13 +167,15 @@ export const Audit = () => {
             className={`flex flex-row items-center p-2 gap-2 border text-[12px] ${colorClasses[selectedOptionId].border20} ${colorClasses[selectedOptionId].bg05} ${colorClasses[selectedOptionId].text}`}
           >
             <AlertCircle />
-            {auditTypesData
-              .filter((x) => x.id === selectedOptionId)
-              .map((data) => data.phrase)}
+            {checkError ||
+              auditTypesData
+                .filter((x) => x.id === selectedOptionId)
+                .map((data) => data.phrase)}
           </div>
         </div>
         <div className="flex flex-col gap-1 max-h-full overflow-y-auto">
           {summaryEntries
+            ?.filter((x) => !x.isDeleted)
             ?.filter((entry) => {
               if (selectedOptionId === auditTypesData[0].id)
                 return entry.auditData?.isCompromised;
@@ -141,9 +190,13 @@ export const Audit = () => {
             .map((entry) => (
               <AuditCredential
                 key={entry.id}
-                selectedId={entry.id}
                 entrySummary={entry}
-                onClick={() => {}}
+                onChangeCredential={onChangeCredential}
+                reusedColorClass={
+                  selectedOptionId === "reused"
+                    ? getReusedColorClass(entry.reusedIds)
+                    : undefined
+                }
               />
             ))}
         </div>
@@ -151,3 +204,4 @@ export const Audit = () => {
     </section>
   );
 };
+
