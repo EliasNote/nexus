@@ -143,6 +143,7 @@ const Dashboard = () => {
               setIsCreate={setIsCreate}
               setSelectedSideCredential={setSelectedSideCredential}
               credential={credential!}
+              setCredential={setCredential}
               focusPassword={focusPassword}
               isLoadingCredential={isLoadingCredential}
               handleStartCreate={handleStartCreate}
@@ -159,4 +160,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

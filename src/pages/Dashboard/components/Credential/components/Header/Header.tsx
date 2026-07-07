@@ -15,6 +15,7 @@ export const Header = ({
   setTempVault,
   iconsSize,
   isLoadingCredential,
+  handleRemoveCredential,
   isEdit,
   setIsEdit,
   isCreate,
@@ -32,11 +33,17 @@ export const Header = ({
   setIsCreate: (isCreate: CredentialType | null) => void;
   handleEditClick: () => void;
   handleCancel: () => void;
+  handleRemoveCredential: () => void;
 }) => {
   const isWriting = isEdit || isCreate;
   const { saveCredential, deleteCredential } = useVaultActions();
   const onSave = async (isTrashed: boolean, isRestore: boolean) => {
     await saveCredential(tempVault, isTrashed, isRestore);
+
+    if (isTrashed) {
+      handleRemoveCredential();
+      return;
+    }
 
     setIsEdit(false);
     setIsCreate(null);
@@ -44,6 +51,8 @@ export const Header = ({
 
   const onDelete = async () => {
     await deleteCredential(tempVault?.id);
+
+    handleRemoveCredential();
     setIsEdit(false);
     setIsCreate(null);
   };
@@ -184,3 +193,4 @@ export const Header = ({
     </div>
   );
 };
+

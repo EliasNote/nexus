@@ -8,6 +8,7 @@ import { Note } from "./CredentialTypes/Note";
 
 export const Credential = ({
   credential,
+  setCredential,
   setSelectedSideCredential,
   tempVault,
   setTempVault,
@@ -20,6 +21,7 @@ export const Credential = ({
   focusPassword,
 }: {
   credential: CredentialType;
+  setCredential: (credential: CredentialType | null) => void;
   setSelectedSideCredential: (id: string | null) => void;
   tempVault: CredentialType;
   setTempVault: React.Dispatch<React.SetStateAction<CredentialType | null>>;
@@ -53,6 +55,12 @@ export const Credential = ({
     }
   };
 
+  const handleRemoveCredential = async () => {
+    setTempVault(null);
+    setCredential(null);
+    setSelectedSideCredential(null);
+  };
+
   return (
     <section className="flex flex-col h-screen w-full">
       <Header
@@ -60,6 +68,7 @@ export const Credential = ({
         setTempVault={setTempVault}
         iconsSize={iconsSize}
         isLoadingCredential={isLoadingCredential}
+        handleRemoveCredential={handleRemoveCredential}
         isEdit={isEdit}
         setIsEdit={setIsEdit}
         isCreate={isCreate}
