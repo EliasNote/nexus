@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useState } from "react";
 import { useCloudStore } from "@/hooks/useCloudStore";
-import { getAllButtons } from "./Buttons";
+import { getAllButtons, SIDEBAR_BUTTONS_IDS } from "./Buttons";
 import type { Folder } from "@/types/vault";
 import { useVaultActions } from "@/hooks/useVaultActions";
 import { useSaveNow } from "@/hooks/useSave";
@@ -44,11 +44,22 @@ const Sidebar = ({
     isSaving,
   );
 
-  const { createFolder } = useVaultActions();
+  const { createFolder, renameFolder, deleteFolder } = useVaultActions();
 
   const onSave = async () => {
     await createFolder(newFolder);
+    setNewFolder("");
     setIsAddFolder(false);
+  };
+
+  const handleDeleteFolder = async (folder: Folder) => {
+    const shouldDelete = window.confirm(
+      `Excluir o diretorio "${folder.name}"? As credenciais nao serao apagadas.`,
+    );
+    if (!shouldDelete) return;
+
+    await deleteFolder(folder.id);
+    if (selected === folder.id) setSelected(SIDEBAR_BUTTONS_IDS.all);
   };
 
   const verifyLogout = () => {
@@ -161,14 +172,17 @@ const Sidebar = ({
               </button>
             </div>
           )}
-          {folders.map((f, index) => (
+          {folders.map((f) => (
             <Button
-              key={index}
+              key={f.id}
               id={f.id}
               selectedId={selected}
-              title={`/${f.name}`}
+              title={f.name}
               setSelected={setSelected}
               icon={<FolderIcon size={20} />}
+              isFolder={true}
+              onRenameFolder={(name) => renameFolder(f.id, name)}
+              onDeleteFolder={() => handleDeleteFolder(f)}
             />
           ))}
         </div>

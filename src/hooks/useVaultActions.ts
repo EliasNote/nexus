@@ -83,9 +83,12 @@ export const useVaultActions = () => {
   const createFolder = async (folderName: string) => {
     if (!vault || !summaryVault) return;
 
+    const trimmedName = folderName.trim();
+    if (!trimmedName) return;
+
     const newFolder: Folder = {
       id: crypto.randomUUID(),
-      name: folderName.trim(),
+      name: trimmedName,
     };
 
     const updatedSummaryVault: VaultSummarizedData = {
@@ -105,6 +108,59 @@ export const useVaultActions = () => {
     return newFolder;
   };
 
-  return { saveCredential, createFolder, deleteCredential, saveVault };
+  const renameFolder = async (folderId: string, folderName: string) => {
+    if (!vault || !summaryVault) return;
+
+    const trimmedName = folderName.trim();
+    if (!trimmedName) return;
+
+    const updatedSummaryVault: VaultSummarizedData = {
+      ...summaryVault,
+      folders: summaryVault.folders.map((folder) =>
+        folder.id === folderId ? { ...folder, name: trimmedName } : folder,
+      ),
+    };
+
+    const newVault = await cryptoService.updateVaultFromSummary(
+      vault,
+      updatedSummaryVault,
+    );
+
+    setIsPendingSync(true);
+    setVault(newVault);
+    setSummaryVault(updatedSummaryVault);
+  };
+
+  const deleteFolder = async (folderId: string) => {
+    if (!vault || !summaryVault) return;
+
+    const updatedSummaryVault: VaultSummarizedData = {
+      ...summaryVault,
+      folders: summaryVault.folders.filter((folder) => folder.id !== folderId),
+      entries: summaryVault.entries.map((entry) => ({
+        ...entry,
+        foldersIds: entry.foldersIds?.filter((id) => id !== folderId),
+      })),
+    };
+
+    const newVault = await cryptoService.updateVaultFromSummary(
+      vault,
+      updatedSummaryVault,
+    );
+
+    setIsPendingSync(true);
+    setVault(newVault);
+    setSummaryVault(updatedSummaryVault);
+  };
+
+  return {
+    saveCredential,
+    createFolder,
+    renameFolder,
+    deleteFolder,
+    deleteCredential,
+    saveVault,
+  };
 };
+
 
