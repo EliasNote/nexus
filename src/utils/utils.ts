@@ -1,5 +1,7 @@
 import { useCloudStore } from "@/hooks/useCloudStore";
 import type { Credential, EntrySummary, VaultSummarizedData } from "@/types/vault";
+import { isTauri } from "@tauri-apps/api/core";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
 export const getGithubUserData = async (token: string) => {
   const userRes = await fetch("https://api.github.com/user", {
@@ -18,14 +20,14 @@ export const getGithubUserRepo = async (token: string, user: string) => {
   return repoRes;
 };
 
-export const copyToClipboard = (text: string) => {
-  try {
-    navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
+export async function copyToClipboard(text: string): Promise<void> {
+    if (isTauri()) {
+      await writeText(text);
+      return;
+    }
+
+    await navigator.clipboard.writeText(text);
   }
-};
 
 export const updateSummaryVaultCredential = (
   vault: VaultSummarizedData,
@@ -66,4 +68,3 @@ export const updateSummaryVaultCredential = (
   setSummaryVault(result);
   return result;
 };
-

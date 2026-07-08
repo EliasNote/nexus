@@ -4,6 +4,7 @@ import generator from "generate-password-ts";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { GeneratorOptions } from "./Components/GeneratorOptions";
+import { copyToClipboard } from "@/utils/utils";
 
 export const Generator = ({
   onChange,
@@ -61,9 +62,9 @@ export const Generator = ({
     }
   }, [passlength, numbers, symbols, uppercase, lowercase, seed]);
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     setCopied(true);
-    navigator.clipboard.writeText(password!);
+    await copyToClipboard(password!);
     setTimeout(() => {
       setCopied(false);
     }, 1000);

@@ -44,8 +44,8 @@ export const Input = ({
     }
   }, [autoFocus, disabled]);
 
-  const handleCopy = (value: string) => {
-    copyToClipboard(value);
+  const handleCopy = async (value: string) => {
+    await copyToClipboard(value);
     setCopied(true);
     setTimeout(() => {
       setCopied(false);

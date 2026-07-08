@@ -29,13 +29,13 @@ const Credential = ({
     }
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     switch (credential.type) {
       case "login":
         cryptoService
           .getPassword(vault!, credential.id)
-          .then((password) => {
-            copyToClipboard(password || "");
+          .then(async (password) => {
+            await copyToClipboard(password || "");
           })
           .finally(() => {
             setCopied(true);

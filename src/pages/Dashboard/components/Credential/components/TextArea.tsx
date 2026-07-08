@@ -19,8 +19,8 @@ export const TextArea = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = (value: string) => {
-    copyToClipboard(value);
+  const handleCopy = async (value: string) => {
+    await copyToClipboard(value);
     setCopied(true);
     setTimeout(() => {
       setCopied(false);
