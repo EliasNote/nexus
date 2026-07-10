@@ -1,19 +1,19 @@
-import { useCallback } from "react";
-import { useCloudStore } from "./useCloudStore";
-import { useGoogle } from "./useGoogle";
+﻿import { useCallback } from "react";
+import { useCloudStore } from "@/hooks/useCloudStore";
 import type { EncryptedVault } from "@/types/vault";
+import { useGoogleStorage } from "./providers/google/useGoogleStorage";
+import { useLocalStorageProvider } from "./providers/local/useLocalStorageProvider";
 
-export const useCloudSync = () => {
+export const useStorageSync = () => {
   const activeProvider = useCloudStore((state) => state.activeProvider);
   const setActiveProvider = useCloudStore((state) => state.setActiveProvider);
-  const token = useCloudStore((state) => state.accessToken);
 
-  const googleService = useGoogle();
-  // const githubService = useGitHub();
+  const googleService = useGoogleStorage();
+  const localService = useLocalStorageProvider();
 
   const services = {
     google: googleService,
-    // github: githubService,
+    local: localService,
   };
 
   const getActiveService = () => {
@@ -31,13 +31,13 @@ export const useCloudSync = () => {
 
   const download = useCallback(async () => {
     return getActiveService()?.download() ?? null;
-  }, [activeProvider, token]);
+  }, [activeProvider]);
 
   const uploadVault = useCallback(
     async (content: EncryptedVault) => {
       return getActiveService()?.uploadVault(content) ?? null;
     },
-    [activeProvider, token],
+    [activeProvider],
   );
 
   const disconnect = useCallback(() => {
@@ -50,7 +50,7 @@ export const useCloudSync = () => {
 
   const find = useCallback(async () => {
     return getActiveService()?.find() ?? null;
-  }, [activeProvider, token]);
+  }, [activeProvider]);
 
   const needsRepoFix = useCloudStore((state) => state.needsRepoFix);
   const setNeedsRepoFix = useCloudStore((state) => state.setNeedsRepoFix);
@@ -61,7 +61,6 @@ export const useCloudSync = () => {
     provider: activeProvider,
     setProvider: setActiveProvider,
     isLoading: currentService ? currentService.isLoading : false,
-
     login,
     loginWithPromise,
     download,
@@ -71,6 +70,5 @@ export const useCloudSync = () => {
     find,
     needsRepoFix,
     setNeedsRepoFix,
-    // loginRepoNotFound: githubService.loginRepoNotFound,
   };
 };

@@ -1,4 +1,6 @@
-import type { EncryptedVault } from "@/types/vault";
+﻿import type { EncryptedVault } from "@/types/vault";
+
+export type StorageProvider = "google" | "local" | null;
 
 export type CloudFileMetadata = {
   id?: string;

@@ -1,26 +1,30 @@
-import type { ReactNode } from "react";
-import { useCloudSync } from "@/hooks/useCloudSync";
-import { type StorageProvider } from "@/hooks/useCloudStore";
+﻿import type { ReactNode } from "react";
+import { useStorageSync } from "@/hooks/storage/useStorageSync";
+import type { StorageProvider } from "@/hooks/storage/types";
+
+type IconButtonProps = {
+  id: Exclude<StorageProvider, null>;
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+};
 
 export const IconButton = ({
   id,
   icon,
   title,
   subtitle,
-}: {
-  id: string;
-  icon: ReactNode;
-  title: string;
-  subtitle: string;
-}) => {
-  const { loginWithPromise, isLoading, setProvider } = useCloudSync();
+}: IconButtonProps) => {
+  const { loginWithPromise, isLoading, setProvider } = useStorageSync();
 
   const handleClick = async () => {
     try {
-      setProvider(id as StorageProvider);
+      setProvider(id);
       const token = await loginWithPromise();
 
-      if (token) console.log(`Conectado ao ${id} com sucesso!`);
+      if (token) {
+        console.log(`Conectado ao ${id} com sucesso!`);
+      }
     } catch (err) {
       console.error(`Erro ao conectar ao ${id}:`, err);
     }
@@ -28,7 +32,7 @@ export const IconButton = ({
 
   return (
     <button
-      onClick={() => handleClick()}
+      onClick={handleClick}
       disabled={isLoading}
       className="flex p-[14px] justify-start items-center w-full h-[63px] bg-zinc-900 border border-zinc-800 transition-colors cursor-pointer disabled:opacity-50 hover:border-zinc-700"
     >

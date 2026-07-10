@@ -1,8 +1,8 @@
-import type { Credential, Folder, VaultSummarizedData } from "@/types/vault";
-import { useCloudStore } from "./useCloudStore";
-import { updateSummaryVaultCredential } from "@/utils/utils";
+﻿import type { Credential, Folder, VaultSummarizedData } from "@/types/vault";
 import { cryptoService } from "@/hooks/useCloudStore";
-import { useCloudSync } from "./useCloudSync";
+import { updateSummaryVaultCredential } from "@/utils/utils";
+import { useStorageSync } from "./storage/useStorageSync";
+import { useCloudStore } from "./useCloudStore";
 
 export const useVaultActions = () => {
   const vault = useCloudStore((s) => s.vault);
@@ -12,7 +12,7 @@ export const useVaultActions = () => {
   const setVault = useCloudStore.getState().setVault;
   const setSummaryVault = useCloudStore.getState().setSummaryVault;
 
-  const { uploadVault } = useCloudSync();
+  const { uploadVault } = useStorageSync();
 
   const saveVault = async () => {
     if (!vault) return;
@@ -162,5 +162,3 @@ export const useVaultActions = () => {
     saveVault,
   };
 };
-
-

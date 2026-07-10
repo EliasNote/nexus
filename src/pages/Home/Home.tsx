@@ -1,37 +1,33 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import LetterGlitch from "./components/LetterGlitch";
-import { Step } from "./components/Step";
-import { IconButton } from "./components/IconButton";
-import { useCloudSync } from "@/hooks/useCloudSync";
-import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
-import { dashboardRoute } from "@/App";
-import { createInitialVault } from "@/utils/initialVault";
-import { useGoogle } from "@/hooks/useGoogle";
-import type { EncryptedVault } from "@/types/vault";
-import { CLOUD_OPTIONS } from "@/types/constants";
-import { Input } from "../Dashboard/components/Credential/components/Input";
+﻿import { isTauri } from "@tauri-apps/api/core";
 import { Eye } from "lucide-react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { dashboardRoute } from "@/App";
+import { useStorageSync } from "@/hooks/storage/useStorageSync";
+import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
+import { CLOUD_OPTIONS } from "@/types/constants";
+import type { EncryptedVault } from "@/types/vault";
+import { createInitialVault } from "@/utils/initialVault";
 import { uint8ArrayToBase64 } from "@/utils/worker";
+import { Input } from "../Dashboard/components/Credential/components/Input";
+import LetterGlitch from "./components/LetterGlitch";
+import { IconButton } from "./components/IconButton";
+import { Step } from "./components/Step";
 
 export const Home = () => {
-  const { uploadVault, download, find } = useCloudSync();
+  const { uploadVault, download, find } = useStorageSync();
+  const isDesktop = isTauri();
 
   const navigate = useNavigate();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [password, setPassword] = useState("");
-
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
-  const setToken = useCloudStore((state) => state.setAccessToken);
-  const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
   const setVault = useCloudStore((state) => state.setVault);
   const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
-
-  const { deleteVault } = useGoogle();
 
   const nextStep = () => {
     setDirection(1);
@@ -108,7 +104,9 @@ export const Home = () => {
         setSummaryVault(await cryptoService.getFolderAndEntryData(vault));
       }
 
-      if (inputRef.current) inputRef.current.value = "";
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
       setPassword("");
 
       navigate(dashboardRoute);
@@ -134,18 +132,6 @@ export const Home = () => {
         classname="fixed inset-0 z-0 pointer-events-none"
       />
       <section className="relative z-10 flex min-h-screen items-center justify-center">
-        <button
-          className="mb-100"
-          onClick={() => setExpiresIn(Date.now() - 1000)}
-        >
-          Expirar ExpireIn
-        </button>
-        <button className="mb-100" onClick={() => setToken(null)}>
-          Remover Token
-        </button>
-        <button onClick={() => deleteVault()} className="bg-red-500 p-4">
-          APAGAR TUDO DO GOOGLE AGORA
-        </button>
         {currentStep === 0 && (
           <Step key="step0" direction={direction}>
             <div className="flex flex-col items-center justify-center gap-[20px]">
@@ -167,21 +153,27 @@ export const Home = () => {
           <Step key="step1" direction={direction}>
             <div className="flex flex-col items-center gap-[10px]">
               <div className="w-full max-w-[384px] flex flex-col gap-[10px] items-start">
-                {CLOUD_OPTIONS.map((text, index) => {
+                {CLOUD_OPTIONS.map((option) => {
+                  const platform = isDesktop ? "desktop" : "web";
+
+                  if (!option.type.includes(platform)) {
+                    return null;
+                  }
+
                   return (
                     <IconButton
-                      id={text.id}
-                      key={index}
+                      id={option.id}
+                      key={option.id}
                       icon={
-                        <text.icon
+                        <option.icon
                           width={22}
                           height={22}
                           strokeWidth={1.5}
                           className="text-zinc-400"
                         />
                       }
-                      title={text.title}
-                      subtitle={text.subtitle}
+                      title={option.title}
+                      subtitle={option.subtitle}
                     />
                   );
                 })}

@@ -1,13 +1,13 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
+import { useStorageSync } from "./storage/useStorageSync";
 import { useCloudStore } from "./useCloudStore";
-import { useCloudSync } from "./useCloudSync";
 
 export const useAutoSave = () => {
   const setIsPendingSync = useCloudStore((s) => s.setIsPendingSync);
   const autoSaveInterval = useCloudStore((s) => s.autoSaveInterval);
   const setIsSaving = useCloudStore((s) => s.setIsSaving);
 
-  const { uploadVault } = useCloudSync();
+  const { uploadVault } = useStorageSync();
 
   const uploadRef = useRef(uploadVault);
 
@@ -43,7 +43,7 @@ export const useAutoSave = () => {
 export const useSaveNow = () => {
   const setIsPendingSync = useCloudStore((s) => s.setIsPendingSync);
   const setIsSaving = useCloudStore((s) => s.setIsSaving);
-  const { uploadVault } = useCloudSync();
+  const { uploadVault } = useStorageSync();
 
   return async () => {
     const currentIsPendingSync = useCloudStore.getState().isPendingSync;

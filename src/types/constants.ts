@@ -1,4 +1,13 @@
-import { Server } from "lucide-react";
+﻿import { HardDrive, Server } from "lucide-react";
+import type { StorageProvider } from "@/hooks/storage/types";
+
+type CloudOption = {
+  id: Exclude<StorageProvider, null>;
+  title: string;
+  subtitle: string;
+  type: Array<"web" | "desktop">;
+  icon: typeof HardDrive;
+};
 
 export const MONTH_OPTIONS = [
   "01 - Janeiro",
@@ -15,17 +24,19 @@ export const MONTH_OPTIONS = [
   "12 - Dezembro",
 ];
 
-export const CLOUD_OPTIONS = [
-  // {
-  //   id: "github",
-  //   title: "GITHUB",
-  //   subtitle: "Usar GitHub como cofre",
-  //   icon: Server,
-  // },
+export const CLOUD_OPTIONS: CloudOption[] = [
+  {
+    id: "local",
+    title: "ARMAZENAMENTO LOCAL",
+    subtitle: "Salvar o cofre no dispositivo",
+    type: ["desktop"],
+    icon: HardDrive,
+  },
   {
     id: "google",
     title: "GOOGLE DRIVE",
     subtitle: "Usar cofre do Google Drive",
+    type: ["web"],
     icon: Server,
   },
 ];

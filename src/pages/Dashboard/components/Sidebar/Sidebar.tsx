@@ -1,20 +1,20 @@
-import { Button } from "./Button";
+﻿import { motion, AnimatePresence } from "framer-motion";
 import {
+  CheckCircle2,
   Dot,
   Folder as FolderIcon,
-  Plus,
-  Minus,
   Loader2,
-  CheckCircle2,
+  Minus,
+  Plus,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useCloudSync } from "@/hooks/useCloudSync";
 import { useState } from "react";
-import { useCloudStore } from "@/hooks/useCloudStore";
-import { getAllButtons, SIDEBAR_BUTTONS_IDS } from "./Buttons";
-import type { Folder } from "@/types/vault";
-import { useVaultActions } from "@/hooks/useVaultActions";
+import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import { useSaveNow } from "@/hooks/useSave";
+import { useVaultActions } from "@/hooks/useVaultActions";
+import { useCloudStore } from "@/hooks/useCloudStore";
+import type { Folder } from "@/types/vault";
+import { Button } from "./Button";
+import { getAllButtons, SIDEBAR_BUTTONS_IDS } from "./Buttons";
 
 const Sidebar = ({
   selected,
@@ -25,7 +25,7 @@ const Sidebar = ({
   setSelected: (id: number | string) => void;
   folders: Folder[];
 }) => {
-  const { disconnect } = useCloudSync();
+  const { disconnect } = useStorageSync();
   const [newFolder, setNewFolder] = useState("");
   const [isAddFolder, setIsAddFolder] = useState(false);
   const { isPendingSync, setIsPendingSync, isSaving } = useCloudStore(
@@ -299,7 +299,7 @@ const Sidebar = ({
                       </motion.button>
 
                       <motion.button
-                        className="w-full px-4 py-2.5 border border-zinc-500 text-zinc-100 bg-zinc-700 hover:bg-zinc-500 text-sm  cursor-pointer font-medium  "
+                        className="w-full px-4 py-2.5 border border-zinc-500 text-zinc-100 bg-zinc-700 hover:bg-zinc-500 text-sm  cursor-pointer font-medium"
                         onClick={handleLogoutWithoutSync}
                         disabled={isSyncing}
                       >

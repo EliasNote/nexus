@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
 import { cryptoService, useCloudStore } from "../../hooks/useCloudStore";
@@ -10,7 +10,7 @@ import { SIDEBAR_BUTTONS_IDS } from "./components/Sidebar/Buttons";
 import { Generator } from "./components/Generator/Generator";
 import { Audit } from "./components/Audit/Audit";
 
-// import { salvarJsonComoArquivo, salvarJsonComTauri } from "./utils/salvarLocal";
+
 
 const Dashboard = () => {
   useAutoSave();

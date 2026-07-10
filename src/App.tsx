@@ -1,10 +1,10 @@
-import { HashRouter, Routes, Route } from "react-router-dom";
+﻿import { useEffect } from "react";
+import { HashRouter, Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "./components/ProtectedRoutes";
+import { useStorageSync } from "./hooks/storage/useStorageSync";
+import { useCloudStore } from "./hooks/useCloudStore";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Home from "./pages/Home/Home";
-import { ProtectedRoute } from "./components/ProtectedRoutes";
-import { useCloudStore } from "./hooks/useCloudStore";
-import { useCloudSync } from "./hooks/useCloudSync";
-import { useEffect } from "react";
 
 export const dashboardRoute = "/dashboard";
 
@@ -13,7 +13,7 @@ function App() {
   const expiresIn = useCloudStore((state) => state.expiresIn);
   const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
 
-  const { refresh } = useCloudSync();
+  const { refresh } = useStorageSync();
 
   useEffect(() => {
     if (token && expiresIn) {
