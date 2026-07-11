@@ -31,7 +31,6 @@ export type GitSyncResult = {
 export type GitRepoStatus = {
   isGitRepo: boolean;
   hasRemote: boolean;
-  hasChanges: boolean;
   branch?: string;
   remoteUrl?: string;
 };

@@ -1,6 +1,7 @@
-﻿import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import type { StorageProvider } from "@/hooks/storage/types";
+import { GitSteps } from "./GitSteps";
 
 type IconButtonProps = {
   id: Exclude<StorageProvider, null>;
@@ -15,36 +16,68 @@ export const IconButton = ({
   title,
   subtitle,
 }: IconButtonProps) => {
-  const { loginWithPromise, isLoading, setProvider } = useStorageSync();
+  const {
+    connect,
+    isLoading,
+    setProvider,
+  } = useStorageSync();
+
+  const [openGitSteps, setOpenGitSteps] =
+    useState(false);
 
   const handleClick = async () => {
     try {
       setProvider(id);
-      const token = await loginWithPromise();
+
+      if (id === "git") {
+        setOpenGitSteps(true);
+        return;
+      }
+
+      const token = await connect();
 
       if (token) {
-        console.log(`Conectado ao ${id} com sucesso!`);
+        console.log(
+          `Conectado ao ${id} com sucesso!`,
+        );
       }
-    } catch (err) {
-      console.error(`Erro ao conectar ao ${id}:`, err);
+    } catch (error) {
+      console.error(
+        `Erro ao conectar ao ${id}:`,
+        error,
+      );
     }
   };
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={isLoading}
-      className="flex p-[14px] justify-start items-center w-full h-[63px] bg-zinc-900 border border-zinc-800 transition-colors cursor-pointer disabled:opacity-50 hover:border-zinc-700"
-    >
-      <div className="flex flex-row gap-[14px] justify-center items-center">
-        <div className="flex flex-row justify-center items-center border w-[35px] h-[35px] bg-zinc-950 border-zinc-700">
-          {icon}
+    <>
+      <button
+        onClick={handleClick}
+        disabled={isLoading}
+        className="flex h-[63px] w-full cursor-pointer items-center justify-start border border-zinc-800 bg-zinc-900 p-[14px] transition-colors hover:border-zinc-700 disabled:opacity-50"
+      >
+        <div className="flex flex-row items-center justify-center gap-[14px]">
+          <div className="flex h-[35px] w-[35px] flex-row items-center justify-center border border-zinc-700 bg-zinc-950">
+            {icon}
+          </div>
+
+          <div className="flex flex-col items-start">
+            <span className="text-[14px] font-bold text-white">
+              {title}
+            </span>
+
+            <span className="text-[12px] text-zinc-600">
+              {subtitle}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col items-start">
-          <span className="text-[14px] font-bold text-white">{title}</span>
-          <span className="text-[12px] text-zinc-600">{subtitle}</span>
-        </div>
-      </div>
-    </button>
+      </button>
+
+      {openGitSteps && (
+        <GitSteps
+          onClose={() => setOpenGitSteps(false)}
+        />
+      )}
+    </>
   );
 };

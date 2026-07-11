@@ -1,29 +1,38 @@
-﻿import type { EncryptedVault } from "@/types/vault";
+import type { EncryptedVault } from "@/types/vault";
 
-export type StorageProvider = "google" | "local" | null;
+export type StorageProvider =
+  | "google"
+  | "local"
+  | "git"
+  | null;
 
-export type CloudFileMetadata = {
+export interface AuthSession {
+  isAuthenticated: boolean;
+  connect(): Promise<string | null>;
+  refresh(): Promise<string | null>;
+  disconnect(): void;
+}
+
+export interface GitRepository {
+  directory: string | null;
+  remoteUrl?: string;
+  isLoading: boolean;
+  isGitRepo(): Promise<boolean>;
+  initialize(remoteUrl: string): Promise<void>;
+  sync(): Promise<void>;
+}
+
+export type VaultMetadata = {
   id?: string;
-  sha?: string;
-};
-
-export type CloudUploadResult = CloudFileMetadata & {
+  revision?: string;
   name?: string;
   mimeType?: string;
 };
 
-export interface StorageProviderInterface {
-  token: string | null;
-  refresh: () => Promise<string | null>;
+export interface VaultStorage {
   isLoading: boolean;
-  find: () => Promise<CloudFileMetadata | null>;
-  loginRepoNotFound?: () => void;
-  needsRepoFix?: boolean;
-  setNeedsRepoFix?: (needsRepoFix: boolean) => void;
-  login: () => void;
-  loginWithPromise: () => Promise<string | null>;
-  download: () => Promise<EncryptedVault>;
-  uploadVault: (vault: EncryptedVault) => Promise<CloudUploadResult>;
-  disconnect: () => void;
-  deleteVault: () => Promise<void>;
+  exists(): Promise<VaultMetadata | null>;
+  download(): Promise<EncryptedVault>;
+  upload(vault: EncryptedVault): Promise<VaultMetadata>;
+  delete(): Promise<void>;
 }

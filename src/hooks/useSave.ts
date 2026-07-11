@@ -1,65 +1,103 @@
-﻿import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useStorageSync } from "./storage/useStorageSync";
 import { useCloudStore } from "./useCloudStore";
 
 export const useAutoSave = () => {
-  const setIsPendingSync = useCloudStore((s) => s.setIsPendingSync);
-  const autoSaveInterval = useCloudStore((s) => s.autoSaveInterval);
-  const setIsSaving = useCloudStore((s) => s.setIsSaving);
+  const autoSaveInterval = useCloudStore(
+    (state) => state.autoSaveInterval,
+  );
 
-  const { uploadVault } = useStorageSync();
+  const setIsPendingSync = useCloudStore(
+    (state) => state.setIsPendingSync,
+  );
 
-  const uploadRef = useRef(uploadVault);
+  const setIsSaving = useCloudStore(
+    (state) => state.setIsSaving,
+  );
+
+  const { upload } = useStorageSync();
+  const uploadRef = useRef(upload);
 
   useEffect(() => {
-    uploadRef.current = uploadVault;
-  }, [uploadVault]);
+    uploadRef.current = upload;
+  }, [upload]);
 
   useEffect(() => {
     const intervalMs = autoSaveInterval * 60 * 1000;
 
-    const timer = setInterval(async () => {
-      const currentIsPendingSync = useCloudStore.getState().isPendingSync;
-      const currentVault = useCloudStore.getState().vault;
+    const timer = window.setInterval(async () => {
+      const state = useCloudStore.getState();
+      const currentVault = state.vault;
 
-      if (currentIsPendingSync && currentVault) {
-        try {
-          setIsSaving(true);
-          console.log("Auto-save: Sincronizando modificações com a nuvem...");
-          await uploadRef.current(currentVault);
-          setIsPendingSync(false);
-          console.log("Auto-save: Cofre salvo.");
-          setIsSaving(false);
-        } catch (error) {
-          console.error("Auto-save: Falha ao salvar em background:", error);
-        }
+      if (!state.isPendingSync || !currentVault) {
+        return;
+      }
+
+      try {
+        setIsSaving(true);
+
+        await uploadRef.current(currentVault);
+
+        setIsPendingSync(false);
+      } catch (error) {
+        console.error(
+          "Falha ao salvar automaticamente:",
+          error,
+        );
+      } finally {
+        setIsSaving(false);
       }
     }, intervalMs);
 
-    return () => clearInterval(timer);
-  }, [autoSaveInterval, setIsPendingSync, setIsSaving]);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [
+    autoSaveInterval,
+    setIsPendingSync,
+    setIsSaving,
+  ]);
 };
 
 export const useSaveNow = () => {
-  const setIsPendingSync = useCloudStore((s) => s.setIsPendingSync);
-  const setIsSaving = useCloudStore((s) => s.setIsSaving);
-  const { uploadVault } = useStorageSync();
+  const setIsPendingSync = useCloudStore(
+    (state) => state.setIsPendingSync,
+  );
+
+  const setIsSaving = useCloudStore(
+    (state) => state.setIsSaving,
+  );
+
+  const { upload } = useStorageSync();
+  const uploadRef = useRef(upload);
+
+  useEffect(() => {
+    uploadRef.current = upload;
+  }, [upload]);
 
   return async () => {
-    const currentIsPendingSync = useCloudStore.getState().isPendingSync;
-    const currentVault = useCloudStore.getState().vault;
+    const state = useCloudStore.getState();
+    const currentVault = state.vault;
 
-    if (currentIsPendingSync && currentVault) {
-      try {
-        setIsSaving(true);
-        console.log("Save Manual: Sincronizando modificações com a nuvem...");
-        await uploadVault(currentVault);
-        setIsPendingSync(false);
-        console.log("Save Manual: Cofre salvo.");
-        setIsSaving(false);
-      } catch (error) {
-        console.error("Save Manual: Falha ao salvar em background:", error);
-      }
+    if (!state.isPendingSync || !currentVault) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      await uploadRef.current(currentVault);
+
+      setIsPendingSync(false);
+    } catch (error) {
+      console.error(
+        "Falha ao salvar o cofre:",
+        error,
+      );
+
+      throw error;
+    } finally {
+      setIsSaving(false);
     }
   };
 };

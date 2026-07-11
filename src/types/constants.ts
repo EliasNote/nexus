@@ -1,4 +1,4 @@
-﻿import { HardDrive, Server } from "lucide-react";
+﻿import { GitFork, HardDrive, Server } from "lucide-react";
 import type { StorageProvider } from "@/hooks/storage/types";
 
 type CloudOption = {
@@ -31,6 +31,13 @@ export const CLOUD_OPTIONS: CloudOption[] = [
     subtitle: "Salvar o cofre no dispositivo",
     type: ["desktop"],
     icon: HardDrive,
+  },
+  {
+    id: "git",
+    title: "GITHUB",
+    subtitle: "Usar cofre do Git",
+    type: ["desktop"],
+    icon: GitFork,
   },
   {
     id: "google",

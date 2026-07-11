@@ -1,8 +1,13 @@
 ﻿import { create } from "zustand";
 import { wrap } from "comlink";
 import type { CryptoService } from "../utils/worker";
-import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
-import type { StorageProvider } from "./storage/types";
+import type {
+  StorageProvider,
+} from "./storage/types";
+import type {
+  EncryptedVault,
+  VaultSummarizedData,
+} from "@/types/vault";
 
 const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
   type: "module",
@@ -11,80 +16,106 @@ const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
 export const cryptoService = wrap<CryptoService>(worker);
 
 type CloudState = {
-  vault: null | EncryptedVault;
-  setVault: (vault: null | EncryptedVault) => void;
-  summaryVault: null | VaultSummarizedData;
-  setSummaryVault: (summary: VaultSummarizedData) => void;
   activeProvider: StorageProvider;
-  setActiveProvider: (provider: StorageProvider) => void;
+  setActiveProvider: (
+    provider: StorageProvider,
+  ) => void;
+
+  vault: EncryptedVault | null;
+  setVault: (vault: EncryptedVault | null) => void;
+
+  summaryVault: VaultSummarizedData | null;
+  setSummaryVault: (
+    vault: VaultSummarizedData | null,
+  ) => void;
+
   accessToken: string | null;
   setAccessToken: (token: string | null) => void;
-  refreshToken: string | null;
-  setRefreshToken: (token: string | null) => void;
-  loginRepoNotFound?: () => void;
-  setLoginRepoNotFound: (fn: () => void) => void;
-  needsRepoFix: boolean;
-  setNeedsRepoFix: (needsRepoFix: boolean) => void;
-  clearSession: () => void;
+
   expiresIn: number | null;
   setExpiresIn: (expiresIn: number | null) => void;
+
   isTokenValid: boolean;
-  setIsTokenValid: (isValid: boolean) => void;
+  setIsTokenValid: (value: boolean) => void;
+
   isPendingSync: boolean;
-  setIsPendingSync: (isPendingSync: boolean) => void;
+  setIsPendingSync: (value: boolean) => void;
+
   isSaving: boolean;
-  setIsSaving: (isSaving: boolean) => void;
+  setIsSaving: (value: boolean) => void;
+
   autoSaveInterval: number;
-  setAutoSaveInterval: (interval: number) => void;
+  setAutoSaveInterval: (value: number) => void;
+
+  clearSession: () => void;
 };
 
-export const useCloudStore = create<CloudState>()((set) => ({
-  vault: null,
-  setVault: (vault) => set({ vault: vault }),
+export const useCloudStore = create<CloudState>(
+  (set) => ({
+    activeProvider: null,
 
-  summaryVault: null,
-  setSummaryVault: (summary) => set({ summaryVault: summary }),
+    setActiveProvider: (provider) => {
+      set({ activeProvider: provider });
+    },
 
-  accessToken: null,
-  setAccessToken: (token) => set({ accessToken: token }),
+    vault: null,
 
-  refreshToken: null,
-  setRefreshToken: (token) => set({ refreshToken: token }),
+    setVault: (vault) => {
+      set({ vault });
+    },
 
-  activeProvider: null,
-  setActiveProvider: (provider) => set({ activeProvider: provider }),
+    summaryVault: null,
 
-  needsRepoFix: false,
-  setNeedsRepoFix: (needsRepoFix) => set({ needsRepoFix }),
+    setSummaryVault: (summaryVault) => {
+      set({ summaryVault });
+    },
 
-  loginRepoNotFound: undefined,
-  setLoginRepoNotFound: (fn) => set({ loginRepoNotFound: fn }),
+    accessToken: null,
 
-  clearSession: () => {
-    cryptoService.destroyKey();
-    set({
-      accessToken: null,
-      refreshToken: null,
-      expiresIn: null,
-      isTokenValid: false,
-      vault: null,
-      summaryVault: null,
-      activeProvider: null,
-    });
-  },
+    setAccessToken: (accessToken) => {
+      set({ accessToken });
+    },
 
-  expiresIn: null,
-  setExpiresIn: (expiresIn) => set({ expiresIn }),
+    expiresIn: null,
 
-  isTokenValid: false,
-  setIsTokenValid: (isValid) => set({ isTokenValid: isValid }),
+    setExpiresIn: (expiresIn) => {
+      set({ expiresIn });
+    },
 
-  isPendingSync: false,
-  setIsPendingSync: (isPendingSync) => set({ isPendingSync }),
+    isTokenValid: false,
 
-  isSaving: false,
-  setIsSaving: (isSaving) => set({ isSaving }),
+    setIsTokenValid: (isTokenValid) => {
+      set({ isTokenValid });
+    },
 
-  autoSaveInterval: 1,
-  setAutoSaveInterval: (interval) => set({ autoSaveInterval: interval }),
-}));
+    isPendingSync: false,
+
+    setIsPendingSync: (isPendingSync) => {
+      set({ isPendingSync });
+    },
+
+    isSaving: false,
+
+    setIsSaving: (isSaving) => {
+      set({ isSaving });
+    },
+
+    autoSaveInterval: 1,
+
+    setAutoSaveInterval: (autoSaveInterval) => {
+      set({ autoSaveInterval });
+    },
+
+    clearSession: () => {
+      cryptoService.destroyKey();
+      set({
+        activeProvider: null,
+        accessToken: null,
+        expiresIn: null,
+        isTokenValid: false,
+        vault: null,
+        summaryVault: null,
+      });
+    },
+  }),
+);

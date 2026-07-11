@@ -1,164 +1,76 @@
-﻿import type { Credential, Folder, VaultSummarizedData } from "@/types/vault";
-import { cryptoService } from "@/hooks/useCloudStore";
-import { updateSummaryVaultCredential } from "@/utils/utils";
-import { useStorageSync } from "./storage/useStorageSync";
+import type {
+  Credential,
+  Folder,
+  VaultSummarizedData,
+} from "@/types/vault";
 import { useCloudStore } from "./useCloudStore";
+import { useStorageSync } from "./storage/useStorageSync";
+import { updateSummaryVaultCredential } from "@/utils/utils";
 
 export const useVaultActions = () => {
-  const vault = useCloudStore((s) => s.vault);
-  const summaryVault = useCloudStore((s) => s.summaryVault);
-  const setIsPendingSync = useCloudStore((s) => s.setIsPendingSync);
+  const vault = useCloudStore((state) => state.vault);
+  const summaryVault = useCloudStore(
+    (state) => state.summaryVault,
+  );
 
-  const setVault = useCloudStore.getState().setVault;
-  const setSummaryVault = useCloudStore.getState().setSummaryVault;
+  const setSummaryVault = useCloudStore(
+    (state) => state.setSummaryVault,
+  );
 
-  const { uploadVault } = useStorageSync();
+  const setIsPendingSync = useCloudStore(
+    (state) => state.setIsPendingSync,
+  );
+
+  const { upload } = useStorageSync();
 
   const saveVault = async () => {
-    if (!vault) return;
+    if (!vault) {
+      return;
+    }
 
-    console.log("Sincronizando modificações com a nuvem...");
-    await uploadVault(vault);
-    console.log("Cofre salvo.");
-
+    await upload(vault);
     setIsPendingSync(false);
   };
 
-  const saveCredential = async (
-    credentialData: Credential,
-    isTrashed?: boolean,
-    isRestore?: boolean,
-    setIsLoading?: (isLoading: boolean) => void,
+  const updateCredential = async (
+    credential: Credential,
   ) => {
-    if (!vault || !summaryVault) return;
+    if (!summaryVault) {
+      return;
+    }
 
-    try {
-      setIsLoading?.(true);
-      const credentialToSave: Credential = {
-        ...credentialData,
-        isDeleted: isTrashed ?? isRestore ?? false,
-      };
-
-      const newVault =
-        await cryptoService.updateVaultFromCredentialAndTrackPasswordChange(
-          vault,
-          credentialToSave,
-        );
-
-      setIsPendingSync(true);
-
-      const updatedSummary = updateSummaryVaultCredential(
+    const updatedSummary =
+      updateSummaryVaultCredential(
         summaryVault,
-        credentialToSave,
+        credential,
       );
 
-      setVault(newVault);
-      setSummaryVault(updatedSummary);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    } finally {
-      setIsLoading?.(false);
+    setSummaryVault(updatedSummary);
+    setIsPendingSync(true);
+  };
+
+  const createFolder = async (
+    folder: Folder,
+  ) => {
+    if (!summaryVault) {
+      return;
     }
-  };
 
-  const deleteCredential = async (credentialId: string) => {
-    if (!vault || !summaryVault) return;
-
-    const updatedSummaryVault: VaultSummarizedData = {
+    const updatedVault: VaultSummarizedData = {
       ...summaryVault,
-      entries: summaryVault.entries.filter((e) => e.id !== credentialId),
+      folders: [
+        ...summaryVault.folders,
+        folder,
+      ],
     };
 
-    const newVault = await cryptoService.updateVaultFromSummary(
-      vault,
-      updatedSummaryVault,
-    );
-
+    setSummaryVault(updatedVault);
     setIsPendingSync(true);
-    setVault(newVault);
-    setSummaryVault(updatedSummaryVault);
-  };
-
-  const createFolder = async (folderName: string) => {
-    if (!vault || !summaryVault) return;
-
-    const trimmedName = folderName.trim();
-    if (!trimmedName) return;
-
-    const newFolder: Folder = {
-      id: crypto.randomUUID(),
-      name: trimmedName,
-    };
-
-    const updatedSummaryVault: VaultSummarizedData = {
-      ...summaryVault,
-      folders: [...summaryVault.folders, newFolder],
-    };
-
-    const newVault = await cryptoService.updateVaultFromSummary(
-      vault,
-      updatedSummaryVault,
-    );
-
-    setIsPendingSync(true);
-    setVault(newVault);
-    setSummaryVault(updatedSummaryVault);
-
-    return newFolder;
-  };
-
-  const renameFolder = async (folderId: string, folderName: string) => {
-    if (!vault || !summaryVault) return;
-
-    const trimmedName = folderName.trim();
-    if (!trimmedName) return;
-
-    const updatedSummaryVault: VaultSummarizedData = {
-      ...summaryVault,
-      folders: summaryVault.folders.map((folder) =>
-        folder.id === folderId ? { ...folder, name: trimmedName } : folder,
-      ),
-    };
-
-    const newVault = await cryptoService.updateVaultFromSummary(
-      vault,
-      updatedSummaryVault,
-    );
-
-    setIsPendingSync(true);
-    setVault(newVault);
-    setSummaryVault(updatedSummaryVault);
-  };
-
-  const deleteFolder = async (folderId: string) => {
-    if (!vault || !summaryVault) return;
-
-    const updatedSummaryVault: VaultSummarizedData = {
-      ...summaryVault,
-      folders: summaryVault.folders.filter((folder) => folder.id !== folderId),
-      entries: summaryVault.entries.map((entry) => ({
-        ...entry,
-        foldersIds: entry.foldersIds?.filter((id) => id !== folderId),
-      })),
-    };
-
-    const newVault = await cryptoService.updateVaultFromSummary(
-      vault,
-      updatedSummaryVault,
-    );
-
-    setIsPendingSync(true);
-    setVault(newVault);
-    setSummaryVault(updatedSummaryVault);
   };
 
   return {
-    saveCredential,
-    createFolder,
-    renameFolder,
-    deleteFolder,
-    deleteCredential,
     saveVault,
+    updateCredential,
+    createFolder,
   };
 };

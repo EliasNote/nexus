@@ -68,3 +68,17 @@ export const updateSummaryVaultCredential = (
   setSummaryVault(result);
   return result;
 };
+
+export function formatGitHubRemoteUrl(value: string): string {
+  const input = value.trim();
+  const match = input.match(/^https?:\/\/github\.com\/([^/]+)\/([^/?#]+)(?:\/tree\/[^/?#]+)?\/?$/i);
+
+  if (!match) {
+    throw new Error("Informe um link valido de um repositorio do GitHub.");
+  }
+
+  const [, owner, repository] = match;
+  const cleanRepository = repository.replace(/\.git$/i, "");
+
+  return `https://github.com/${owner}/${cleanRepository}.git`;
+}

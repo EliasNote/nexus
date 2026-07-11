@@ -1,18 +1,18 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import type { GoogleToken } from "@/types/types";
 import type { EncryptedVault } from "@/types/vault";
 import { useGoogleWebAuth } from "./webAuth";
 import type {
-  CloudFileMetadata,
-  CloudUploadResult,
-  StorageProviderInterface,
+  AuthSession,
+  VaultMetadata,
+  VaultStorage,
 } from "../../types";
 
 const VAULT_FILE_NAME = "vault.json";
 const APP_DATA_SPACE = "appDataFolder";
 
-function assertAccessToken(token: string | null): string {
+function requireToken(token: string | null): string {
   if (!token) {
     throw new Error("Não autenticado no Google.");
   }
@@ -20,7 +20,9 @@ function assertAccessToken(token: string | null): string {
   return token;
 }
 
-async function parseGoogleError(response: Response): Promise<Error> {
+async function parseGoogleError(
+  response: Response,
+): Promise<Error> {
   const text = await response.text();
 
   try {
@@ -30,19 +32,36 @@ async function parseGoogleError(response: Response): Promise<Error> {
       };
     };
 
-    return new Error(data.error?.message || text || "Erro na API do Google.");
+    return new Error(
+      data.error?.message ||
+        text ||
+        "Erro na API do Google.",
+    );
   } catch {
     return new Error(text || "Erro na API do Google.");
   }
 }
 
-export function useGoogleStorage(): StorageProviderInterface {
+export function useGoogleDrive(): VaultStorage & {
+  session: AuthSession;
+} {
   const auth = useGoogleWebAuth();
-  const token = useCloudStore((state) => state.accessToken);
-  const setToken = useCloudStore((state) => state.setAccessToken);
-  const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
-  const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
-  const clearSession = useCloudStore((state) => state.clearSession);
+
+  const token = useCloudStore(
+    (state) => state.accessToken,
+  );
+  const setToken = useCloudStore(
+    (state) => state.setAccessToken,
+  );
+  const setExpiresIn = useCloudStore(
+    (state) => state.setExpiresIn,
+  );
+  const setIsTokenValid = useCloudStore(
+    (state) => state.setIsTokenValid,
+  );
+  const clearSession = useCloudStore(
+    (state) => state.clearSession,
+  );
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,7 +73,7 @@ export function useGoogleStorage(): StorageProviderInterface {
     return response.accessToken;
   };
 
-  const loginWithPromise = async (): Promise<string | null> => {
+  const connect = async (): Promise<string | null> => {
     try {
       const response = await auth.loginWithPromise();
 
@@ -66,40 +85,45 @@ export function useGoogleStorage(): StorageProviderInterface {
     }
   };
 
-  const login = (): void => {
-    void loginWithPromise();
-  };
-
   const refresh = async (): Promise<string | null> => {
     try {
       const response = await auth.refresh();
 
       return response ? applyToken(response) : null;
     } catch (error) {
-      console.error("Erro ao renovar o token Google:", error);
+      console.error(
+        "Erro ao renovar o token Google:",
+        error,
+      );
+
       clearSession();
       return null;
     }
   };
 
-  const find = async (): Promise<CloudFileMetadata | null> => {
-    const accessToken = assertAccessToken(token);
-    const query = encodeURIComponent(`name = '${VAULT_FILE_NAME}'`);
-    const url = `https://www.googleapis.com/drive/v3/files?spaces=${APP_DATA_SPACE}&q=${query}`;
+  const exists = async (): Promise<VaultMetadata | null> => {
+    const accessToken = requireToken(token);
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const query = encodeURIComponent(
+      `name = '${VAULT_FILE_NAME}'`,
+    );
+
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files` +
+        `?spaces=${APP_DATA_SPACE}&q=${query}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw await parseGoogleError(response);
     }
 
     const data = (await response.json()) as {
-      files?: CloudFileMetadata[];
+      files?: VaultMetadata[];
     };
 
     return data.files?.[0] ?? null;
@@ -108,18 +132,19 @@ export function useGoogleStorage(): StorageProviderInterface {
   const download = async (): Promise<EncryptedVault> => {
     setIsLoading(true);
 
-    const accessToken = assertAccessToken(token);
-    const file = await find();
-
-    if (!file?.id) {
-      throw new Error("Arquivo não encontrado na nuvem.");
-    }
-
     try {
+      const accessToken = requireToken(token);
+      const file = await exists();
+
+      if (!file?.id) {
+        throw new Error(
+          "Arquivo não encontrado na nuvem.",
+        );
+      }
+
       const response = await fetch(
         `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -136,27 +161,32 @@ export function useGoogleStorage(): StorageProviderInterface {
     }
   };
 
-  const uploadVault = async (
+  const upload = async (
     vault: EncryptedVault,
-  ): Promise<CloudUploadResult> => {
+  ): Promise<VaultMetadata> => {
     setIsLoading(true);
-    const accessToken = assertAccessToken(token);
-    const existingFile = await find();
-    const fileId = existingFile?.id;
 
     try {
+      const accessToken = requireToken(token);
+      const existingFile = await exists();
+      const fileId = existingFile?.id;
+
       const metadata = {
         name: VAULT_FILE_NAME,
-        parents: fileId ? undefined : [APP_DATA_SPACE],
+        parents: fileId
+          ? undefined
+          : [APP_DATA_SPACE],
       };
 
       const form = new FormData();
+
       form.append(
         "metadata",
         new Blob([JSON.stringify(metadata)], {
           type: "application/json",
         }),
       );
+
       form.append(
         "file",
         new Blob([JSON.stringify(vault)], {
@@ -180,18 +210,20 @@ export function useGoogleStorage(): StorageProviderInterface {
         throw await parseGoogleError(response);
       }
 
-      return (await response.json()) as CloudUploadResult;
+      return (await response.json()) as VaultMetadata;
     } finally {
       setIsLoading(false);
     }
   };
 
   const deleteVault = async (): Promise<void> => {
-    const accessToken = assertAccessToken(token);
-    const file = await find();
+    const accessToken = requireToken(token);
+    const file = await exists();
 
     if (!file?.id) {
-      throw new Error("Arquivo não encontrado no Google Drive.");
+      throw new Error(
+        "Arquivo não encontrado no Google Drive.",
+      );
     }
 
     const response = await fetch(
@@ -210,23 +242,21 @@ export function useGoogleStorage(): StorageProviderInterface {
   };
 
   const disconnect = (): void => {
-    void Promise.resolve(auth.disconnect()).catch((error) => {
-      console.error("Erro ao desconectar Google:", error);
-    });
-
+    auth.disconnect();
     clearSession();
   };
 
   return {
-    token,
     isLoading,
-    login,
-    loginWithPromise,
-    refresh,
-    find,
+    exists,
     download,
-    uploadVault,
-    deleteVault,
-    disconnect,
+    upload,
+    delete: deleteVault,
+    session: {
+      isAuthenticated: Boolean(token),
+      connect,
+      refresh,
+      disconnect,
+    },
   };
 }

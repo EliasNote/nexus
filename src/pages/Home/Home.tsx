@@ -1,10 +1,11 @@
-﻿import { isTauri } from "@tauri-apps/api/core";
+import { isTauri } from "@tauri-apps/api/core";
 import { Eye } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboardRoute } from "@/App";
 import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
+
 import { CLOUD_OPTIONS } from "@/types/constants";
 import type { EncryptedVault } from "@/types/vault";
 import { createInitialVault } from "@/utils/initialVault";
@@ -15,7 +16,7 @@ import { IconButton } from "./components/IconButton";
 import { Step } from "./components/Step";
 
 export const Home = () => {
-  const { uploadVault, download, find } = useStorageSync();
+  const { upload, download, exists } = useStorageSync();
   const isDesktop = isTauri();
 
   const navigate = useNavigate();
@@ -48,9 +49,9 @@ export const Home = () => {
         return;
       }
 
-      const data = await find();
+      const data = await exists();
 
-      if (data && (data.id || data.sha)) {
+      if (data && data.id) {
         console.log("Vault existe");
         const encryptedVault = await download();
         if (!encryptedVault) return;
@@ -97,7 +98,7 @@ export const Home = () => {
           entries: encryptedContent.entries,
         };
 
-        await uploadVault(cofreFinal);
+        await upload(cofreFinal);
 
         useCloudStore.getState().setAutoSaveInterval(1);
         setVault(cofreFinal);

@@ -1,74 +1,103 @@
-﻿import { useCallback } from "react";
-import { useCloudStore } from "@/hooks/useCloudStore";
+import { useCallback } from "react";
 import type { EncryptedVault } from "@/types/vault";
-import { useGoogleStorage } from "./providers/google/useGoogleStorage";
-import { useLocalStorageProvider } from "./providers/local/useLocalStorageProvider";
+import { useCloudStore } from "@/hooks/useCloudStore";
+import { useGoogleDrive } from "./adapters/google-drive/useGoogleDrive";
+import { useLocalFile } from "./adapters/local-file/useLocalFile";
+import type { VaultStorage } from "./types";
 
 export const useStorageSync = () => {
-  const activeProvider = useCloudStore((state) => state.activeProvider);
-  const setActiveProvider = useCloudStore((state) => state.setActiveProvider);
-
-  const googleService = useGoogleStorage();
-  const localService = useLocalStorageProvider();
-
-  const services = {
-    google: googleService,
-    local: localService,
-  };
-
-  const getActiveService = () => {
-    const active = useCloudStore.getState().activeProvider;
-    return active ? services[active] : null;
-  };
-
-  const login = useCallback(() => {
-    getActiveService()?.login();
-  }, [activeProvider]);
-
-  const loginWithPromise = useCallback(async () => {
-    return getActiveService()?.loginWithPromise() ?? null;
-  }, [activeProvider]);
-
-  const download = useCallback(async () => {
-    return getActiveService()?.download() ?? null;
-  }, [activeProvider]);
-
-  const uploadVault = useCallback(
-    async (content: EncryptedVault) => {
-      return getActiveService()?.uploadVault(content) ?? null;
-    },
-    [activeProvider],
+  const provider = useCloudStore(
+    (state) => state.activeProvider,
   );
 
-  const disconnect = useCallback(() => {
-    getActiveService()?.disconnect();
-  }, [activeProvider]);
+  const setProvider = useCloudStore(
+    (state) => state.setActiveProvider,
+  );
+
+  const googleStorage = useGoogleDrive();
+  const localStorage = useLocalFile();
+
+  const getStorage = useCallback((): VaultStorage | null => {
+    if (provider === "google") {
+      return googleStorage;
+    }
+
+    if (provider === "local") {
+      return localStorage;
+    }
+
+    return null;
+  }, [provider, googleStorage, localStorage]);
+
+  const connect = useCallback(async () => {
+    if (provider !== "google") {
+      return null;
+    }
+
+    return googleStorage.session.connect();
+  }, [provider, googleStorage]);
 
   const refresh = useCallback(async () => {
-    return getActiveService()?.refresh() ?? null;
-  }, [activeProvider]);
+    if (provider !== "google") {
+      return null;
+    }
 
-  const find = useCallback(async () => {
-    return getActiveService()?.find() ?? null;
-  }, [activeProvider]);
+    return googleStorage.session.refresh();
+  }, [provider, googleStorage]);
 
-  const needsRepoFix = useCloudStore((state) => state.needsRepoFix);
-  const setNeedsRepoFix = useCloudStore((state) => state.setNeedsRepoFix);
+  const disconnect = useCallback(() => {
+    if (provider === "google") {
+      googleStorage.session.disconnect();
+    }
+  }, [provider, googleStorage]);
 
-  const currentService = activeProvider ? services[activeProvider] : null;
+  const exists = useCallback(async () => {
+    return getStorage()?.exists() ?? null;
+  }, [getStorage]);
+
+  const download = useCallback(async () => {
+    const storage = getStorage();
+
+    if (!storage) {
+      throw new Error("Nenhum storage foi selecionado.");
+    }
+
+    return storage.download();
+  }, [getStorage]);
+
+  const upload = useCallback(
+    async (vault: EncryptedVault) => {
+      const storage = getStorage();
+
+      if (!storage) {
+        throw new Error("Nenhum storage foi selecionado.");
+      }
+
+      return storage.upload(vault);
+    },
+    [getStorage],
+  );
+
+  const remove = useCallback(async () => {
+    const storage = getStorage();
+
+    if (!storage) {
+      throw new Error("Nenhum storage foi selecionado.");
+    }
+
+    await storage.delete();
+  }, [getStorage]);
 
   return {
-    provider: activeProvider,
-    setProvider: setActiveProvider,
-    isLoading: currentService ? currentService.isLoading : false,
-    login,
-    loginWithPromise,
-    download,
-    uploadVault,
-    disconnect,
+    provider,
+    setProvider,
+    isLoading: getStorage()?.isLoading ?? false,
+    connect,
     refresh,
-    find,
-    needsRepoFix,
-    setNeedsRepoFix,
+    disconnect,
+    exists,
+    download,
+    upload,
+    remove,
   };
 };
