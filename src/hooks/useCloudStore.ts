@@ -1,54 +1,13 @@
 ﻿import { create } from "zustand";
 import { wrap } from "comlink";
 import type { CryptoService } from "../utils/worker";
-import type {
-  StorageProvider,
-} from "./storage/types";
-import type {
-  EncryptedVault,
-  VaultSummarizedData,
-} from "@/types/vault";
+import type { CloudState } from "./storage/types";
 
 const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
   type: "module",
 });
 
 export const cryptoService = wrap<CryptoService>(worker);
-
-type CloudState = {
-  activeProvider: StorageProvider;
-  setActiveProvider: (
-    provider: StorageProvider,
-  ) => void;
-
-  vault: EncryptedVault | null;
-  setVault: (vault: EncryptedVault | null) => void;
-
-  summaryVault: VaultSummarizedData | null;
-  setSummaryVault: (
-    vault: VaultSummarizedData | null,
-  ) => void;
-
-  accessToken: string | null;
-  setAccessToken: (token: string | null) => void;
-
-  expiresIn: number | null;
-  setExpiresIn: (expiresIn: number | null) => void;
-
-  isTokenValid: boolean;
-  setIsTokenValid: (value: boolean) => void;
-
-  isPendingSync: boolean;
-  setIsPendingSync: (value: boolean) => void;
-
-  isSaving: boolean;
-  setIsSaving: (value: boolean) => void;
-
-  autoSaveInterval: number;
-  setAutoSaveInterval: (value: number) => void;
-
-  clearSession: () => void;
-};
 
 export const useCloudStore = create<CloudState>(
   (set) => ({
@@ -62,6 +21,12 @@ export const useCloudStore = create<CloudState>(
 
     setVault: (vault) => {
       set({ vault });
+    },
+
+    vaultPath: null,
+
+    setVaultPath: (vaultPath) => {
+      set({ vaultPath });
     },
 
     summaryVault: null,

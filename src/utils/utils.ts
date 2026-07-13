@@ -23,10 +23,10 @@ export const getGithubUserRepo = async (token: string, user: string) => {
 export async function copyToClipboard(text: string): Promise<void> {
     if (isTauri()) {
       await writeText(text);
-      return;
+    } else {
+      await navigator.clipboard.writeText(text);
     }
-
-    await navigator.clipboard.writeText(text);
+    return;
   }
 
 export const updateSummaryVaultCredential = (

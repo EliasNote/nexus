@@ -7,17 +7,9 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import {
-  checkGitExists,
-  checkGitRepo,
-} from "@/hooks/storage/adapters/git-repository/gitSync";
 import { useGitRepository } from "@/hooks/storage/adapters/git-repository/useGitRepository";
 import { formatGitHubRemoteUrl } from "@/utils/utils";
-
-type GitStepsProps = {
-  onClose?: () => void;
-  onDirectorySelected?: (directory: string) => void;
-};
+import { useCloudStore } from "@/hooks/useCloudStore";
 
 type Step =
   | "select"
@@ -28,16 +20,16 @@ type Step =
 
 export const GitSteps = ({
   onClose,
-  onDirectorySelected,
-}: GitStepsProps) => {
+}: {
+  onClose?: () => void;
+}) => {
   const [step, setStep] = useState<Step>("select");
-  const [directory, setDirectory] = useState("");
   const [remoteUrl, setRemoteUrl] = useState("");
   const [error, setError] = useState("");
+  const [directory, setDirectory] = useState("");
+  const setVaultPath = useCloudStore.getState().setVaultPath;
 
-  const gitRepository = useGitRepository(
-    directory || null,
-  );
+  const gitRepository = useGitRepository();
 
   const selectDirectory = async () => {
     setError("");
@@ -48,26 +40,14 @@ export const GitSteps = ({
         multiple: false,
       });
 
-      if (!selected || Array.isArray(selected)) {
-        return;
-      }
+      if (!selected || Array.isArray(selected)) return;
 
-      if (!(await checkGitExists())) {
-        throw new Error(
-          "O Git não foi encontrado no seu computador.",
-        );
-      }
-
+      setVaultPath(selected);
       setDirectory(selected);
-      onDirectorySelected?.(selected);
 
-      const repository = await checkGitRepo(selected);
+      const repoStatus = await gitRepository.isRepo!()
 
-      setStep(
-        repository.isGitRepo
-          ? "success"
-          : "github",
-      );
+      setStep(repoStatus ? "success" : "github");
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -92,13 +72,11 @@ export const GitSteps = ({
     setError("");
 
     try {
-      const formattedRemoteUrl =
-        formatGitHubRemoteUrl(remoteUrl);
-
-      await gitRepository.initialize(
-        formattedRemoteUrl,
+      await gitRepository.initialize!(
+        formatGitHubRemoteUrl(remoteUrl),
       );
 
+      useCloudStore.getState().setActiveProvider("git");
       setStep("success");
     } catch (cause) {
       setError(

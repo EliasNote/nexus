@@ -3,39 +3,48 @@ import type { EncryptedVault } from "@/types/vault";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { useGoogleDrive } from "./adapters/google-drive/useGoogleDrive";
 import { useLocalFile } from "./adapters/local-file/useLocalFile";
-import type { VaultStorage } from "./types";
+import type { StorageProvider, VaultStorage } from "./types";
+import { useGitRepository } from "./adapters/git-repository/useGitRepository";
 
 export const useStorageSync = () => {
-  const provider = useCloudStore(
-    (state) => state.activeProvider,
-  );
-
-  const setProvider = useCloudStore(
-    (state) => state.setActiveProvider,
-  );
+  const provider = useCloudStore((state) => state.activeProvider);
+  const setProvider = useCloudStore((state) => state.setActiveProvider);
 
   const googleStorage = useGoogleDrive();
   const localStorage = useLocalFile();
+  const gitStorage = useGitRepository();
 
-  const getStorage = useCallback((): VaultStorage | null => {
-    if (provider === "google") {
-      return googleStorage;
+
+  const getStorage = useCallback((targetProvider?: StorageProvider): VaultStorage | null => {
+    const active = targetProvider ?? provider;
+    switch (active) {
+      case "google":
+        return googleStorage;
+      case "local":
+        return localStorage;
+      case "git":
+        return gitStorage;
+      default:
+        return null;
     }
+  }, [provider, googleStorage, localStorage, gitStorage]);
 
-    if (provider === "local") {
-      return localStorage;
-    }
+  const connect = useCallback(
+    async (targetProvider?: StorageProvider) => {
+      const active = targetProvider ?? provider;
+      const storage = getStorage(active);
 
-    return null;
-  }, [provider, googleStorage, localStorage]);
+      if (active === "google") return googleStorage.session.connect();
 
-  const connect = useCallback(async () => {
-    if (provider !== "google") {
-      return null;
-    }
-
-    return googleStorage.session.connect();
-  }, [provider, googleStorage]);
+      const res = await storage?.exists();
+      if (res) {
+        useCloudStore.getState().setAccessToken(active);
+        useCloudStore.getState().setIsTokenValid(true);
+      }
+      return res;
+    },
+    [provider, getStorage, googleStorage],
+  );
 
   const refresh = useCallback(async () => {
     if (provider !== "google") {

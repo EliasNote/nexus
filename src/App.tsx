@@ -16,6 +16,8 @@ function App() {
   const { refresh } = useStorageSync();
 
   useEffect(() => {
+    console.log("Token: ", token);
+    console.log("ExpiresIn: ", expiresIn);
     if (token && expiresIn) {
       if (Date.now() < expiresIn) {
         setIsTokenValid(true);

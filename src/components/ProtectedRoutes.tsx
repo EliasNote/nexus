@@ -3,9 +3,8 @@ import { useCloudStore } from "../hooks/useCloudStore";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
-  const refreshToken = useCloudStore((state) => state.refreshToken);
 
-  if (!isTokenValid && !refreshToken) {
+  if (!isTokenValid) {
     return <Navigate to="/" replace />;
   }
 

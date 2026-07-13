@@ -1,4 +1,4 @@
-import type { EncryptedVault } from "@/types/vault";
+import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
 
 export type StorageProvider =
   | "google"
@@ -31,8 +31,48 @@ export type VaultMetadata = {
 
 export interface VaultStorage {
   isLoading: boolean;
-  exists(): Promise<VaultMetadata | null>;
+  exists(): Promise<string | null>;
+  isRepo?(): Promise<boolean>;
+  initialize?(remoteUrl: string): Promise<void>;
   download(): Promise<EncryptedVault>;
-  upload(vault: EncryptedVault): Promise<VaultMetadata>;
+  upload(vault: EncryptedVault): Promise<void>;
   delete(): Promise<void>;
 }
+
+export type CloudState = {
+  activeProvider: StorageProvider;
+  setActiveProvider: (
+    provider: StorageProvider,
+  ) => void;
+
+  vault: EncryptedVault | null;
+  setVault: (vault: EncryptedVault | null) => void;
+
+  vaultPath: string | null;
+  setVaultPath: (vaultPath: string | null) => void;
+
+  summaryVault: VaultSummarizedData | null;
+  setSummaryVault: (
+    vault: VaultSummarizedData | null,
+  ) => void;
+
+  accessToken: string | null;
+  setAccessToken: (token: string | null) => void;
+
+  expiresIn: number | null;
+  setExpiresIn: (expiresIn: number | null) => void;
+
+  isTokenValid: boolean;
+  setIsTokenValid: (value: boolean) => void;
+
+  isPendingSync: boolean;
+  setIsPendingSync: (value: boolean) => void;
+
+  isSaving: boolean;
+  setIsSaving: (value: boolean) => void;
+
+  autoSaveInterval: number;
+  setAutoSaveInterval: (value: number) => void;
+
+  clearSession: () => void;
+};

@@ -3,19 +3,17 @@ import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import type { StorageProvider } from "@/hooks/storage/types";
 import { GitSteps } from "./GitSteps";
 
-type IconButtonProps = {
-  id: Exclude<StorageProvider, null>;
-  icon: ReactNode;
-  title: string;
-  subtitle: string;
-};
-
 export const IconButton = ({
   id,
   icon,
   title,
   subtitle,
-}: IconButtonProps) => {
+}: {
+  id: Exclude<StorageProvider, null>;
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+}) => {
   const {
     connect,
     isLoading,
@@ -34,12 +32,10 @@ export const IconButton = ({
         return;
       }
 
-      const token = await connect();
+      const token = await connect(id);
 
       if (token) {
-        console.log(
-          `Conectado ao ${id} com sucesso!`,
-        );
+        console.log(`Conectado ao ${id} com sucesso!`);
       }
     } catch (error) {
       console.error(

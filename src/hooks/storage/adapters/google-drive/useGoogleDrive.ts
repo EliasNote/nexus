@@ -70,7 +70,7 @@ export function useGoogleDrive(): VaultStorage & {
     setExpiresIn(response.expiresAt);
     setIsTokenValid(response.expiresAt > Date.now());
 
-    return response.accessToken;
+    return "google";
   };
 
   const connect = async (): Promise<string | null> => {
@@ -101,7 +101,7 @@ export function useGoogleDrive(): VaultStorage & {
     }
   };
 
-  const exists = async (): Promise<VaultMetadata | null> => {
+  const exists = async (): Promise<string | null> => {
     const accessToken = requireToken(token);
 
     const query = encodeURIComponent(
@@ -126,7 +126,7 @@ export function useGoogleDrive(): VaultStorage & {
       files?: VaultMetadata[];
     };
 
-    return data.files?.[0] ?? null;
+    return data.files?.[0].id ? data.files[0].id : null;
   };
 
   const download = async (): Promise<EncryptedVault> => {
@@ -134,16 +134,10 @@ export function useGoogleDrive(): VaultStorage & {
 
     try {
       const accessToken = requireToken(token);
-      const file = await exists();
-
-      if (!file?.id) {
-        throw new Error(
-          "Arquivo não encontrado na nuvem.",
-        );
-      }
+      const fileId = await exists();
 
       const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
+        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -163,13 +157,12 @@ export function useGoogleDrive(): VaultStorage & {
 
   const upload = async (
     vault: EncryptedVault,
-  ): Promise<VaultMetadata> => {
+  ): Promise<void> => {
     setIsLoading(true);
 
     try {
       const accessToken = requireToken(token);
-      const existingFile = await exists();
-      const fileId = existingFile?.id;
+      const fileId = await exists();
 
       const metadata = {
         name: VAULT_FILE_NAME,
@@ -209,8 +202,6 @@ export function useGoogleDrive(): VaultStorage & {
       if (!response.ok) {
         throw await parseGoogleError(response);
       }
-
-      return (await response.json()) as VaultMetadata;
     } finally {
       setIsLoading(false);
     }
@@ -218,16 +209,10 @@ export function useGoogleDrive(): VaultStorage & {
 
   const deleteVault = async (): Promise<void> => {
     const accessToken = requireToken(token);
-    const file = await exists();
-
-    if (!file?.id) {
-      throw new Error(
-        "Arquivo não encontrado no Google Drive.",
-      );
-    }
+    const fileId = await exists();
 
     const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${file.id}`,
+      `https://www.googleapis.com/drive/v3/files/${fileId}`,
       {
         method: "DELETE",
         headers: {

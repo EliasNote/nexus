@@ -64,15 +64,16 @@ export async function checkGitRepo(
     };
   }
 
-  const branch = await tryRunGit(
-    directory,
-    ["branch", "--show-current"],
-  );
+  const branch = await tryRunGit(directory, [
+    "branch",
+    "--show-current",
+  ]);
 
-  const remoteUrl = await tryRunGit(
-    directory,
-    ["remote", "get-url", "origin"],
-  );
+  const remoteUrl = await tryRunGit(directory, [
+    "remote",
+    "get-url",
+    "origin",
+  ]);
 
   return {
     isGitRepo: true,
@@ -85,7 +86,7 @@ export async function checkGitRepo(
 export async function initGitRepo(
   directory: string,
 ): Promise<GitSyncResult> {
-  const output = await runGit(directory, ["init"]);
+  const output = await runGit(directory, ["init", "-b", "main"]);
 
   return {
     ok: true,
@@ -186,6 +187,8 @@ export async function syncGitRepo(
 ): Promise<GitSyncResult> {
   const repository = await checkGitRepo(directory);
 
+  console.log("Repositório Git:", repository);
+
   if (!repository.isGitRepo) {
     throw new Error(
       "Essa pasta ainda não é um repositório Git.",
@@ -198,8 +201,8 @@ export async function syncGitRepo(
     );
   }
 
-  await gitPull(directory);
   await gitCommitAll(directory);
+  await gitPull(directory);
   await gitPush(directory);
 
   return {

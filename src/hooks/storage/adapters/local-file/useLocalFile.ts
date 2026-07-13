@@ -7,29 +7,51 @@ import {
   writeTextFile,
 } from "@tauri-apps/plugin-fs";
 import type { EncryptedVault } from "@/types/vault";
-import type {
-  VaultMetadata,
-  VaultStorage,
-} from "../../types";
+import type { VaultStorage } from "../../types";
+import { useCloudStore } from "@/hooks/useCloudStore";
 
 const VAULT_DIRECTORY = "Nexus";
-const VAULT_PATH = "Nexus/nexus-vault.json";
+const VAULT_NAME = "nexus-vault.json";
+const VAULT_PATH = `${VAULT_DIRECTORY}/${VAULT_NAME}`;
 
-async function exists(): Promise<VaultMetadata | null> {
-  const vaultExists = await fileExists(VAULT_PATH, {
-    baseDir: BaseDirectory.Document,
+function getBaseDir(): BaseDirectory {
+  return BaseDirectory.Document;
+}
+
+function resolvePath(): string {
+  const { activeProvider, vaultPath } =
+    useCloudStore.getState();
+
+  if (activeProvider === "git" && vaultPath) {
+    return `${vaultPath}/${VAULT_NAME}`;
+  }
+
+  return VAULT_PATH;
+}
+
+function isGitStorage(): boolean {
+  const { activeProvider, vaultPath } =
+    useCloudStore.getState();
+
+  return activeProvider === "git" && Boolean(vaultPath);
+}
+
+async function exists(): Promise<string | null> {
+  const vaultExists = await fileExists(resolvePath(), {
+    baseDir: getBaseDir(),
   });
 
-  return vaultExists ? { id: VAULT_PATH } : null;
+  return vaultExists ? "local" : null;
 }
 
 async function download(): Promise<EncryptedVault> {
-  const content = await readTextFile(VAULT_PATH, {
-    baseDir: BaseDirectory.Document,
+  const path = resolvePath();
+  const content = await readTextFile(path, {
+    baseDir: getBaseDir(),
   });
 
-  if (!content) {
-    throw new Error("Nenhum cofre local foi encontrado.");
+  if (!content.trim()) {
+    throw new Error("Nenhum cofre foi encontrado.");
   }
 
   try {
@@ -41,33 +63,33 @@ async function download(): Promise<EncryptedVault> {
 
 async function upload(
   vault: EncryptedVault,
-): Promise<VaultMetadata> {
-  await mkdir(VAULT_DIRECTORY, {
-    baseDir: BaseDirectory.Document,
-    recursive: true,
-  });
+): Promise<void> {
+  if (!isGitStorage()) {
+    await mkdir(VAULT_DIRECTORY, {
+      baseDir: getBaseDir(),
+      recursive: true,
+    });
+  }
 
   await writeTextFile(
-    VAULT_PATH,
+    resolvePath(),
     JSON.stringify(vault),
     {
-      baseDir: BaseDirectory.Document,
+      baseDir: getBaseDir(),
     },
   );
-
-  return {
-    id: VAULT_PATH,
-    name: "nexus-vault.json",
-    mimeType: "application/json",
-  };
 }
 
 async function deleteVault(): Promise<void> {
-  if (await fileExists(VAULT_PATH, {
-    baseDir: BaseDirectory.Document,
-  })) {
-    await remove(VAULT_PATH, {
-      baseDir: BaseDirectory.Document,
+  const vaultPath = resolvePath();
+
+  if (
+    await fileExists(vaultPath, {
+      baseDir: getBaseDir(),
+    })
+  ) {
+    await remove(vaultPath, {
+      baseDir: getBaseDir(),
     });
   }
 }

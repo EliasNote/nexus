@@ -51,7 +51,7 @@ export const Home = () => {
 
       const data = await exists();
 
-      if (data && data.id) {
+      if (data) {
         console.log("Vault existe");
         const encryptedVault = await download();
         if (!encryptedVault) return;
@@ -74,6 +74,8 @@ export const Home = () => {
 
           setSummaryVault(summaryVault);
           setVault(encryptedVault);
+        } else {
+          throw new Error("Senha mestra incorreta.");
         }
       } else {
         console.log("Vault não existe, fazendo upload");
