@@ -1,6 +1,6 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { Eye } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboardRoute } from "@/App";
 import { useStorageSync } from "@/hooks/storage/useStorageSync";
@@ -14,6 +14,8 @@ import { Input } from "../Dashboard/components/Credential/components/Input";
 import LetterGlitch from "./components/LetterGlitch";
 import { IconButton } from "./components/IconButton";
 import { Step } from "./components/Step";
+import { loadSettings } from "@/config/settingsStore";
+import type { StorageProvider } from "@/hooks/storage/types";
 
 export const Home = () => {
   const { upload, download, exists } = useStorageSync();
@@ -25,10 +27,27 @@ export const Home = () => {
   const [password, setPassword] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [isConfigLoaded, setIsConfigLoaded] = useState(false);
+  const [tempVaultPath, setTempVaultPath] = useState<string | null>(null);
+  const [tempActiveProvider, setTempActiveProvider] = useState<StorageProvider | null>(null);
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
   const setVault = useCloudStore((state) => state.setVault);
   const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
+  const setVaultPath = useCloudStore((state) => state.setVaultPath);
+  const setActiveProvider = useCloudStore((state) => state.setActiveProvider);
+
+  useEffect(() => {
+    const init = async () => {
+      const { vaultPath, activeProvider } = await loadSettings();
+      setVaultPath(vaultPath);
+      setTempVaultPath(vaultPath);
+      setActiveProvider(activeProvider);
+      setTempActiveProvider(activeProvider);
+      setIsConfigLoaded(true);
+    };
+    init();
+  }, [setActiveProvider, setVaultPath]);
 
   const nextStep = () => {
     setDirection(1);

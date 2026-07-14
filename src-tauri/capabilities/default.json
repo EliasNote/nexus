@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "shell:default",
@@ -27,9 +29,14 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        { "path": "$DOCUMENT/Nexus" },
-        { "path": "$DOCUMENT/Nexus/**/*" }
+        {
+          "path": "$DOCUMENT/Nexus"
+        },
+        {
+          "path": "$DOCUMENT/Nexus/**/*"
+        }
       ]
-    }
+    },
+    "store:default"
   ]
 }
