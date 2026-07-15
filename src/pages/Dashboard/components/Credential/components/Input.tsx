@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Check, EyeClosed } from "lucide-react";
+import { Check, Eye, EyeClosed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { copyToClipboard } from "../../../../../utils/utils";
 import type { iconsInputProp } from "@/types/types";
@@ -85,9 +85,9 @@ export const Input = ({
               >
                 {icon.id === "eye" &&
                   (showPassword ? (
-                    <EyeClosed size={20} strokeWidth={2} />
+                    <Eye size={20} strokeWidth={2} />
                   ) : (
-                    <icon.icon size={20} strokeWidth={2} />
+                    <EyeClosed size={20} strokeWidth={2} />
                   ))}
                 {icon.id === "generate" && (
                   <icon.icon size={20} strokeWidth={2} />

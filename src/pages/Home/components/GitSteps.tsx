@@ -101,7 +101,7 @@ export const GitSteps = ({
             <button
               onClick={onClose}
               aria-label="Fechar"
-              className="text-zinc-500 hover:text-white"
+              className="text-zinc-500 hover:text-white cursor-pointer"
             >
               <X size={20} />
             </button>

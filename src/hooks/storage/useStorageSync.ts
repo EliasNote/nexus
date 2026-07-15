@@ -100,7 +100,6 @@ export const useStorageSync = () => {
   return {
     provider,
     setProvider,
-    isLoading: getStorage()?.isLoading ?? false,
     connect,
     refresh,
     disconnect,

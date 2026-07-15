@@ -16,7 +16,6 @@ export interface AuthSession {
 export interface GitRepository {
   directory: string | null;
   remoteUrl?: string;
-  isLoading: boolean;
   isGitRepo(): Promise<boolean>;
   initialize(remoteUrl: string): Promise<void>;
   sync(): Promise<void>;
@@ -30,9 +29,9 @@ export type VaultMetadata = {
 };
 
 export interface VaultStorage {
-  isLoading: boolean;
   exists(): Promise<string | null>;
   isRepo?(): Promise<boolean>;
+  isLoading?: boolean;
   initialize?(remoteUrl: string): Promise<void>;
   download(): Promise<EncryptedVault>;
   upload(vault: EncryptedVault): Promise<void>;

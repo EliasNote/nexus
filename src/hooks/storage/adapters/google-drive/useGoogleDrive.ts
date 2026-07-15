@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import type { GoogleToken } from "@/types/types";
 import type { EncryptedVault } from "@/types/vault";
@@ -62,8 +61,6 @@ export function useGoogleDrive(): VaultStorage & {
   const clearSession = useCloudStore(
     (state) => state.clearSession,
   );
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const applyToken = (response: GoogleToken): string => {
     setToken(response.accessToken);
@@ -130,8 +127,6 @@ export function useGoogleDrive(): VaultStorage & {
   };
 
   const download = async (): Promise<EncryptedVault> => {
-    setIsLoading(true);
-
     try {
       const accessToken = requireToken(token);
       const fileId = await exists();
@@ -150,16 +145,15 @@ export function useGoogleDrive(): VaultStorage & {
       }
 
       return (await response.json()) as EncryptedVault;
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
   };
 
   const upload = async (
     vault: EncryptedVault,
   ): Promise<void> => {
-    setIsLoading(true);
-
     try {
       const accessToken = requireToken(token);
       const fileId = await exists();
@@ -202,8 +196,9 @@ export function useGoogleDrive(): VaultStorage & {
       if (!response.ok) {
         throw await parseGoogleError(response);
       }
-    } finally {
-      setIsLoading(false);
+    } catch(error) {
+      console.log(error);
+      throw error;
     }
   };
 
@@ -232,7 +227,6 @@ export function useGoogleDrive(): VaultStorage & {
   };
 
   return {
-    isLoading,
     exists,
     download,
     upload,
