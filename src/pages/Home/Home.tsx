@@ -27,22 +27,27 @@ export const Home = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isConfigLoaded, setIsConfigLoaded] = useState(false);
-  const [tempVaultPath, setTempVaultPath] = useState<string | null>(null);
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
+  const activeProvider = useCloudStore((state) => state.activeProvider);
+  const vaultPath = useCloudStore((state) => state.vaultPath);
   const setVault = useCloudStore((state) => state.setVault);
   const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
   const setVaultPath = useCloudStore((state) => state.setVaultPath);
+  const setActiveProvider = useCloudStore((state) => state.setActiveProvider);
 
   useEffect(() => {
     const init = async () => {
-      const savedPath = await loadSettings();
-      setVaultPath(savedPath);
-      setTempVaultPath(savedPath);
+      const settings = await loadSettings();
+
+      if (settings) {
+        setVaultPath(settings.vaultPath);
+        setActiveProvider(settings.provider);
+      }
       setIsConfigLoaded(true);
     };
     init();
-  }, [setVaultPath, setTempVaultPath]);
+  }, [setActiveProvider, setVaultPath]);
 
   const nextStep = () => {
     setDirection(1);
@@ -139,6 +144,12 @@ export const Home = () => {
   const prevButtonStyle =
     "px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer";
 
+  const canContinue =
+    isConfigLoaded &&
+    ((activeProvider === "local" && vaultPath !== null) ||
+      (activeProvider === "git" && vaultPath !== null) ||
+      (activeProvider === "google" && isTokenValid));
+
   return (
     <div className="relative isolate min-h-screen overflow-hidden text-white">
       <LetterGlitch
@@ -199,7 +210,7 @@ export const Home = () => {
                 <button
                   className={nextButtonStyle}
                   onClick={nextStep}
-                  disabled={tempVaultPath !== null ? false : !isTokenValid}
+                  disabled={!canContinue}
                 >
                   Próximo
                 </button>

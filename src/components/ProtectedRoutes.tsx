@@ -2,9 +2,9 @@ import { Navigate } from "react-router-dom";
 import { useCloudStore } from "../hooks/useCloudStore";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isTokenValid = useCloudStore((state) => state.isTokenValid);
+  const vault = useCloudStore((state) => state.vault);
 
-  if (!isTokenValid) {
+  if (!vault) {
     return <Navigate to="/" replace />;
   }
 

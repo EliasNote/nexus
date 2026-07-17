@@ -8,8 +8,10 @@ import {
   X,
 } from "lucide-react";
 import { useGitRepository } from "@/hooks/storage/adapters/git-repository/useGitRepository";
+import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import { formatGitHubRemoteUrl } from "@/utils/utils";
 import { useCloudStore } from "@/hooks/useCloudStore";
+import { saveSettings } from "@/config/settingsStore";
 
 type Step =
   | "select"
@@ -30,6 +32,7 @@ export const GitSteps = ({
   const setVaultPath = useCloudStore.getState().setVaultPath;
 
   const gitRepository = useGitRepository();
+  const { connect } = useStorageSync();
 
   const selectDirectory = async () => {
     setError("");
@@ -38,16 +41,17 @@ export const GitSteps = ({
       const selected = await open({
         directory: true,
         multiple: false,
+        recursive: true,
       });
 
       if (!selected || Array.isArray(selected)) return;
 
       setVaultPath(selected);
       setDirectory(selected);
+      await saveSettings(selected, "git");
 
-      const repoStatus = await gitRepository.isRepo!()
-
-      setStep(repoStatus ? "success" : "github");
+      const connected = await connect("git");
+      setStep(connected ? "success" : "github");
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -76,7 +80,12 @@ export const GitSteps = ({
         formatGitHubRemoteUrl(remoteUrl),
       );
 
-      useCloudStore.getState().setActiveProvider("git");
+      const connected = await connect("git");
+
+      if (!connected) {
+        throw new Error("Não foi possível validar o repositório Git.");
+      }
+
       setStep("success");
     } catch (cause) {
       setError(

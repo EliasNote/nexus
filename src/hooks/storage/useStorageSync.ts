@@ -30,20 +30,39 @@ export const useStorageSync = () => {
   }, [provider, googleStorage, localStorage, gitStorage]);
 
   const connect = useCallback(
-    async (targetProvider?: StorageProvider) => {
-      const active = targetProvider ?? provider;
-      const storage = getStorage(active);
+    async (targetProvider: StorageProvider): Promise<boolean> => {
+      if (targetProvider === "google") {
+        const result = await googleStorage.session.connect();
 
-      if (active === "google") return googleStorage.session.connect();
+        if (!result) {
+          return false;
+        }
 
-      const res = await storage?.exists();
-      if (res) {
-        useCloudStore.getState().setAccessToken(active);
-        useCloudStore.getState().setIsTokenValid(true);
+        setProvider("google");
+        return true;
       }
-      return res;
+
+      if (targetProvider === "git") {
+        const isRepository = await gitStorage.isRepo?.();
+
+        if (!isRepository) {
+          return false;
+        }
+
+        setProvider("git");
+        return true;
+      }
+
+      const { vaultPath } = useCloudStore.getState();
+
+      if (!vaultPath) {
+        return false;
+      }
+
+      setProvider(targetProvider);
+      return true;
     },
-    [provider, getStorage, googleStorage],
+    [gitStorage, googleStorage, setProvider],
   );
 
   const refresh = useCallback(async () => {
