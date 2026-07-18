@@ -77,6 +77,7 @@ export const useStorageSync = () => {
     if (provider === "google") {
       googleStorage.session.disconnect();
     }
+    useCloudStore.getState().clearSession();
   }, [provider, googleStorage]);
 
   const exists = useCallback(async () => {

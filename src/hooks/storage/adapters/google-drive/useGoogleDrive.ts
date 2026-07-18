@@ -46,21 +46,11 @@ export function useGoogleDrive(): VaultStorage & {
 } {
   const auth = useGoogleWebAuth();
 
-  const token = useCloudStore(
-    (state) => state.accessToken,
-  );
-  const setToken = useCloudStore(
-    (state) => state.setAccessToken,
-  );
-  const setExpiresIn = useCloudStore(
-    (state) => state.setExpiresIn,
-  );
-  const setIsTokenValid = useCloudStore(
-    (state) => state.setIsTokenValid,
-  );
-  const clearSession = useCloudStore(
-    (state) => state.clearSession,
-  );
+  const token = useCloudStore((state) => state.accessToken);
+  const setToken = useCloudStore((state) => state.setAccessToken);
+  const setExpiresIn = useCloudStore((state) => state.setExpiresIn);
+  const setIsTokenValid = useCloudStore((state) => state.setIsTokenValid);
+  const clearSession = useCloudStore((state) => state.clearSession);
 
   const applyToken = (response: GoogleToken): string => {
     setToken(response.accessToken);
@@ -223,7 +213,6 @@ export function useGoogleDrive(): VaultStorage & {
 
   const disconnect = (): void => {
     auth.disconnect();
-    clearSession();
   };
 
   return {
