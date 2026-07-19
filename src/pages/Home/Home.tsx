@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { dashboardRoute } from "@/App";
 import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
+import { motion } from "framer-motion";
 
 import { CLOUD_OPTIONS } from "@/types/constants";
 import type { EncryptedVault } from "@/types/vault";
@@ -27,6 +28,8 @@ export const Home = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isConfigLoaded, setIsConfigLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorContent, setErrorContent] = useState<string | null>(null);
 
   const isTokenValid = useCloudStore((state) => state.isTokenValid);
   const activeProvider = useCloudStore((state) => state.activeProvider);
@@ -45,14 +48,21 @@ export const Home = () => {
         setActiveProvider(settings.provider);
       }
       setIsConfigLoaded(true);
+      console.log("isConfigLoaded", isConfigLoaded);
     };
-    init();
+    if (isDesktop) init();
   }, [setActiveProvider, setVaultPath]);
 
   const nextStep = () => {
     setDirection(1);
     setCurrentStep((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    const image = new Image();
+    image.src = "/loading.webp";
+    image.decode().catch(() => {});
+  }, []);
 
   const prevStep = () => {
     setDirection(-1);
@@ -64,7 +74,7 @@ export const Home = () => {
       const masterPassword = password;
 
       if (!masterPassword) {
-        alert("Por favor, digite a senha mestra.");
+        setErrorContent("Digite sua senha mestra para continuar.");
         return;
       }
 
@@ -76,13 +86,21 @@ export const Home = () => {
         if (!encryptedVault) return;
         const salt = encryptedVault.kdf.salt;
 
-        const unlocked = await cryptoService.verifyUnlockVaultKeys(
-          masterPassword,
-          salt,
-          encryptedVault.encrypted_dek,
-        );
+        let unlocked = false;
+        try {
+          unlocked = await cryptoService.verifyUnlockVaultKeys(
+            masterPassword,
+            salt,
+            encryptedVault.encrypted_dek,
+          );
+        } catch (error) {
+          setErrorContent("Senha mestra incorreta. Tente novamente.");
+          console.error("Erro: ", error);
+          return;
+        }
 
         if (unlocked) {
+          setErrorContent(null);
           const summaryVault =
             await cryptoService.getInitialData(encryptedVault);
 
@@ -93,8 +111,6 @@ export const Home = () => {
 
           setSummaryVault(summaryVault);
           setVault(encryptedVault);
-        } else {
-          throw new Error("Senha mestra incorreta.");
         }
       } else {
         console.log("Vault não existe, fazendo upload");
@@ -131,10 +147,11 @@ export const Home = () => {
       }
       setPassword("");
 
+      setIsLoading(false);
       navigate(dashboardRoute);
     } catch (error) {
       console.error("Erro: ", error);
-      alert("Falha ao abrir cofre. Senha incorreta?");
+      setIsLoading(false);
     }
   };
 
@@ -145,10 +162,9 @@ export const Home = () => {
     "px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer";
 
   const canContinue =
-    isConfigLoaded &&
-    ((activeProvider === "local" && vaultPath !== null) ||
-      (activeProvider === "git" && vaultPath !== null) ||
-      (activeProvider === "google" && isTokenValid));
+    (isConfigLoaded && activeProvider === "local" && vaultPath !== null) ||
+    (isConfigLoaded && activeProvider === "git" && vaultPath !== null) ||
+    (activeProvider === "google" && isTokenValid);
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden text-white">
@@ -221,15 +237,19 @@ export const Home = () => {
             </div>
           </Step>
         )}
-        {currentStep === 2 && (
+        {currentStep === 2 && !isLoading && (
           <Step key="step2" direction={direction}>
-            <div className="flex flex-col gap-2 items-center">
-              <div className="w-full flex flex-col items-start">
-                <p className="text-sm font-bold">SENHA MESTRA</p>
+            <div className="flex w-[min(384px,calc(100vw-32px))] flex-col items-center gap-4">
+              <div className="flex w-full flex-col items-start">
+                <p className="mb-1.5 text-sm font-bold">SENHA MESTRA</p>
                 <Input
                   isPassword={true}
                   value={password}
-                  onChange={(val) => setPassword(val)}
+                  onChange={(val) => {
+                    setPassword(val);
+                    if (errorContent) setErrorContent(null);
+                  }}
+                  errorContent={errorContent}
                   iconsInput={[
                     {
                       id: "eye",
@@ -241,7 +261,11 @@ export const Home = () => {
               <div className="flex gap-3">
                 <button
                   className={nextButtonStyle}
-                  onClick={async () => await handleConcluir()}
+                  onClick={async () => {
+                    setIsLoading(true);
+                    await handleConcluir();
+                    setIsLoading(false);
+                  }}
                 >
                   Concluir
                 </button>
@@ -251,6 +275,12 @@ export const Home = () => {
               </div>
             </div>
           </Step>
+        )}
+        {currentStep === 2 && isLoading && (
+          <div className="flex flex-col items-center gap-3" role="status" aria-live="polite">
+            <img src="/loading.webp" className="h-18 w-18 object-contain" alt="" />
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-zinc-300">Abrindo seu cofre...</motion.p>
+          </div>
         )}
       </section>
     </div>

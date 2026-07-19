@@ -38,7 +38,7 @@ export const useStorageSync = () => {
           return false;
         }
 
-        setProvider("google");
+        setProvider(targetProvider);
         return true;
       }
 
@@ -49,7 +49,7 @@ export const useStorageSync = () => {
           return false;
         }
 
-        setProvider("git");
+        setProvider(targetProvider);
         return true;
       }
 

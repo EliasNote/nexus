@@ -3,11 +3,10 @@ import {
   CheckCircle2,
   Dot,
   Folder as FolderIcon,
-  Loader2,
   Minus,
   Plus,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import { useSaveNow } from "@/hooks/useSave";
 import { useVaultActions } from "@/hooks/useVaultActions";
@@ -91,6 +90,13 @@ const Sidebar = ({
     setIsPendingSync(false);
     disconnect();
   };
+
+  // Serve para carregar a imagem antes de exibir no carregamento, sem isso, a imagem só carrega na metade do salvamento
+  useEffect(() => {
+    const image = new Image();
+    image.src = "/loading.webp";
+    image.decode().catch(() => {});
+  }, []);
 
   return (
     <section className="flex flex-col gap-[20px] items-start border-r border-zinc-800 h-screen overflow-hidden max-w-[248px] w-full">
@@ -240,7 +246,7 @@ const Sidebar = ({
                     className="flex flex-col items-center gap-4 py-6"
                   >
                     <div className="flex gap-3 items-center">
-                      {syncSuccess && (
+                      {syncSuccess ? (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1.25 }}
@@ -252,18 +258,8 @@ const Sidebar = ({
                         >
                           <CheckCircle2 size={24} className="text-green-500" />
                         </motion.div>
-                      )}
-                      {!syncSuccess && (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1.5,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                        >
-                          <Loader2 size={24} className="text-blue-500" />
-                        </motion.div>
+                      ) : (
+                        <img src="/loading.webp" className="h-16 w-16 object-contain" alt="loader" />
                       )}
                       <span className="text-white font-medium">
                         {syncSuccess
