@@ -19,6 +19,7 @@ export const Input = ({
   isEdit,
   isCreate,
   errorContent,
+  onDoubleClick,
 }: {
   iconsInput?: iconsInputProp[];
   iconTop?: LucideIcon;
@@ -32,6 +33,7 @@ export const Input = ({
   isEdit?: boolean;
   isCreate?: boolean;
   errorContent?: string | null;
+  onDoubleClick?: () => void;
 }) => {
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,7 +62,8 @@ export const Input = ({
   };
 
   return (
-    <div className="flex w-full items-center justify-center">
+    <div className="flex w-full items-center justify-center"
+      onDoubleClick={onDoubleClick}>
       <div className="flex gap-0.5 flex-col w-full max-w-[760px]">
         <div className="flex items-start font-medium gap-1 text-[12px] text-zinc-400">
           {Icontop && <Icontop size={16} strokeWidth={1.5} />}
@@ -74,7 +77,7 @@ export const Input = ({
           <input
             ref={inputRef}
             disabled={disabled}
-            className="flex-1 bg-transparent px-3 text-[14px] text-white outline-none placeholder:text-zinc-500"
+            className={`flex-1 bg-transparent px-3 text-[14px] text-white outline-none placeholder:text-zinc-500 ${disabled ? "pointer-events-none" : ""}`}
             type={isPassword ? (showPassword ? "text" : "password") : "text"}
             placeholder={placeholder}
             value={value}

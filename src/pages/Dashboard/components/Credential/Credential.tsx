@@ -82,6 +82,7 @@ export const Credential = ({
             key={isCreate ? "new" : tempVault.id}
             folders={folders}
             isEdit={isEditable}
+            setIsEdit={setIsEdit}
             isCreate={isCreate}
             credential={tempVault}
             setCredential={setTempVault}

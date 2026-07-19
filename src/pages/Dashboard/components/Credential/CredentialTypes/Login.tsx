@@ -16,10 +16,12 @@ import type {
   LoginCredential,
   Credential,
 } from "@/types/vault";
+import { useState } from "react";
 
 export const Login = ({
   folders,
   isEdit,
+  setIsEdit,
   isCreate,
   credential,
   setCredential,
@@ -27,11 +29,14 @@ export const Login = ({
 }: {
   folders: FolderType[];
   isEdit: boolean;
+  setIsEdit: (isEdit: boolean) => void;
   isCreate: Credential["type"] | null;
   credential: LoginCredential;
   setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
   focusPassword?: boolean;
-}) => {
+  }) => {
+  const [autoFocusId, setAutoFocusId] = useState<string | null>(null);
+
   const handleChange = (
     field: keyof LoginCredential,
     value: string | string[],
@@ -56,7 +61,12 @@ export const Login = ({
           },
         ]}
         value={credential.username!}
+        autoFocus={autoFocusId === "username"}
         onChange={(val) => handleChange("username", val)}
+        onDoubleClick={() => {
+          setAutoFocusId("username");
+          setIsEdit(true);
+        }}
       />
       <Input
         disabled={!isEdit}
@@ -79,10 +89,14 @@ export const Login = ({
           },
         ]}
         value={credential.password}
-        autoFocus={focusPassword}
+        autoFocus={autoFocusId === "password"}
         isEdit={isEdit}
         isCreate={Boolean(isCreate)}
         onChange={(val) => handleChange("password", val)}
+        onDoubleClick={() => {
+          setAutoFocusId("password");
+          setIsEdit(true);
+        }}
       />
       <Input
         disabled={!isEdit}
@@ -96,7 +110,12 @@ export const Login = ({
           },
         ]}
         value={credential.url}
+        autoFocus={autoFocusId === "url"}
         onChange={(val) => handleChange("url", val)}
+        onDoubleClick={() => {
+          setAutoFocusId("url");
+          setIsEdit(true);
+        }}
       />
       <DirectorySelect
         disabled={!isEdit}
@@ -118,4 +137,3 @@ export const Login = ({
     </section>
   );
 };
-

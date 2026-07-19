@@ -3,7 +3,7 @@ import {
   type Credential,
   type CredentialType,
 } from "@/types/vault";
-import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
+import { ArrowLeft, Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
@@ -49,6 +49,18 @@ export const Header = ({
     setIsCreate(null);
   };
 
+  const onUndo = () => {
+    if (
+      isEdit &&
+      !window.confirm("Descartar as alterações e voltar?")
+    ) {
+      return;
+    }
+
+    setIsEdit(false);
+    handleRemoveCredential();
+  };
+
   const onDelete = async () => {
     await deleteCredential(tempVault?.id);
 
@@ -60,8 +72,7 @@ export const Header = ({
   return (
     <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-zinc-800">
       <div className="flex gap-2.5">
-        <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">
-          {(tempVault?.title?.[0] || "?").toUpperCase()}
+        <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">          {(tempVault?.title?.[0] || "?").toUpperCase()}
         </div>
 
         <div className="flex flex-col items-start">
@@ -112,6 +123,15 @@ export const Header = ({
       </div>
 
       <div className="flex gap-2.5 items-center justify-center text-[14px]">
+        {!isCreate && (
+          <Button
+            iconsSize={iconsSize}
+            color="border-zinc-800 bg-zinc-900 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            label={"VOLTAR"}
+            icon={Undo2}
+            onClick={onUndo}
+          />
+        )}
         {isWriting ? (
           <>
             {isLoadingCredential ? (
@@ -193,4 +213,3 @@ export const Header = ({
     </div>
   );
 };
-
