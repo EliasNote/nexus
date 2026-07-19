@@ -11,6 +11,8 @@ export const DirectorySelect = ({
   disabled,
   selectedFoldersIds,
   setSelectedFoldersIds,
+  autoFocus,
+  onDoubleClick,
 }: {
   iconTop: LucideIcon;
   topName: string;
@@ -19,6 +21,8 @@ export const DirectorySelect = ({
   disabled?: boolean;
   selectedFoldersIds: string[];
   setSelectedFoldersIds: (ids: string[]) => void;
+  autoFocus?: boolean;
+  onDoubleClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,6 +40,12 @@ export const DirectorySelect = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      dropdownRef.current?.focus();
+    }
+  }, [autoFocus, disabled]);
+
   const toggleFolder = (id: string) => {
     const newIds = selectedFoldersIds.includes(id)
       ? selectedFoldersIds.filter((i) => i !== id)
@@ -52,8 +62,13 @@ export const DirectorySelect = ({
 
   return (
     <div
-      className="flex flex-col gap-0.5 w-full max-w-[760px]"
+      className="flex flex-col gap-0.5 w-full max-w-[760px] outline-none"
       ref={dropdownRef}
+      onDoubleClick={() => {
+        onDoubleClick?.()
+        setIsOpen(true)
+      }}
+      tabIndex={-1}
     >
       <span className="text-[12px] text-zinc-400 font-medium flex items-start gap-1">
         <Icontop size={16} strokeWidth={1.5} />
@@ -64,7 +79,7 @@ export const DirectorySelect = ({
         <button
           disabled={disabled}
           onClick={() => setIsOpen(!isOpen)}
-          className={`flex items-center justify-between bg-zinc-900 border ${isOpen ? "border-zinc-600" : "border-zinc-800"} h-[45px] w-full px-3 ${!disabled && "cursor-pointer"} transition-colors`}
+          className={`flex items-center justify-between bg-zinc-900 border ${isOpen ? "border-zinc-600" : "border-zinc-800"} h-[45px] w-full px-3 ${disabled ? "pointer-events-none" : "cursor-pointer"} transition-colors`}
         >
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
             {selectedFolders.length > 0 ? (

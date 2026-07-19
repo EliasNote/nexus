@@ -16,7 +16,6 @@ const Dashboard = () => {
   useAutoSave();
 
   const [selected, setSelected] = useState<number | string>(0);
-  const [focusPassword, setFocusPassword] = useState(false);
 
   const vault = useCloudStore((state) => state.vault);
   const summaryVault = useCloudStore((state) => state.summaryVault);
@@ -71,7 +70,6 @@ const Dashboard = () => {
           setCredential(data);
           setTempVault(data);
           setIsEdit(!isEditFromAudit ? false : true);
-          setFocusPassword(isEditFromAudit);
           setIsCreate(null);
           setIsEditFromAudit(false);
         });
@@ -144,7 +142,6 @@ const Dashboard = () => {
               setSelectedSideCredential={setSelectedSideCredential}
               credential={credential!}
               setCredential={setCredential}
-              focusPassword={focusPassword}
               isLoadingCredential={isLoadingCredential}
               handleStartCreate={handleStartCreate}
             />

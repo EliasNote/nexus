@@ -5,6 +5,7 @@ import { Footer } from "./components/Footer";
 import { Header } from "./components/Header/Header";
 import { Card } from "./CredentialTypes/Card";
 import { Note } from "./CredentialTypes/Note";
+import { useState } from "react";
 
 export const Credential = ({
   credential,
@@ -18,7 +19,6 @@ export const Credential = ({
   setIsCreate,
   isLoadingCredential,
   handleStartCreate,
-  focusPassword,
 }: {
   credential: CredentialType;
   setCredential: (credential: CredentialType | null) => void;
@@ -31,7 +31,6 @@ export const Credential = ({
   setIsCreate: (isCreate: CredentialType["type"] | null) => void;
   isLoadingCredential: boolean;
   handleStartCreate: (type: CredentialType["type"]) => void;
-  focusPassword?: boolean;
 }) => {
   const iconsSize = 18;
 
@@ -39,8 +38,11 @@ export const Credential = ({
 
   const folders = summaryVault?.folders ?? [];
 
-  const handleEditClick = () => {
+  const [autoFocusId, setAutoFocusId] = useState<string | null>(null);
+
+  const handleEditClick = (focusId: string = "title") => {
     setTempVault(credential || null);
+    setAutoFocusId(focusId);
     setIsEdit(true);
   };
 
@@ -75,6 +77,7 @@ export const Credential = ({
         setIsCreate={setIsCreate}
         handleEditClick={handleEditClick}
         handleCancel={handleCancel}
+        autoFocus={autoFocusId === "title"}
       />
       <div className="flex-1 h-full w-full flex flex-col">
         {tempVault?.type === "login" && (
@@ -86,7 +89,8 @@ export const Credential = ({
             isCreate={isCreate}
             credential={tempVault}
             setCredential={setTempVault}
-            focusPassword={focusPassword}
+            autoFocusId={autoFocusId}
+            setAutoFocusId={setAutoFocusId}
           />
         )}
         {tempVault?.type === "card" && (
@@ -94,9 +98,12 @@ export const Credential = ({
             key={isCreate ? "new" : tempVault.id}
             folders={folders}
             isEdit={isEditable}
+            setIsEdit={setIsEdit}
             isCreate={isCreate}
             credential={tempVault}
             setCredential={setTempVault}
+            autoFocusId={autoFocusId}
+            setAutoFocusId={setAutoFocusId}
           />
         )}
         {tempVault?.type === "note" && (

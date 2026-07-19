@@ -16,7 +16,6 @@ import type {
   LoginCredential,
   Credential,
 } from "@/types/vault";
-import { useState } from "react";
 
 export const Login = ({
   folders,
@@ -25,7 +24,9 @@ export const Login = ({
   isCreate,
   credential,
   setCredential,
-  focusPassword,
+  autoFocusId,
+  setAutoFocusId,
+
 }: {
   folders: FolderType[];
   isEdit: boolean;
@@ -33,10 +34,9 @@ export const Login = ({
   isCreate: Credential["type"] | null;
   credential: LoginCredential;
   setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
-  focusPassword?: boolean;
-  }) => {
-  const [autoFocusId, setAutoFocusId] = useState<string | null>(null);
-
+  autoFocusId: string | null;
+  setAutoFocusId: (id: string | null) => void;
+}) => {
   const handleChange = (
     field: keyof LoginCredential,
     value: string | string[],
@@ -123,16 +123,26 @@ export const Login = ({
         iconTop={Folder}
         topName="DIRETÓRIOS"
         selectedFoldersIds={credential.foldersIds ?? []}
+        autoFocus={autoFocusId === "foldersIds"}
         setSelectedFoldersIds={(ids) => handleChange("foldersIds", ids)}
         folders={folders}
+        onDoubleClick={() => {
+          setAutoFocusId("foldersIds");
+          setIsEdit(true);
+        }}
       />
       <TextArea
         disabled={!isEdit}
         iconTop={NotepadText}
         topName="ANOTAÇÕES"
         placeholder="anotações"
+        autoFocus={autoFocusId === "notes"}
         value={credential.notes}
         onChange={(val) => handleChange("notes", val)}
+        onDoubleClick={() => {
+          setAutoFocusId("notes");
+          setIsEdit(true);
+        }}
       />
     </section>
   );

@@ -1,6 +1,6 @@
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check, type LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export const TextArea = ({
   iconTop: IconTop,
@@ -9,6 +9,8 @@ export const TextArea = ({
   disabled,
   value,
   onChange,
+  autoFocus,
+  onDoubleClick,
 }: {
   iconTop: LucideIcon;
   topName: string;
@@ -16,8 +18,17 @@ export const TextArea = ({
   disabled?: boolean;
   value?: string;
   onChange?: (val: string) => void;
+  autoFocus?: boolean;
+  onDoubleClick?: () => void;
 }) => {
   const [copied, setCopied] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      textAreaRef.current?.focus();
+    }
+  }, [autoFocus, disabled]);
 
   const handleCopy = async (value: string) => {
     await copyToClipboard(value);
@@ -28,7 +39,7 @@ export const TextArea = ({
   };
 
   return (
-    <div className="flex flex-col gap-0.5 w-full max-w-[760px]">
+    <div className="flex flex-col gap-0.5 w-full max-w-[760px]" onDoubleClick={onDoubleClick}>
       <span className="text-[12px] text-zinc-400 font-medium flex items-start gap-1">
         <IconTop size={16} strokeWidth={1.5} />
         <span>{topName}</span>
@@ -36,7 +47,8 @@ export const TextArea = ({
 
       <div className="group relative flex flex-col bg-zinc-900 border border-zinc-800 focus-within:border-zinc-600 transition-colors w-full min-h-[200px]">
         <textarea
-          className="flex-1 bg-transparent text-[14px] px-3 py-2 text-white outline-none placeholder:text-zinc-500 resize-none no-scrollbar text-sm"
+          ref={textAreaRef}
+          className={`flex-1 bg-transparent text-[14px] px-3 py-2 text-white outline-none placeholder:text-zinc-500 resize-none no-scrollbar text-sm ${disabled ? "pointer-events-none" : ""}`}
           placeholder={placeholder}
           disabled={disabled}
           value={value}

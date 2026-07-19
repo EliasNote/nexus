@@ -8,18 +8,36 @@ export const Date = ({
   disabled,
   value,
   onChange,
+  onDoubleClick,
 }: {
   iconTop: LucideIcon;
   topName: string;
   disabled?: boolean;
   value?: string;
   onChange?: (val: string) => void;
+  onDoubleClick?: () => void;
 }) => {
   const [isMonthOpen, setIsMonthOpen] = useState(false);
   const monthDropdownRef = useRef<HTMLDivElement>(null);
+  const monthButtonRef = useRef<HTMLButtonElement>(null);
+  const yearInputRef = useRef<HTMLInputElement>(null);
 
   const [monthVal, yearVal] =
     value && value.includes("/") ? value.split("/") : ["", ""];
+
+  const handleEditTarget = (target: "month" | "year") => {
+    if (target === "month") setIsMonthOpen(true);
+    onDoubleClick?.();
+
+    requestAnimationFrame(() => {
+      if (target === "month") {
+        monthButtonRef.current?.focus();
+      } else {
+        yearInputRef.current?.focus();
+        yearInputRef.current?.select();
+      }
+    });
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,7 +72,7 @@ export const Date = ({
   };
 
   return (
-    <div className="flex w-full items-center justify-center">
+    <div className="flex w-full items-center justify-center outline-none">
       <div className="flex gap-0.5 flex-col w-full max-w-[760px]">
         <div className="flex items-start font-medium gap-1 text-[12px] text-zinc-400">
           <Icontop size={16} strokeWidth={1.5} />
@@ -62,14 +80,19 @@ export const Date = ({
         </div>
 
         <div className="flex gap-4 w-full">
-          <div className="relative flex-1" ref={monthDropdownRef}>
+          <div
+            className="relative flex-1"
+            ref={monthDropdownRef}
+            onDoubleClick={() => handleEditTarget("month")}
+          >
             <button
+              ref={monthButtonRef}
               type="button"
               disabled={disabled}
               onClick={() => setIsMonthOpen(!isMonthOpen)}
               className={`flex items-center justify-between bg-zinc-900 border ${
                 isMonthOpen ? "border-zinc-600" : "border-zinc-800"
-              } h-[45px] w-full px-3 ${!disabled && "cursor-pointer"} transition-colors`}
+              } h-[45px] w-full px-3 ${disabled ? "pointer-events-none" : "cursor-pointer"} transition-colors`}
             >
               <span
                 className={
@@ -102,11 +125,15 @@ export const Date = ({
             )}
           </div>
 
-          <div className="flex-1">
+          <div
+            className="flex-1"
+            onDoubleClick={() => handleEditTarget("year")}
+          >
             <div className="group flex items-center focus-within:border-zinc-600 bg-zinc-900 border border-zinc-800 h-[45px] w-full">
               <input
+                ref={yearInputRef}
                 disabled={disabled}
-                className="flex-1 bg-transparent px-3 text-[14px] text-white outline-none placeholder:text-zinc-500"
+                className={`flex-1 bg-transparent px-3 text-[14px] text-white outline-none placeholder:text-zinc-500 ${disabled ? "pointer-events-none" : ""}`}
                 type="text"
                 pattern="[0-9]*"
                 inputMode="numeric"

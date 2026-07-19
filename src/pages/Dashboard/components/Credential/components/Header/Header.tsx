@@ -3,12 +3,13 @@ import {
   type Credential,
   type CredentialType,
 } from "@/types/vault";
-import { ArrowLeft, Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
+import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
 import { Button } from "./components/Button";
 import { useVaultActions } from "@/hooks/useVaultActions";
+import { useEffect, useRef } from "react";
 
 export const Header = ({
   tempVault,
@@ -22,6 +23,7 @@ export const Header = ({
   setIsCreate,
   handleEditClick,
   handleCancel,
+  autoFocus,
 }: {
   tempVault: Credential;
   setTempVault: React.Dispatch<React.SetStateAction<Credential | null>>;
@@ -31,12 +33,20 @@ export const Header = ({
   setIsEdit: (isEdit: boolean) => void;
   isCreate: CredentialType | null;
   setIsCreate: (isCreate: CredentialType | null) => void;
-  handleEditClick: () => void;
+  handleEditClick: (id?: string) => void;
   handleCancel: () => void;
   handleRemoveCredential: () => void;
+  autoFocus?: boolean;
 }) => {
   const isWriting = isEdit || isCreate;
   const { saveCredential, deleteCredential } = useVaultActions();
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (autoFocus && isWriting) {
+      titleInputRef.current?.focus();
+    }
+  }, [autoFocus, isWriting]);
   const onSave = async (isTrashed: boolean, isRestore: boolean) => {
     await saveCredential(tempVault, isTrashed, isRestore);
 
@@ -72,27 +82,28 @@ export const Header = ({
   return (
     <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-zinc-800">
       <div className="flex gap-2.5">
-        <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">          {(tempVault?.title?.[0] || "?").toUpperCase()}
+        <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">
+          {(tempVault?.title?.[0] || "?").toUpperCase()}
         </div>
 
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start" onDoubleClick={() => !isWriting && handleEditClick()}>
           {isWriting ? (
             <div className="group flex items-center focus-within:border-zinc-600 bg-zinc-900 border border-zinc-800 h-[35px] w-full min-w-[300px]">
               <input
+                ref={titleInputRef}
                 type="text"
-                className="flex-1 bg-transparent px-3 text-[16px] text-white font-bold outline-none placeholder:text-zinc-500"
+                className={`flex-1 bg-transparent px-3 text-[16px] text-white font-bold outline-none placeholder:text-zinc-500 ${!isWriting ? "pointer-events-none" : ""}`}
                 value={tempVault?.title || ""}
                 onChange={(e) =>
                   setTempVault((prev) =>
                     prev ? { ...prev, title: e.target.value } : null,
                   )
                 }
-                autoFocus
                 placeholder="Título da credencial"
               />
             </div>
           ) : (
-            <h2 className="text-[18px] text-zinc-300 font-bold max-w-100 truncate">
+            <h2 className="text-[18px] text-zinc-300 font-bold max-w-100 truncate cursor-default">
               {tempVault?.title}
             </h2>
           )}
