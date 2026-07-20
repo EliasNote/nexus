@@ -48,7 +48,7 @@ export const Login = ({
   };
 
   return (
-    <section className="flex flex-1 h-full flex-col gap-4 w-full items-center justify-center py-10 overflow-y-auto no-scrollbar">
+    <section className="flex flex-1 min-h-full flex-col w-full gap-4 items-center py-10 overflow-y-auto">
       <Input
         disabled={!isEdit}
         placeholder="Usuário/email"
@@ -123,9 +123,9 @@ export const Login = ({
         iconTop={Folder}
         topName="DIRETÓRIOS"
         selectedFoldersIds={credential.foldersIds ?? []}
-        autoFocus={autoFocusId === "foldersIds"}
         setSelectedFoldersIds={(ids) => handleChange("foldersIds", ids)}
         folders={folders}
+        autoFocus={autoFocusId === "foldersIds"}
         onDoubleClick={() => {
           setAutoFocusId("foldersIds");
           setIsEdit(true);
@@ -136,9 +136,9 @@ export const Login = ({
         iconTop={NotepadText}
         topName="ANOTAÇÕES"
         placeholder="anotações"
-        autoFocus={autoFocusId === "notes"}
         value={credential.notes}
         onChange={(val) => handleChange("notes", val)}
+        autoFocus={autoFocusId === "notes"}
         onDoubleClick={() => {
           setAutoFocusId("notes");
           setIsEdit(true);

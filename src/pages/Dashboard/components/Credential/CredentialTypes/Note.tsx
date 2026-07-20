@@ -10,13 +10,19 @@ import type {
 export const Note = ({
   folders,
   isEdit,
+  setIsEdit,
   credential,
   setCredential,
+  autoFocusId,
+  setAutoFocusId,
 }: {
   folders: FolderType[];
   isEdit: boolean;
+  setIsEdit: (isEdit: boolean) => void;
   credential: NoteCredential;
   setCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
+  autoFocusId: string | null;
+  setAutoFocusId: (id: string | null) => void;
 }) => {
   const handleChange = (
     field: keyof NoteCredential,
@@ -29,7 +35,7 @@ export const Note = ({
   };
 
   return (
-    <section className="flex flex-1 h-full flex-col gap-4 w-full items-center justify-center py-10 overflow-y-auto no-scrollbar">
+    <section className="flex flex-1 min-h-full flex-col w-full gap-4 items-center py-10 overflow-y-auto">
       <DirectorySelect
         disabled={!isEdit}
         isEdit={isEdit}
@@ -38,6 +44,11 @@ export const Note = ({
         selectedFoldersIds={credential.foldersIds ?? []}
         setSelectedFoldersIds={(ids) => handleChange("foldersIds", ids)}
         folders={folders}
+        autoFocus={autoFocusId === "foldersIds"}
+        onDoubleClick={() => {
+          setAutoFocusId("foldersIds");
+          setIsEdit(true);
+        }}
       />
       <TextArea
         disabled={!isEdit}
@@ -46,6 +57,11 @@ export const Note = ({
         placeholder="anotações"
         value={credential.notes}
         onChange={(val) => handleChange("notes", val)}
+        autoFocus={autoFocusId === "notes"}
+        onDoubleClick={() => {
+          setAutoFocusId("notes");
+          setIsEdit(true);
+        }}
       />
     </section>
   );

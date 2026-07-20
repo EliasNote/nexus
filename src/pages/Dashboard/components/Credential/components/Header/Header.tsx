@@ -80,7 +80,7 @@ export const Header = ({
   };
 
   return (
-    <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-zinc-800">
+    <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-zinc-800 shrink-0">
       <div className="flex gap-2.5">
         <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">
           {(tempVault?.title?.[0] || "?").toUpperCase()}

@@ -49,7 +49,7 @@ export const Card = ({
   };
 
   return (
-    <section className="flex flex-1 h-full flex-col gap-4 w-full items-center justify-center py-10 overflow-y-auto">
+    <section className="flex flex-1 min-h-full flex-col w-full gap-4 items-center py-10 overflow-y-auto">
       <Input
         disabled={!isEdit}
         placeholder="Nome do Titular"

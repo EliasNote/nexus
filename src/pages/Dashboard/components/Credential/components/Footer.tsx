@@ -17,7 +17,7 @@ export const Footer = ({
 
   return (
     <div
-      className={`w-full flex justify-between items-center border-t border-zinc-800 px-[40px] py-[30px]`}
+      className={`w-full flex justify-between items-center border-t border-zinc-800 px-[40px] py-[30px] shrink-0`}
     >
       {!isCreate && (
         <>

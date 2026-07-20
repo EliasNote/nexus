@@ -62,6 +62,16 @@ const Dashboard = () => {
     }
   }, [selected, summaryVault, folders]);
 
+  const handleSelectCredential = (id: string | null) => {
+    if (isEdit || isCreate) {
+      const shouldDiscard = window.confirm(
+        "Descartar as alterações e abrir outra credencial?",
+      );
+      if (!shouldDiscard) return;
+    }
+    setSelectedSideCredential(id);
+  };
+
   useEffect(() => {
     if (selectedSideCredential && vault) {
       cryptoService
@@ -69,12 +79,12 @@ const Dashboard = () => {
         .then((data) => {
           setCredential(data);
           setTempVault(data);
-          setIsEdit(!isEditFromAudit ? false : true);
+          setIsEdit(isEditFromAudit);
           setIsCreate(null);
           setIsEditFromAudit(false);
         });
     }
-  }, [selectedSideCredential, vault, cryptoService]);
+  }, [selectedSideCredential, vault, isEditFromAudit]);
 
   const newEntry = (type: CredentialType["type"]) =>
     ({
@@ -128,7 +138,7 @@ const Dashboard = () => {
         <>
           <SidebarCredentials
             selectedSideCredential={selectedSideCredential}
-            setSelectedSideCredential={setSelectedSideCredential}
+            setSelectedSideCredential={handleSelectCredential}
             credentials={credentials}
           />
           {(selectedSideCredential && credential && tempVault) || isCreate ? (

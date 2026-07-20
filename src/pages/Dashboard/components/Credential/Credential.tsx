@@ -79,7 +79,7 @@ export const Credential = ({
         handleCancel={handleCancel}
         autoFocus={autoFocusId === "title"}
       />
-      <div className="flex-1 h-full w-full flex flex-col">
+      <div className="flex flex-1 h-full w-full flex-col overflow-y-auto">
         {tempVault?.type === "login" && (
           <Login
             key={isCreate ? "new" : tempVault.id}
@@ -111,8 +111,11 @@ export const Credential = ({
             key={isCreate ? "new" : tempVault.id}
             folders={folders}
             isEdit={isEditable}
+            setIsEdit={setIsEdit}
             credential={tempVault}
             setCredential={setTempVault}
+            autoFocusId={autoFocusId}
+            setAutoFocusId={setAutoFocusId}
           />
         )}
       </div>
