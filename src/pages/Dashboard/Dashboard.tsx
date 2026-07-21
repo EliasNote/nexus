@@ -123,7 +123,7 @@ const Dashboard = () => {
   };
 
   return (
-    <main className="flex bg-[#0A0A0A] max-h-screen w-screen">
+    <main className="flex bg-[#0A0A0A] h-screen w-screen">
       <Sidebar
         selected={selected}
         setSelected={setSelected}

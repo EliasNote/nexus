@@ -82,3 +82,13 @@ export function formatGitHubRemoteUrl(value: string): string {
 
   return `https://github.com/${owner}/${cleanRepository}.git`;
 }
+
+export function getHeadings(content: string) {
+  return content
+    .split("\n")
+    .filter((line) => /^#\s/.test(line))
+    .map((line) => ({
+      level: 1,
+      text: line.replace(/^#{1,6}\s*/, "").trim(),
+    }));
+}

@@ -5,8 +5,11 @@ import { useStorageSync } from "./hooks/storage/useStorageSync";
 import { useCloudStore } from "./hooks/useCloudStore";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Home from "./pages/Home/Home";
+import Manual from "./pages/Manual/Manual";
 
 export const dashboardRoute = "/dashboard";
+export const manualRoute = "/manual";
+
 
 function App() {
   const token = useCloudStore((state) => state.accessToken);
@@ -36,6 +39,7 @@ function App() {
           path={dashboardRoute}
           element={<ProtectedRoute children={<Dashboard />} />}
         />
+        <Route path={manualRoute} element={<Manual />} />
       </Routes>
     </HashRouter>
   );

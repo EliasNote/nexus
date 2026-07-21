@@ -1,0 +1,88 @@
+# 1. Introdução
+Bem-vindo(a) ao Nexus, um gerenciador de senhas com foco na descentralização e permitir a total autonomia dos usuários sobre suas credenciais.
+
+Este é um projeto de código aberto construído com React + Tailwind para a criação das interfaces e Tauri para converter em uma aplicação desktop.
+
+
+# 2. Avisos
+<div className="border border-red-500 bg-red-500/10 p-3 text-red-500 mt-1 mb-3">
+**Atenção**: Este é um projeto de código aberto e totalmente gratuito, o Nexus não se responsabiliza por perdas causadas pela ausência de backups, uso inadequado, falhas de serviços externos ou modificações não oficiais no software.
+</div>
+
+O Nexus foi desenvolvido para manter o usuário no controle de suas credenciais. Por isso:
+- A senha mestra não é enviada nem armazenada pelo Nexus;
+- O Nexus não mantém cópias do cofre em servidores próprios;
+- Uma senha mestra esquecida não pode ser recuperada;
+- Um cofre perdido, excluído ou corrompido não pode ser restaurado sem um backup válido.
+
+Por fim, Algumas funcionalidades podem depender de serviços externos, como Google Drive, GitHub e Pwned Passwords. O Nexus não controla a disponibilidade, as políticas ou eventuais alterações desses serviços.
+
+# 3. Boas Práticas
+
+## 3.1. Proteja sua senha mestra
+A senha mestra protege o acesso a todo o cofre. Escolha uma senha longa, exclusiva e que não seja utilizada em nenhum outro serviço.
+
+- Não compartilhe sua senha mestra;
+- Não salve a senha mestra dentro do próprio cofre;
+- Evite digitá-la em computadores públicos ou desconhecidos;
+- Prefira uma frase-senha longa, fácil para você lembrar e difícil de adivinhar;
+- Não use nomes, datas, documentos ou informações pessoais previsíveis.
+
+## 3.2. Use uma senha diferente em cada serviço
+Use uma senha exclusiva para cada conta. Quando uma mesma senha é reutilizada, o vazamento de um único serviço pode comprometer todas as contas que utilizam essa credencial.
+
+O gerador de senhas do Nexus pode ser utilizado para criar senhas diferentes e difíceis de adivinhar.
+
+## 3.3. Verifique periodicamente a auditoria
+A auditoria do Nexus ajuda a identificar credenciais que exigem atenção:
+
+- Senhas encontradas em vazamentos conhecidos;
+- Senhas fracas;
+- Senhas reutilizadas;
+- Senhas que não são alteradas há mais de 90 dias e podem precisar de revisão.
+
+O tempo desde a última alteração, isoladamente, não significa que uma senha esteja comprometida. Esse alerta serve como lembrete para a sugestão de renovação da senha.
+
+Ao verificar vazamentos, o Nexus não envia sua senha completa. Ela é transformada localmente em um hash, e somente os cinco primeiros caracteres desse hash são consultados no serviço Pwned Passwords.
+
+## 3.4. Troque senhas quando houver risco
+
+Troque imediatamente uma senha quando:
+
+- Ela aparecer na auditoria de vazamentos;
+- Tiver sido reutilizada em outra conta;
+- O serviço informar um incidente de segurança;
+- Você suspeitar de acesso indevido;
+- Ela tiver sido compartilhada;
+- O dispositivo onde foi utilizada tiver sido comprometido.
+
+Não é necessário trocar automaticamente todas as senhas em intervalos fixos quando não houver indícios de comprometimento. Trocas frequentes e sem necessidade podem incentivar variações previsíveis de senhas anteriores.
+
+## 3.5. Cuidados com o arquivo do cofre
+No armazenamento local e na sincronização por Git, o cofre é salvo no arquivo `nexus-vault.json`. Em outros provedores, o nome e a localização do arquivo podem variar.
+
+Embora o conteúdo do cofre seja criptografado:
+
+- Não altere manualmente o conteúdo do arquivo;
+- Não renomeie ou mova o arquivo enquanto o Nexus estiver aberto;
+- Não exclua o arquivo ou sua pasta sem possuir um backup válido;
+- Proteja sua conta do sistema operacional;
+- Mantenha o dispositivo atualizado e protegido contra malware.
+
+# 4. Como Usar?
+## 4.1. Tutorial de Acesso
+1. Na primeira tela, clique na opção "Começar";
+<img src="tutorial_acesso_1.webp" alt="Tela inicial do Nexus" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+
+2. Na segunda tela será exibido as opções de armazenamento, selecione a opção desejada e clique em "Continuar";
+<img src="tutorial_acesso_2.webp" alt="Tela de seleção de armazenamento" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+<p className="mt-[-28px]">Obs: Algumas opções de armazenamento em núvem necessitam a liberação de acesso;</p>
+<img src="tutorial_acesso_3.webp" alt="Tela de conclusão" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+
+
+3. Na terceira e última tela, digite sua senha e clique em "Concluir";
+<img src="tutorial_acesso_4.webp" alt="Tela de conclusão" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+
+<div className="rounded-lg bg-blue-500 p-6 text-white">
+  Esse bloco usa Tailwind.
+</div>

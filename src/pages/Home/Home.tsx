@@ -2,7 +2,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { Eye } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dashboardRoute } from "@/App";
+import { dashboardRoute, manualRoute } from "@/App";
 import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { motion } from "framer-motion";
@@ -187,7 +187,7 @@ export const Home = () => {
                 <button className={nextButtonStyle} onClick={nextStep}>
                   Começar
                 </button>
-                <button className={prevButtonStyle}>Como usar</button>
+                <button className={prevButtonStyle} onClick={() => navigate(manualRoute)}>Manual</button>
               </div>
             </div>
           </Step>
