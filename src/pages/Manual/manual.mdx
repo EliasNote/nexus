@@ -1,4 +1,4 @@
-# 1. Introdução
+﻿# 1. Introdução
 Bem-vindo(a) ao Nexus, um gerenciador de senhas com foco na descentralização e permitir a total autonomia dos usuários sobre suas credenciais.
 
 Este é um projeto de código aberto construído com React + Tailwind para a criação das interfaces e Tauri para converter em uma aplicação desktop.
@@ -70,7 +70,7 @@ Embora o conteúdo do cofre seja criptografado:
 - Mantenha o dispositivo atualizado e protegido contra malware.
 
 # 4. Como Usar?
-## 4.1. Tutorial de Acesso
+## 4.1. Primeiro Acesso
 1. Na primeira tela, clique na opção "Começar";
 <img src="tutorial_acesso_1.webp" alt="Tela inicial do Nexus" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
 
@@ -83,6 +83,16 @@ Embora o conteúdo do cofre seja criptografado:
 3. Na terceira e última tela, digite sua senha e clique em "Concluir";
 <img src="tutorial_acesso_4.webp" alt="Tela de conclusão" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
 
-<div className="rounded-lg bg-blue-500 p-6 text-white">
-  Esse bloco usa Tailwind.
-</div>
+<p className="mt-[-28px]">Obs: No primeiro acesso a senha que digitar será a senha oficial de criptografia do seu cofre, a partir da segunda utilização deve ser digitado essa mesma senha para acessar o seu cofre novamente;</p>
+
+# 5. Informações Técnicas
+
+## 5.1. Como o Nexus funciona?
+
+O Nexus armazena as credenciais em um cofre criptografado. No primeiro acesso, uma chave de criptografia é gerada aleatoriamente para proteger o conteúdo do cofre. A senha mestra, combinada com um salt exclusivo, é processada pelo Argon2id e utilizada para proteger essa chave.
+
+Ao abrir um cofre existente, o mesmo processo é realizado com a senha informada. Se a senha estiver correta, a chave do cofre é desbloqueada e mantida apenas na memória enquanto a aplicação estiver em uso. Ao sair, ela é removida da memória.
+
+As credenciais e os diretórios são criptografados separadamente com AES-256-GCM antes de serem salvos. Assim, o armazenamento selecionado — local, Google Drive ou repositório Git — recebe somente o conteúdo criptografado. A senha mestra não é armazenada no cofre nem enviada ao provedor de armazenamento.
+
+O arquivo também contém os parâmetros necessários para derivar a chave e descriptografar os dados, como salt, IV e tag de autenticação. Essas informações não revelam a senha nem o conteúdo do cofre.
