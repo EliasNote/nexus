@@ -128,7 +128,7 @@ export const Audit = ({
   };
 
   return (
-    <section className="flex flex-col items-center h-screen w-full p-10">
+    <section className="flex flex-col items-center h-full w-full p-10">
       <div className="max-w-[700px] w-full h-full flex flex-col gap-5">
         <div className="flex items-center flex-col w-full">
           <div className="flex items-center justify-between mb-8 w-full">

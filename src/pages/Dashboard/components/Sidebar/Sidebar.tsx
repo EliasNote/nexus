@@ -99,7 +99,7 @@ const Sidebar = ({
   }, []);
 
   return (
-    <section className="flex flex-col gap-[20px] items-start border-r border-zinc-800 h-screen overflow-hidden max-w-[248px] w-full">
+    <section className="flex flex-col gap-[20px] items-start border-r border-zinc-800 h-full overflow-hidden max-w-[248px] w-full">
       <div className="w-full">
         <div className="flex items-center gap-[10px] justify-center h-[60px] py-[20px]">
           <img src="/logo.svg" alt="Logo" className="w-[40px]" />

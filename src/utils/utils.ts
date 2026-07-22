@@ -84,11 +84,12 @@ export function formatGitHubRemoteUrl(value: string): string {
 }
 
 export function getHeadings(content: string) {
-  return content
-    .split("\n")
-    .filter((line) => /^#\s/.test(line))
-    .map((line) => ({
-      level: 1,
-      text: line.replace(/^#{1,6}\s*/, "").trim(),
-    }));
-}
+    return content
+      .replace(/^\uFEFF/, "")
+      .split("\n")
+      .filter((line) => /^#\s/.test(line))
+      .map((line) => ({
+        level: 1,
+        text: line.replace(/^#{1,6}\s*/, "").trim(),
+      }));
+  }

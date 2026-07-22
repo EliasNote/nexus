@@ -69,6 +69,9 @@ const Dashboard = () => {
       );
       if (!shouldDiscard) return;
     }
+
+    setIsEditFromAudit(false);
+    setIsEdit(false);
     setSelectedSideCredential(id);
   };
 
@@ -79,12 +82,10 @@ const Dashboard = () => {
         .then((data) => {
           setCredential(data);
           setTempVault(data);
-          setIsEdit(isEditFromAudit);
           setIsCreate(null);
-          setIsEditFromAudit(false);
         });
     }
-  }, [selectedSideCredential, vault, isEditFromAudit]);
+  }, [selectedSideCredential, vault]);
 
   const newEntry = (type: CredentialType["type"]) =>
     ({
@@ -109,6 +110,7 @@ const Dashboard = () => {
     }) as CredentialType;
 
   const handleStartCreate = (type: CredentialType["type"]) => {
+    setIsEditFromAudit(false);
     setSelectedSideCredential(null);
     setTempVault(newEntry(type));
     setIsCreate(type);
@@ -123,7 +125,7 @@ const Dashboard = () => {
   };
 
   return (
-    <main className="flex bg-[#0A0A0A] h-screen w-screen">
+    <main className="flex bg-dark-background h-full w-full">
       <Sidebar
         selected={selected}
         setSelected={setSelected}
@@ -148,6 +150,7 @@ const Dashboard = () => {
               isEdit={isEdit}
               setIsEdit={setIsEdit}
               isCreate={isCreate}
+              isEditFromAudit={isEditFromAudit}
               setIsCreate={setIsCreate}
               setSelectedSideCredential={setSelectedSideCredential}
               credential={credential!}

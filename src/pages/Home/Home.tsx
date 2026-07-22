@@ -167,7 +167,7 @@ export const Home = () => {
     (activeProvider === "google" && isTokenValid);
 
   return (
-    <div className="relative isolate min-h-screen overflow-hidden text-white">
+    <div className="relative h-full overflow-hidden text-white">
       <LetterGlitch
         glitchSpeed={25}
         centerVignette={true}
@@ -175,7 +175,7 @@ export const Home = () => {
         smooth={false}
         classname="fixed inset-0 z-0 pointer-events-none"
       />
-      <section className="relative z-10 flex min-h-screen items-center justify-center">
+      <section className="relative z-10 flex h-full items-center justify-center">
         {currentStep === 0 && (
           <Step key="step0" direction={direction}>
             <div className="flex flex-col items-center justify-center gap-[20px]">

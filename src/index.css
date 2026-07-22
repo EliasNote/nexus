@@ -3,6 +3,7 @@
 @theme inline {
     --color-brand: #2563eb;
     --color-red-alert: #dc2626;
+    --color-dark-background: #0A0A0A;
     --font-family-base: "JetBrains Mono", monospace;
 }
 
@@ -70,6 +71,11 @@
     color: #ef4444;
 }
 
+:where(.markdown-content > p > a) {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -91,4 +97,37 @@ input::-webkit-credentials-auto-fill-button {
     pointer-events: none;
     position: absolute;
     right: 0;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #3f3f46 #0a0a0a;
+}
+
+/* Tauri WebView2, Chrome e Edge */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    border: 2px solid #0a0a0a;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
+}
+
+*::-webkit-scrollbar-corner {
+    background: #0a0a0a;
+}
+
+*::-webkit-scrollbar-button {
+    display: none;
 }

@@ -1,4 +1,4 @@
-﻿# 1. Introdução
+# 1. Introdução
 Bem-vindo(a) ao Nexus, um gerenciador de senhas com foco na descentralização e permitir a total autonomia dos usuários sobre suas credenciais.
 
 Este é um projeto de código aberto construído com React + Tailwind para a criação das interfaces e Tauri para converter em uma aplicação desktop.
@@ -10,8 +10,6 @@ Este é um projeto de código aberto construído com React + Tailwind para a cri
 </div>
 
 O Nexus foi desenvolvido para manter o usuário no controle de suas credenciais. Por isso:
-- A senha mestra não é enviada nem armazenada pelo Nexus;
-- O Nexus não mantém cópias do cofre em servidores próprios;
 - Uma senha mestra esquecida não pode ser recuperada;
 - Um cofre perdido, excluído ou corrompido não pode ser restaurado sem um backup válido.
 
@@ -28,7 +26,7 @@ A senha mestra protege o acesso a todo o cofre. Escolha uma senha longa, exclusi
 - Prefira uma frase-senha longa, fácil para você lembrar e difícil de adivinhar;
 - Não use nomes, datas, documentos ou informações pessoais previsíveis.
 
-## 3.2. Use uma senha diferente em cada serviço
+## 3.2. Use uma senha diferente em cada credencial
 Use uma senha exclusiva para cada conta. Quando uma mesma senha é reutilizada, o vazamento de um único serviço pode comprometer todas as contas que utilizam essa credencial.
 
 O gerador de senhas do Nexus pode ser utilizado para criar senhas diferentes e difíceis de adivinhar.
@@ -59,8 +57,6 @@ Troque imediatamente uma senha quando:
 Não é necessário trocar automaticamente todas as senhas em intervalos fixos quando não houver indícios de comprometimento. Trocas frequentes e sem necessidade podem incentivar variações previsíveis de senhas anteriores.
 
 ## 3.5. Cuidados com o arquivo do cofre
-No armazenamento local e na sincronização por Git, o cofre é salvo no arquivo `nexus-vault.json`. Em outros provedores, o nome e a localização do arquivo podem variar.
-
 Embora o conteúdo do cofre seja criptografado:
 
 - Não altere manualmente o conteúdo do arquivo;
@@ -69,30 +65,74 @@ Embora o conteúdo do cofre seja criptografado:
 - Proteja sua conta do sistema operacional;
 - Mantenha o dispositivo atualizado e protegido contra malware.
 
-# 4. Como Usar?
+# 4. Orientações de Uso
+
 ## 4.1. Primeiro Acesso
 1. Na primeira tela, clique na opção "Começar";
-<img src="tutorial_acesso_1.webp" alt="Tela inicial do Nexus" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+<img src="tutorial_acesso_1.webp" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
 
 2. Na segunda tela será exibido as opções de armazenamento, selecione a opção desejada e clique em "Continuar";
-<img src="tutorial_acesso_2.webp" alt="Tela de seleção de armazenamento" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+<img src="tutorial_acesso_2.webp" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-16"/>
 <p className="mt-[-28px]">Obs: Algumas opções de armazenamento em núvem necessitam a liberação de acesso;</p>
-<img src="tutorial_acesso_3.webp" alt="Tela de conclusão" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
-
+<img src="tutorial_acesso_3.webp" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
 
 3. Na terceira e última tela, digite sua senha e clique em "Concluir";
-<img src="tutorial_acesso_4.webp" alt="Tela de conclusão" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+<img src="tutorial_acesso_4.webp" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
 
-<p className="mt-[-28px]">Obs: No primeiro acesso a senha que digitar será a senha oficial de criptografia do seu cofre, a partir da segunda utilização deve ser digitado essa mesma senha para acessar o seu cofre novamente;</p>
+<p className="mt-[-28px]">Obs: No primeiro acesso a senha que digitar será a senha oficial de criptografia do seu cofre, a partir da segunda utilização deve ser digitado essa mesma senha para acessar novamente;</p>
+
+## 4.2. Sincronização do Cofre
+
+O Nexus suporta sincronização automática com armazenamento em nuvem e serviços locais, permitindo atualização automática das últimas modificações realizadas no cofre.
+
+Por padrão, é feita uma verificação períódica a cada 1 minuto se o cofre teve alguma modificação, e se houver, salva as modificações no serviço de armazenamento selecioado na tela inicial.
+
+Entretando, também oferece a opção de sincronização manual no botão chamado "SINCRONIZAR" que fica localizado no canto inferior esquerdo da tela principal. Se o cofre não foi modificado, o botão ficará desabilitado como na imagem abaixo.
+<img src="sincronizacao_1.webp" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
+
+Se o cofre foi modificado, o botão "SINCRONIZAR" ficará habilitado como na imagem abaixo e permitirá que o usuário sincronize manualmente as modificações clicando no mesmo.
+<img src="sincronizacao_2.webp" className="w-full max-w-[1000px] rounded-sm border border-zinc-800 mb-10"/>
 
 # 5. Informações Técnicas
 
-## 5.1. Como o Nexus funciona?
+O Nexus foi desenvolvido para que todas as operações envolvendo dados sensíveis ocorram no próprio dispositivo do usuário. Isso significa que a senha mestra, a criptografia e a descriptografia das credenciais acontecem localmente, sem depender de um servidor central.
 
-O Nexus armazena as credenciais em um cofre criptografado. No primeiro acesso, uma chave de criptografia é gerada aleatoriamente para proteger o conteúdo do cofre. A senha mestra, combinada com um salt exclusivo, é processada pelo Argon2id e utilizada para proteger essa chave.
+## 5.1. Criptografia do cofre
 
-Ao abrir um cofre existente, o mesmo processo é realizado com a senha informada. Se a senha estiver correta, a chave do cofre é desbloqueada e mantida apenas na memória enquanto a aplicação estiver em uso. Ao sair, ela é removida da memória.
+O Nexus utiliza o algoritmo AES-256-GCM para criptografar o conteúdo do cofre. Além de impedir a leitura dos dados sem a chave correta, esse modo de operação permite verificar sua autenticidade e detectar alterações ou corrupção no conteúdo criptografado.
 
-As credenciais e os diretórios são criptografados separadamente com AES-256-GCM antes de serem salvos. Assim, o armazenamento selecionado — local, Google Drive ou repositório Git — recebe somente o conteúdo criptografado. A senha mestra não é armazenada no cofre nem enviada ao provedor de armazenamento.
+Na criação do cofre, o Nexus gera aleatoriamente uma chave de dados de 256 bits, chamada DEK (*Data Encryption Key*). Essa chave é utilizada pelo AES-256-GCM para criptografar as credenciais e os diretórios.
 
-O arquivo também contém os parâmetros necessários para derivar a chave e descriptografar os dados, como salt, IV e tag de autenticação. Essas informações não revelam a senha nem o conteúdo do cofre.
+Cada credencial é criptografada individualmente, enquanto a lista de diretórios é criptografada separadamente. Para cada operação de criptografia é gerado um vetor de inicialização (IV) aleatório de 12 bytes. O resultado inclui uma etiqueta de autenticação de 128 bits, utilizada pelo AES-GCM para validar o conteúdo durante a descriptografia.
+
+A DEK é protegida por outra chave, chamada KEK (*Key Encryption Key*), e armazenada no cofre como `encrypted_dek`. Ao abrir o cofre, a KEK é gerada novamente a partir da senha mestra e utilizada para descriptografar a DEK. Esse modelo é conhecido como criptografia de envelope.
+
+Depois de desbloqueada, a DEK permanece apenas na memória do processo responsável pelas operações criptográficas, como uma chave não exportável. Ao sair do cofre, a referência mantida pelo Nexus é removida da memória. A senha mestra e a KEK não são armazenadas no arquivo do cofre.
+
+## 5.2. Derivação da KEK
+
+A senha mestra não é utilizada diretamente para criptografar as credenciais. O Nexus utiliza o Argon2id para derivar a KEK a partir da senha mestra e de um *salt* aleatório de 16 bytes.
+
+Atualmente, a derivação utiliza os seguintes parâmetros:
+
+- Memória: 65.536 KiB (64 MiB);
+- Iterações: 3;
+- Paralelismo: 1;
+- Tamanho da chave derivada: 256 bits.
+
+O *salt* não precisa ser secreto e é armazenado no próprio arquivo do cofre. Sua função é fazer com que senhas mestras iguais produzam chaves diferentes em cofres distintos e dificultar tentativas de descoberta da senha.
+## 5.3. Armazenamento dos dados
+
+Independentemente do local escolhido para armazenar o cofre, o Nexus trabalha apenas com arquivos previamente criptografados.
+
+Quando utilizado armazenamento em nuvem ou um repositório Git, os serviços recebem somente o conteúdo criptografado do cofre.
+
+Isso significa que esses serviços armazenam o arquivo, mas não possuem acesso às credenciais nem à senha mestra.
+
+## 5.4. Verificação de senhas comprometidas
+
+O Nexus utiliza o serviço gratuito oferecido pelo site <a href="https://haveibeenpwned.com/" target="_blank">Have I Been Pwned</a>, isso permite que o nexus verifique se uma senha já apareceu em vazamentos públicos conhecidos.
+
+Durante essa consulta a senha nunca é enviada diretamente, para isso é calculado um hash da senha, somente uma pequena parte da mesma é enviada para o serviço de consulta e com o conteúdo retornado ocorre uma comparação final dentro do próprio dispositivo do usuário.
+
+Dessa forma, a senha continua protegida durante todo o processo de verificação.

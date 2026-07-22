@@ -16,6 +16,7 @@ export const Credential = ({
   isEdit,
   setIsEdit,
   isCreate,
+  isEditFromAudit,
   setIsCreate,
   isLoadingCredential,
   handleStartCreate,
@@ -28,6 +29,7 @@ export const Credential = ({
   isEdit: boolean;
   setIsEdit: (isEdit: boolean) => void;
   isCreate: CredentialType["type"] | null;
+  isEditFromAudit: boolean;
   setIsCreate: (isCreate: CredentialType["type"] | null) => void;
   isLoadingCredential: boolean;
   handleStartCreate: (type: CredentialType["type"]) => void;
@@ -38,7 +40,7 @@ export const Credential = ({
 
   const folders = summaryVault?.folders ?? [];
 
-  const [autoFocusId, setAutoFocusId] = useState<string | null>(null);
+  const [autoFocusId, setAutoFocusId] = useState<string | null>(isEditFromAudit ? "password" : null);
 
   const handleEditClick = (focusId: string = "title") => {
     setTempVault(credential || null);
@@ -64,7 +66,7 @@ export const Credential = ({
   };
 
   return (
-    <section className="flex flex-col h-screen w-full">
+    <section className="flex flex-col h-full w-full">
       <Header
         tempVault={tempVault}
         setTempVault={setTempVault}

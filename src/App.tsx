@@ -6,6 +6,8 @@ import { useCloudStore } from "./hooks/useCloudStore";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Home from "./pages/Home/Home";
 import Manual from "./pages/Manual/Manual";
+import { TitleBar } from "./desktop/TitleBar";
+import { isTauri } from "@tauri-apps/api/core";
 
 export const dashboardRoute = "/dashboard";
 export const manualRoute = "/manual";
@@ -33,15 +35,23 @@ function App() {
 
   return (
     <HashRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path={dashboardRoute}
-          element={<ProtectedRoute children={<Dashboard />} />}
-        />
-        <Route path={manualRoute} element={<Manual />} />
-      </Routes>
-    </HashRouter>
+          <div className="flex h-screen flex-col overflow-hidden bg-dark-background">
+            {isTauri() && <TitleBar />}
+
+            <div className="min-h-0 flex-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+
+                <Route
+                  path={dashboardRoute}
+                  element={<ProtectedRoute children={<Dashboard />} />}
+                />
+
+                <Route path={manualRoute} element={<Manual />} />
+              </Routes>
+            </div>
+          </div>
+        </HashRouter>
   );
 }
 
