@@ -62,6 +62,15 @@ const Dashboard = () => {
     }
   }, [selected, summaryVault, folders]);
 
+  const clearDecryptedCredential = (id?: string | null) => {
+    setCredential(null);
+    setTempVault(null);
+    setSelectedSideCredential(id ?? null);
+    setIsEdit(false);
+    setIsEditFromAudit(false);
+    setIsCreate(null);
+  };
+
   const handleSelectCredential = (id: string | null) => {
     if (isEdit || isCreate) {
       const shouldDiscard = window.confirm(
@@ -70,9 +79,7 @@ const Dashboard = () => {
       if (!shouldDiscard) return;
     }
 
-    setIsEditFromAudit(false);
-    setIsEdit(false);
-    setSelectedSideCredential(id);
+    clearDecryptedCredential(id);
   };
 
   useEffect(() => {
@@ -110,17 +117,17 @@ const Dashboard = () => {
     }) as CredentialType;
 
   const handleStartCreate = (type: CredentialType["type"]) => {
-    setIsEditFromAudit(false);
-    setSelectedSideCredential(null);
+    clearDecryptedCredential();
+
     setTempVault(newEntry(type));
     setIsCreate(type);
-    setIsEdit(false);
   };
 
   const handleChangeCredentialFromAudit = (credentialId: string) => {
-    setIsEditFromAudit(true);
+    clearDecryptedCredential(credentialId);
+
     setSelected(SIDEBAR_BUTTONS_IDS.all);
-    setSelectedSideCredential(credentialId);
+    setIsEditFromAudit(true);
     setIsEdit(true);
   };
 
