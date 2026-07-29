@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
+type IconType = LucideIcon | React.ComponentType<{ size?: number; className?: string }>;
+
 export const Button = ({
   iconsSize,
   icon: Icon,
@@ -10,7 +12,7 @@ export const Button = ({
   children,
 }: {
   iconsSize?: number;
-  icon?: LucideIcon;
+  icon?: IconType;
   color: string;
   label?: string;
   onClick?: () => void;
@@ -23,7 +25,7 @@ export const Button = ({
       disabled={disabled}
       className={`flex gap-1.25 items-center ${children ? "px-2" : "px-3.5"} py-2 border-2 font-bold ${color} hover:text-white cursor-pointer`}
     >
-      {Icon && <Icon size={iconsSize} />}
+      {Icon && <Icon size={iconsSize} className="size-[22px]" />}
       {label && <span>{label}</span>}
       {children && <>{children}</>}
     </button>
