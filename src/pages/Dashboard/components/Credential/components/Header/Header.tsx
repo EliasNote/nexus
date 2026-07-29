@@ -3,7 +3,7 @@ import {
   type Credential,
   type CredentialType,
 } from "@/types/vault";
-import { Trash2, X, Save, RefreshCcw, Undo2 } from "lucide-react";
+import { Trash2, X, Save, RefreshCcw } from "lucide-react";
 import { Edit, Trash, Undo } from "@nsmr/pixelart-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";

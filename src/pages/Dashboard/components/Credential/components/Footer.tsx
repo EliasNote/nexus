@@ -1,5 +1,6 @@
 import type { Credential, CredentialType, EntrySummary } from "@/types/vault";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
+import { Shield, Check } from "@nsmr/pixelart-react";
 import { AddButton } from "../AddButton";
 
 export const Footer = ({
@@ -35,11 +36,10 @@ export const Footer = ({
             {isCompromised ? (
               <ShieldAlert className="text-red-600" strokeWidth={1} size={50} />
             ) : (
-              <ShieldCheck
-                className="text-green-500"
-                strokeWidth={1}
-                size={50}
-              />
+              <div className="relative flex items-center justify-center h-[50px] w-[50px]">
+                <Shield className="text-green-500" strokeWidth={1} size={50} />
+                <Check className="text-green-500 absolute pb-1.5" strokeWidth={1} size={30} />
+              </div>
             )}
 
             <span className={`text-${isCompromised ? "red-600" : "green-500"}`}>
