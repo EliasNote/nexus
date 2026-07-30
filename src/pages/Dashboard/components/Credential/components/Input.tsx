@@ -1,19 +1,21 @@
 import type { LucideIcon } from "lucide-react";
-import { AlertCircle, Check, Eye, EyeClosed } from "lucide-react";
+import { AlertCircle, Check, Copy, RotateCcwKey } from "lucide-react";
+import { Eye, EyeClosed } from "@nsmr/pixelart-react";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { copyToClipboard } from "../../../../../utils/utils";
-import type { iconsInputProp } from "@/types/types";
 import { Generator } from "../../Generator/Generator";
+import { IconButton } from "./IconButton";
 
 export const Input = ({
-  iconsInput,
   iconTop: Icontop,
   topName,
   placeholder,
   disabled,
   value,
-  isPassword,
+  isPasswordIcon,
+  isGenerateIcon,
+  isCopyIcon,
   onChange,
   autoFocus,
   isEdit,
@@ -21,13 +23,14 @@ export const Input = ({
   errorContent,
   onDoubleClick,
 }: {
-  iconsInput?: iconsInputProp[];
   iconTop?: LucideIcon;
   topName?: string;
   placeholder?: string;
   disabled?: boolean;
   value?: string;
-  isPassword?: boolean;
+  isPasswordIcon?: boolean;
+  isGenerateIcon?: boolean;
+  isCopyIcon?: boolean;
   onChange?: (val: string) => void;
   autoFocus?: boolean;
   isEdit?: boolean;
@@ -78,50 +81,43 @@ export const Input = ({
             ref={inputRef}
             disabled={disabled}
             className={`flex-1 bg-transparent px-3 text-[14px] text-white outline-none placeholder:text-zinc-500 ${disabled ? "pointer-events-none" : ""}`}
-            type={isPassword ? (showPassword ? "text" : "password") : "text"}
+            type={isPasswordIcon ? (showPassword ? "text" : "password") : "text"}
             placeholder={placeholder}
             value={value}
             onChange={(e) => onChange?.(e.target.value)}
             aria-invalid={Boolean(errorContent)}
             aria-describedby={errorContent ? "input-error-message" : undefined}
           />
-          {iconsInput?.map((icon, index) => {
-            if (icon.id === "generate" && !isEdit && !isCreate) return null;
-
-            return (
-              <button
-                type="button"
-                key={index}
-                onClick={() => {
-                  if (icon.id === "eye") togglePasswordVisibility();
-                  if (icon.id === "generate") setIsGenerate(!isGenerate);
-                  if (icon.id === "copy") handleCopy(value ?? "");
-                }}
-                className={`flex h-full w-12 cursor-pointer items-center justify-center border-l transition-colors hover:bg-zinc-800 hover:text-brand ${errorContent ? "border-red-500 text-red-400" : "border-zinc-800 text-zinc-600 group-focus-within:border-zinc-600"}`}
-              >
-                {icon.id === "eye" &&
-                  (showPassword ? (
-                    <Eye size={20} strokeWidth={2} />
-                  ) : (
-                    <EyeClosed size={20} strokeWidth={2} />
-                  ))}
-                {icon.id === "generate" && (
-                  <icon.icon size={20} strokeWidth={2} />
+            {isPasswordIcon &&
+              <IconButton errorContent={errorContent} onClick={togglePasswordVisibility}>
+                {showPassword ? (
+                  <Eye size={20} strokeWidth={2} />
+                ) : (
+                  <EyeClosed size={20} strokeWidth={2} />
                 )}
-                {icon.id === "copy" &&
-                  (copied ? (
-                    <Check
-                      className="text-green-500"
-                      size={20}
-                      strokeWidth={2.5}
-                    />
-                  ) : (
-                    <icon.icon size={20} strokeWidth={2} />
-                  ))}
-              </button>
-            );
-          })}
-        </motion.div>
+              </IconButton>
+            }
+
+            {isGenerateIcon && (isEdit || isCreate) &&
+              <IconButton onClick={() => setIsGenerate(!isGenerate)}>
+                <RotateCcwKey size={20} strokeWidth={2} />
+              </IconButton>
+            }
+
+            {isCopyIcon &&
+              <IconButton onClick={() => handleCopy(value ?? "")}>
+                {copied ? (
+                  <Check
+                    className="text-green-500"
+                    size={20}
+                    strokeWidth={2.5}
+                  />
+                ) : (
+                  <Copy size={20} strokeWidth={2} />
+                )}
+              </IconButton>
+            }
+          </motion.div>
         {errorContent && (
           <motion.div id="input-error-message" role="alert" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-400">
             <AlertCircle size={15} strokeWidth={2.25} aria-hidden="true" />

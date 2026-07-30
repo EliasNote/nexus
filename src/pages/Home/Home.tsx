@@ -1,5 +1,4 @@
 import { isTauri } from "@tauri-apps/api/core";
-import { Eye } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboardRoute, manualRoute } from "@/App";
@@ -243,19 +242,13 @@ export const Home = () => {
               <div className="flex w-full flex-col items-start">
                 <p className="mb-1.5 text-sm font-bold">SENHA MESTRA</p>
                 <Input
-                  isPassword={true}
+                  isPasswordIcon={true}
                   value={password}
                   onChange={(val) => {
                     setPassword(val);
                     if (errorContent) setErrorContent(null);
                   }}
                   errorContent={errorContent}
-                  iconsInput={[
-                    {
-                      id: "eye",
-                      icon: Eye,
-                    },
-                  ]}
                 />
               </div>
               <div className="flex gap-3">

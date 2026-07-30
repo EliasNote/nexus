@@ -1,6 +1,7 @@
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check, type LucideIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { IconButton } from "./IconButton";
 
 export const TextArea = ({
   iconTop: IconTop,
@@ -54,17 +55,15 @@ export const TextArea = ({
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
         />
-        <button
+        <IconButton
           className="absolute top-1 right-1 flex items-center justify-center h-10 w-10 bg-zinc-900 border border-zinc-800 group-focus-within:border-zinc-600 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-600 hover:text-brand"
-          title="Copiar anotações"
-          onClick={() => handleCopy(value!)}
-        >
+          onClick={() => handleCopy(value!)}>
           {copied ? (
             <Check className="text-green-500" size={20} strokeWidth={2.5} />
           ) : (
             <Copy size={20} strokeWidth={2} />
           )}
-        </button>
+        </IconButton>
       </div>
     </div>
   );

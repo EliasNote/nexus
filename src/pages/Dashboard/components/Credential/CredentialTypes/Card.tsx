@@ -1,13 +1,10 @@
 import {
-  Copy,
   User,
-  Eye,
   Key,
   CreditCard,
   Calendar,
   Folder,
   NotepadText,
-  RotateCcwKey,
 } from "lucide-react";
 import { Input } from "../components/Input";
 import { DirectorySelect } from "../components/DirectorySelect";
@@ -54,13 +51,8 @@ export const Card = ({
         disabled={!isEdit}
         placeholder="Nome do Titular"
         iconTop={User}
+        isCopyIcon={true}
         topName="NOME DO TITULAR"
-        iconsInput={[
-          {
-            id: "copy",
-            icon: Copy,
-          },
-        ]}
         value={credential.holderName!}
         onChange={(val) => handleChange("holderName", val)}
         autoFocus={autoFocusId === "holderName"}
@@ -72,19 +64,10 @@ export const Card = ({
       <Input
         disabled={!isEdit}
         placeholder="Número do Cartão"
-        isPassword={true}
+        isPasswordIcon={true}
+        isCopyIcon={true}
         iconTop={CreditCard}
         topName="NÚMERO DO CARTÃO"
-        iconsInput={[
-          {
-            id: "eye",
-            icon: Eye,
-          },
-          {
-            id: "copy",
-            icon: Copy,
-          },
-        ]}
         value={credential.cardNumber}
         onChange={(val) => handleChange("cardNumber", val)}
         autoFocus={autoFocusId === "cardNumber"}
@@ -107,19 +90,10 @@ export const Card = ({
       <Input
         disabled={!isEdit}
         placeholder="CVV"
-        isPassword={true}
+        isPasswordIcon={true}
+        isCopyIcon={true}
         iconTop={Key}
         topName="CVV"
-        iconsInput={[
-          {
-            id: "eye",
-            icon: Eye,
-          },
-          {
-            id: "copy",
-            icon: Copy,
-          },
-        ]}
         value={credential.cvv}
         onChange={(val) => handleChange("cvv", val)}
         autoFocus={autoFocusId === "cvv"}
@@ -131,23 +105,11 @@ export const Card = ({
       <Input
         disabled={!isEdit}
         placeholder="Senha"
-        isPassword={true}
+        isPasswordIcon={true}
+        isCopyIcon={true}
+        isGenerateIcon={true}
         iconTop={Key}
         topName="SENHA"
-        iconsInput={[
-          {
-            id: "eye",
-            icon: Eye,
-          },
-          {
-            id: "generate",
-            icon: RotateCcwKey,
-          },
-          {
-            id: "copy",
-            icon: Copy,
-          },
-        ]}
         value={credential.password}
         isEdit={isEdit}
         isCreate={Boolean(isCreate)}

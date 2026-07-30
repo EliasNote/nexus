@@ -1,12 +1,9 @@
 import {
-  Copy,
   User,
-  Eye,
   Key,
   Globe,
   Folder,
   NotepadText,
-  RotateCcwKey,
 } from "lucide-react";
 import { Input } from "./../components/Input";
 import { DirectorySelect } from "./../components/DirectorySelect";
@@ -54,12 +51,7 @@ export const Login = ({
         placeholder="Usuário/email"
         iconTop={User}
         topName="USUÁRIO"
-        iconsInput={[
-          {
-            id: "copy",
-            icon: Copy,
-          },
-        ]}
+        isCopyIcon={true}
         value={credential.username!}
         autoFocus={autoFocusId === "username"}
         onChange={(val) => handleChange("username", val)}
@@ -71,23 +63,11 @@ export const Login = ({
       <Input
         disabled={!isEdit}
         placeholder="Senha"
-        isPassword={true}
+        isPasswordIcon={true}
+        isCopyIcon={true}
+        isGenerateIcon={true}
         iconTop={Key}
         topName="SENHA"
-        iconsInput={[
-          {
-            id: "eye",
-            icon: Eye,
-          },
-          {
-            id: "generate",
-            icon: RotateCcwKey,
-          },
-          {
-            id: "copy",
-            icon: Copy,
-          },
-        ]}
         value={credential.password}
         autoFocus={autoFocusId === "password"}
         isEdit={isEdit}
@@ -103,12 +83,7 @@ export const Login = ({
         placeholder="https://exemplo.com.br"
         iconTop={Globe}
         topName="URL"
-        iconsInput={[
-          {
-            id: "copy",
-            icon: Copy,
-          },
-        ]}
+        isCopyIcon={true}
         value={credential.url}
         autoFocus={autoFocusId === "url"}
         onChange={(val) => handleChange("url", val)}
