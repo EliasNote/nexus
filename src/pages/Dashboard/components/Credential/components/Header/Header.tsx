@@ -3,8 +3,7 @@ import {
   type Credential,
   type CredentialType,
 } from "@/types/vault";
-import { Trash2, X, Save, RefreshCcw } from "lucide-react";
-import { Edit, Trash, Undo } from "@nsmr/pixelart-react";
+import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
@@ -140,7 +139,7 @@ export const Header = ({
             iconsSize={iconsSize}
             color="border-zinc-800 bg-zinc-900 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             label={"VOLTAR"}
-            icon={Undo}
+            icon={Undo2}
             onClick={onUndo}
           />
         )}
@@ -181,7 +180,7 @@ export const Header = ({
           <>
             <Button
               iconsSize={iconsSize}
-              icon={Edit}
+              icon={Pencil}
               color="border-brand text-brand hover:bg-brand"
               label={"EDITAR"}
               onClick={handleEditClick}
@@ -189,7 +188,7 @@ export const Header = ({
 
             <Button
               iconsSize={iconsSize}
-              icon={Trash}
+              icon={Trash2}
               color="border-red-alert text-red-alert hover:bg-red-alert"
               label={"APAGAR"}
               onClick={() =>
@@ -201,7 +200,7 @@ export const Header = ({
           <>
             <Button
               iconsSize={iconsSize}
-              icon={Undo}
+              icon={Undo2}
               color="border-green-500 text-green-500 hover:bg-green-600"
               label={"RESTAURAR"}
               onClick={() => {

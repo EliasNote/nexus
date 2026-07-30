@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { AlertCircle, Check, Copy, RotateCcwKey } from "lucide-react";
-import { Eye, EyeClosed } from "@nsmr/pixelart-react";
+import { AlertCircle, Check, Copy, Eye, EyeClosed, RotateCcwKey } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { copyToClipboard } from "../../../../../utils/utils";

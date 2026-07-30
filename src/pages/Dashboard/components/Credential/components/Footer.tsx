@@ -1,6 +1,6 @@
 import type { Credential, CredentialType, EntrySummary } from "@/types/vault";
-import { Check, Alert } from "@nsmr/pixelart-react";
 import { AddButton } from "../AddButton";
+import { ShieldAlert, ShieldCheck } from "lucide-react";
 
 export const Footer = ({
   isCreate,
@@ -33,9 +33,9 @@ export const Footer = ({
           </div>
           <div className="flex flex-col items-center justify-center gap-1 font-medium  min-w-[180px]">
             {isCompromised ? (
-              <Alert className="text-red-600" strokeWidth={1} size={50} />
+              <ShieldAlert className="text-red-600" strokeWidth={1} size={50} />
             ) : (
-              <Check className="text-green-500" strokeWidth={1} size={50} />
+              <ShieldCheck className="text-green-500" strokeWidth={1} size={50} />
             )}
 
             <span className={`text-${isCompromised ? "red-600" : "green-500"}`}>
