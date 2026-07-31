@@ -1,5 +1,15 @@
 import { useRef, useEffect } from "react";
 
+type RGBColor = { r: number; g: number; b: number };
+
+type Letter = {
+  char: string;
+  color: RGBColor;
+  startColor: RGBColor;
+  targetColor: RGBColor;
+  colorProgress: number;
+};
+
 type LetterGlitchProps = {
   glitchColors?: string[];
   glitchSpeed?: number;
@@ -10,8 +20,11 @@ type LetterGlitchProps = {
   classname?: string;
 };
 
+// ["#2563eb", "#ffffff", "#71717a"]
+const DEFAULT_GLITCH_COLORS = ["#60a5fa", "#61dca3", "#61b3dc", "#dbeafe"];
+
 const LetterGlitch = ({
-  glitchColors = ["#2b4539", "#61dca3", "#61b3dc"],
+  glitchColors = DEFAULT_GLITCH_COLORS,
   glitchSpeed = 50,
   centerVignette = false,
   outerVignette = true,
@@ -24,18 +37,12 @@ const LetterGlitch = ({
   const isVisibleRef = useRef(true);
   const dirtyIndices = useRef<Set<number>>(new Set());
 
-  const letters = useRef<
-    {
-      char: string;
-      color: string;
-      targetColor: string;
-      colorProgress: number;
-    }[]
-  >([]);
+  const letters = useRef<Letter[]>([]);
   const grid = useRef({ columns: 0, rows: 0 });
   const context = useRef<CanvasRenderingContext2D | null>(null);
   const lastGlitchTime = useRef(0);
   const lastDrawTime = useRef(0);
+  const glitchColorsKey = glitchColors.join(",");
 
   const lettersAndSymbols = Array.from(characters);
 
@@ -47,10 +54,6 @@ const LetterGlitch = ({
     return lettersAndSymbols[
       Math.floor(Math.random() * lettersAndSymbols.length)
     ];
-  };
-
-  const getRandomColor = () => {
-    return glitchColors[Math.floor(Math.random() * glitchColors.length)];
   };
 
   const hexToRgb = (hex: string) => {
@@ -69,18 +72,30 @@ const LetterGlitch = ({
       : null;
   };
 
+  const availableColors = glitchColors
+    .map(hexToRgb)
+    .filter((color): color is RGBColor => color !== null);
+
+  const getRandomColor = () => {
+    const color =
+      availableColors[Math.floor(Math.random() * availableColors.length)] ??
+      { r: 97, g: 220, b: 163 };
+    return { ...color };
+  };
+
   const interpolateColor = (
-    start: { r: number; g: number; b: number },
-    end: { r: number; g: number; b: number },
+    start: RGBColor,
+    end: RGBColor,
     factor: number,
   ) => {
-    const result = {
+    return {
       r: Math.round(start.r + (end.r - start.r) * factor),
       g: Math.round(start.g + (end.g - start.g) * factor),
       b: Math.round(start.b + (end.b - start.b) * factor),
     };
-    return `rgb(${result.r}, ${result.g}, ${result.b})`;
   };
+
+  const colorToCss = ({ r, g, b }: RGBColor) => `rgb(${r}, ${g}, ${b})`;
 
   const calculateGrid = (width: number, height: number) => {
     const columns = Math.ceil(width / charWidth);
@@ -91,12 +106,16 @@ const LetterGlitch = ({
   const initializeLetters = (columns: number, rows: number) => {
     grid.current = { columns, rows };
     const totalLetters = columns * rows;
-    letters.current = Array.from({ length: totalLetters }, () => ({
-      char: getRandomChar(),
-      color: getRandomColor(),
-      targetColor: getRandomColor(),
-      colorProgress: 1,
-    }));
+    letters.current = Array.from({ length: totalLetters }, () => {
+      const color = getRandomColor();
+      return {
+        char: getRandomChar(),
+        color,
+        startColor: { ...color },
+        targetColor: getRandomColor(),
+        colorProgress: 1,
+      };
+    });
     dirtyIndices.current.clear();
   };
 
@@ -117,11 +136,16 @@ const LetterGlitch = ({
 
     if (context.current) {
       context.current.setTransform(dpr, 0, 0, dpr, 0, 0);
+      context.current.font = `${fontSize}px monospace`;
+      context.current.textBaseline = "top";
     }
 
     const { columns, rows } = calculateGrid(rect.width, rect.height);
     initializeLetters(columns, rows);
-    drawLetters();
+    if (context.current) {
+      context.current.fillStyle = "#000";
+      context.current.fillRect(0, 0, rect.width, rect.height);
+    }
   };
 
   const drawLetter = (index: number) => {
@@ -132,17 +156,10 @@ const LetterGlitch = ({
     const x = (index % grid.current.columns) * charWidth;
     const y = Math.floor(index / grid.current.columns) * charHeight;
 
-    ctx.clearRect(x, y, charWidth, charHeight);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y, charWidth, charHeight);
-    ctx.clip();
-    ctx.fillStyle = letter.color;
-    ctx.font = `${fontSize}px monospace`;
-    ctx.textBaseline = "top";
+    ctx.fillStyle = "#000";
+    ctx.fillRect(x, y, charWidth, charHeight);
+    ctx.fillStyle = colorToCss(letter.color);
     ctx.fillText(letter.char, x, y);
-    ctx.restore();
   };
 
   const drawLetters = () => {
@@ -171,9 +188,11 @@ const LetterGlitch = ({
       letter.targetColor = getRandomColor();
 
       if (!smooth) {
-        letter.color = letter.targetColor;
+        letter.color = { ...letter.targetColor };
+        letter.startColor = { ...letter.targetColor };
         letter.colorProgress = 1;
       } else {
+        letter.startColor = { ...letter.color };
         letter.colorProgress = 0;
       }
 
@@ -188,17 +207,13 @@ const LetterGlitch = ({
         letter.colorProgress += 0.15;
         if (letter.colorProgress > 1) letter.colorProgress = 1;
 
-        const startRgb = hexToRgb(letter.color);
-        const endRgb = hexToRgb(letter.targetColor);
-        if (startRgb && endRgb) {
-          letter.color = interpolateColor(
-            startRgb,
-            endRgb,
-            letter.colorProgress,
-          );
-          needsRedraw = true;
-          dirtyIndices.current.add(index);
-        }
+        letter.color = interpolateColor(
+          letter.startColor,
+          letter.targetColor,
+          letter.colorProgress,
+        );
+        needsRedraw = true;
+        dirtyIndices.current.add(index);
       }
     });
 
@@ -206,10 +221,7 @@ const LetterGlitch = ({
   };
 
   const animate = (now: number) => {
-    if (!isVisibleRef.current) {
-      animationRef.current = requestAnimationFrame(animate);
-      return;
-    }
+    if (!isVisibleRef.current) return;
 
     let needsRedraw = false;
 
@@ -229,7 +241,9 @@ const LetterGlitch = ({
       lastDrawTime.current = now;
     }
 
-    animationRef.current = requestAnimationFrame(animate);
+    animationRef.current = isVisibleRef.current
+      ? requestAnimationFrame(animate)
+      : null;
   };
 
   useEffect(() => {
@@ -249,13 +263,25 @@ const LetterGlitch = ({
           cancelAnimationFrame(animationRef.current);
         }
         resizeCanvas();
-        animationRef.current = requestAnimationFrame(animate);
+        animationRef.current = isVisibleRef.current
+          ? requestAnimationFrame(animate)
+          : null;
       }, 100);
     };
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         isVisibleRef.current = entry.isIntersecting;
+
+        if (entry.isIntersecting && animationRef.current === null) {
+          const now = performance.now();
+          lastGlitchTime.current = now;
+          lastDrawTime.current = now;
+          animationRef.current = requestAnimationFrame(animate);
+        } else if (!entry.isIntersecting && animationRef.current !== null) {
+          cancelAnimationFrame(animationRef.current);
+          animationRef.current = null;
+        }
       },
       { threshold: 0.1 },
     );
@@ -272,7 +298,7 @@ const LetterGlitch = ({
       clearTimeout(resizeTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [glitchSpeed, smooth]);
+  }, [characters, glitchColorsKey, glitchSpeed, smooth]);
 
   return (
     <div className={`w-full h-full bg-black overflow-hidden ${classname}`}>
