@@ -20,7 +20,6 @@ type LetterGlitchProps = {
   classname?: string;
 };
 
-// ["#2563eb", "#ffffff", "#71717a"]
 const DEFAULT_GLITCH_COLORS = ["#60a5fa", "#61dca3", "#61b3dc", "#dbeafe"];
 
 const LetterGlitch = ({
