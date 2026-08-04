@@ -33,6 +33,23 @@ const Dashboard = () => {
     return summaryVault?.folders || [];
   }, [summaryVault]);
 
+  const getTitle = () => {
+    switch (selected) {
+      case SIDEBAR_BUTTONS_IDS.all:
+        return "TODOS OS ITENS";
+      case SIDEBAR_BUTTONS_IDS.favorites:
+        return "FAVORITOS";
+      case SIDEBAR_BUTTONS_IDS.trash:
+        return "LIXEIRA";
+      default:
+        if (typeof selected === "string") {
+          const targetFolder = folders.find((f) => f.id === selected);
+          return targetFolder?.name || "";
+        };
+        return "TODOS OS ITENS";
+    }
+  }
+
   const credentials = useMemo(() => {
     if (!summaryVault?.entries) return [];
 
@@ -149,6 +166,7 @@ const Dashboard = () => {
             selectedSideCredential={selectedSideCredential}
             setSelectedSideCredential={handleSelectCredential}
             credentials={credentials}
+            topTitle={getTitle()}
           />
           {(selectedSideCredential && credential && tempVault) || isCreate ? (
             <Credential
