@@ -7,7 +7,7 @@ import {
 } from "./gitSync";
 import type { VaultStorage } from "../../types";
 import { useCloudStore } from "@/hooks/useCloudStore";
-import type { EncryptedVault } from "@/types/vault";
+import type { EncryptedVaultEnvelope } from "@/types/vault";
 import { useLocalFile } from "../local-file/useLocalFile";
 
 export function useGitRepository(): VaultStorage {
@@ -60,7 +60,7 @@ export function useGitRepository(): VaultStorage {
   }, []);
 
   const upload = useCallback(
-    async (vault: EncryptedVault) => {
+    async (vault: EncryptedVaultEnvelope) => {
       const vaultPath = useCloudStore.getState().vaultPath;
 
       if (!vaultPath) {

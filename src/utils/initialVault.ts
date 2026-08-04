@@ -1,5 +1,7 @@
 import type { DecryptedVault } from "@/types/vault";
 
+export const version = "1.0";
+
 export const createInitialVault = async (): Promise<DecryptedVault> => {
   const now = () => new Date().toISOString();
   const passwordLastChangedAt = new Date(
@@ -7,7 +9,7 @@ export const createInitialVault = async (): Promise<DecryptedVault> => {
   ).toISOString();
 
   return {
-    version: "1.0",
+    version: version,
     folders: [
       {
         id: "folder-1",

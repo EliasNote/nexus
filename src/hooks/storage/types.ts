@@ -1,4 +1,8 @@
-import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
+import type {
+  EncryptedVault,
+  EncryptedVaultEnvelope,
+  VaultSummarizedData,
+} from "@/types/vault";
 
 export type StorageProvider =
   | "google"
@@ -33,8 +37,8 @@ export interface VaultStorage {
   isRepo?(): Promise<boolean>;
   isLoading?: boolean;
   initialize?(remoteUrl: string): Promise<void>;
-  download(): Promise<EncryptedVault>;
-  upload(vault: EncryptedVault): Promise<void>;
+  download(): Promise<EncryptedVaultEnvelope>;
+  upload(vault: EncryptedVaultEnvelope): Promise<void>;
   delete(): Promise<void>;
 }
 

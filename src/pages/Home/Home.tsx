@@ -81,36 +81,32 @@ export const Home = () => {
 
       if (data) {
         console.log("Vault existe");
-        const encryptedVault = await download();
-        if (!encryptedVault) return;
-        const salt = encryptedVault.kdf.salt;
+        const envelope = await download();
+        if (!envelope) return;
 
-        let unlocked = false;
+        let encryptedVault: EncryptedVault;
         try {
-          unlocked = await cryptoService.verifyUnlockVaultKeys(
+          encryptedVault = await cryptoService.openVault(
             masterPassword,
-            salt,
-            encryptedVault.encrypted_dek,
+            envelope,
           );
         } catch (error) {
-          setErrorContent("Senha mestra incorreta. Tente novamente.");
+          setErrorContent("Senha incorreta ou cofre corrompido.");
           console.error("Erro: ", error);
           return;
         }
 
-        if (unlocked) {
-          setErrorContent(null);
-          const summaryVault =
-            await cryptoService.getInitialData(encryptedVault);
+        setErrorContent(null);
+        const summaryVault =
+          await cryptoService.getInitialData(encryptedVault);
 
-          console.log("Cofre: ", summaryVault);
+        console.log("Cofre: ", summaryVault);
 
-          const interval = encryptedVault.autoSaveInterval ?? 1;
-          useCloudStore.getState().setAutoSaveInterval(interval);
+        const interval = encryptedVault.autoSaveInterval ?? 1;
+        useCloudStore.getState().setAutoSaveInterval(interval);
 
-          setSummaryVault(summaryVault);
-          setVault(encryptedVault);
-        }
+        setSummaryVault(summaryVault);
+        setVault(encryptedVault);
       } else {
         console.log("Vault não existe, fazendo upload");
 
@@ -118,6 +114,12 @@ export const Home = () => {
         const saltBytes = crypto.getRandomValues(new Uint8Array(16));
         const salt = uint8ArrayToBase64(saltBytes);
 
+        const kdf = {
+          salt,
+          memory: 65536,
+          iterations: 3,
+          parallelism: 1,
+        };
         const encryptedDek = await cryptoService.setupVaultKeys(password, salt);
 
         const encryptedContent = await cryptoService.encryptVault(
@@ -128,13 +130,13 @@ export const Home = () => {
         const cofreFinal: EncryptedVault = {
           version: "1.0",
           autoSaveInterval: 1,
-          kdf: { salt, memory: 65536, iterations: 3, parallelism: 1 },
+          kdf,
           encrypted_dek: encryptedDek,
           folders: encryptedContent.folders,
           entries: encryptedContent.entries,
         };
 
-        await upload(cofreFinal);
+        await upload(await cryptoService.sealVault(cofreFinal));
 
         useCloudStore.getState().setAutoSaveInterval(1);
         setVault(cofreFinal);

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { EncryptedVault } from "@/types/vault";
+import type { EncryptedVaultEnvelope } from "@/types/vault";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { useGoogleDrive } from "./adapters/google-drive/useGoogleDrive";
 import { useLocalFile } from "./adapters/local-file/useLocalFile";
@@ -95,7 +95,7 @@ export const useStorageSync = () => {
   }, [getStorage]);
 
   const upload = useCallback(
-    async (vault: EncryptedVault) => {
+    async (vault: EncryptedVaultEnvelope) => {
       const storage = getStorage();
 
       if (!storage) {

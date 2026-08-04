@@ -113,3 +113,9 @@ export type EncryptedVault = {
     [uuid: string]: EncryptedData;
   };
 };
+
+export type EncryptedVaultEnvelope = {
+  version: string;
+  kdf: KdfConfig;
+  encrypted_vault: EncryptedData;
+};

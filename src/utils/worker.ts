@@ -3,6 +3,7 @@ import type {
   DecryptedVault,
   EncryptedData,
   EncryptedVault,
+  EncryptedVaultEnvelope,
   EntrySummary,
   Folder,
   LoginCredential,
@@ -12,8 +13,10 @@ import { expose } from "comlink";
 import { argon2id } from "hash-wasm";
 import { sha1 } from "js-sha1";
 import { ZxcvbnFactory } from "@zxcvbn-ts/core";
+import { version } from "./initialVault";
 
 let secureKey: CryptoKey | null = null;
+let kekKey: CryptoKey | null = null;
 const zxcvbn = new ZxcvbnFactory({
   dictionary: {},
   graphs: {},
@@ -63,9 +66,10 @@ const cryptoService = {
       kekBytes.buffer as ArrayBuffer,
       { name: "AES-GCM" },
       false,
-      ["encrypt"],
+      ["encrypt", "decrypt"],
     );
     kekBytes.fill(0);
+    kekKey = KEK;
 
     const rawDek = crypto.getRandomValues(createBytes(32));
     secureKey = await crypto.subtle.importKey(
@@ -93,13 +97,14 @@ const cryptoService = {
     };
   },
 
-  async verifyUnlockVaultKeys(
+  async openVault(
     password: string,
-    saltBase64: string,
-    encryptedDek: EncryptedData,
-  ): Promise<boolean> {
-    const saltBytes = base64ToUint8Array(saltBase64);
+    envelope: EncryptedVaultEnvelope,
+  ): Promise<EncryptedVault> {
+    secureKey = null;
+    kekKey = null;
 
+    const saltBytes = base64ToUint8Array(envelope.kdf.salt);
     const kekBytes = await argon2id({
       password,
       salt: saltBytes,
@@ -115,23 +120,55 @@ const cryptoService = {
       kekBytes.buffer as ArrayBuffer,
       { name: "AES-GCM" },
       false,
-      ["decrypt"],
+      ["encrypt", "decrypt"],
     );
     kekBytes.fill(0);
 
-    const iv = base64ToUint8Array(encryptedDek.iv);
-    const ciphertext = base64ToUint8Array(encryptedDek.ciphertext);
-    const tag = base64ToUint8Array(encryptedDek.tag);
-
-    const combined = createBytes(ciphertext.length + tag.length);
-    combined.set(ciphertext);
-    combined.set(tag, ciphertext.length);
+    const vaultIv = base64ToUint8Array(envelope.encrypted_vault.iv);
+    const vaultCiphertext = base64ToUint8Array(
+      envelope.encrypted_vault.ciphertext,
+    );
+    const vaultTag = base64ToUint8Array(envelope.encrypted_vault.tag);
+    const combinedVault = createBytes(vaultCiphertext.length + vaultTag.length);
+    combinedVault.set(vaultCiphertext);
+    combinedVault.set(vaultTag, vaultCiphertext.length);
 
     try {
-      const rawDekBuffer = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv, tagLength: 128 },
+      const vaultBuffer = await crypto.subtle.decrypt(
+        {
+          name: "AES-GCM",
+          iv: vaultIv,
+          additionalData: new TextEncoder().encode(
+            JSON.stringify({ version: envelope.version, kdf: envelope.kdf }),
+          ),
+          tagLength: 128,
+        },
         KEK,
-        combined,
+        combinedVault,
+      );
+      const encryptedVault = JSON.parse(
+        new TextDecoder().decode(vaultBuffer),
+      ) as EncryptedVault;
+
+      if (
+        JSON.stringify(encryptedVault.kdf) !== JSON.stringify(envelope.kdf)
+      ) {
+        throw new Error("Configuração KDF inconsistente");
+      }
+
+      const dekIv = base64ToUint8Array(encryptedVault.encrypted_dek.iv);
+      const dekCiphertext = base64ToUint8Array(
+        encryptedVault.encrypted_dek.ciphertext,
+      );
+      const dekTag = base64ToUint8Array(encryptedVault.encrypted_dek.tag);
+      const combinedDek = createBytes(dekCiphertext.length + dekTag.length);
+      combinedDek.set(dekCiphertext);
+      combinedDek.set(dekTag, dekCiphertext.length);
+
+      const rawDekBuffer = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: dekIv, tagLength: 128 },
+        KEK,
+        combinedDek,
       );
 
       secureKey = await crypto.subtle.importKey(
@@ -141,11 +178,45 @@ const cryptoService = {
         false,
         ["encrypt", "decrypt"],
       );
+      kekKey = KEK;
 
-      return true;
+      return encryptedVault;
     } catch (e) {
+      secureKey = null;
+      kekKey = null;
       throw new Error("Senha incorreta ou cofre corrompido", { cause: e });
     }
+  },
+
+  async sealVault(
+    vault: EncryptedVault,
+  ): Promise<EncryptedVaultEnvelope> {
+    if (!kekKey) throw new Error("KEK não importada no Worker");
+
+    const iv = crypto.getRandomValues(createBytes(12));
+    const encryptedBuffer = await crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv,
+        additionalData: new TextEncoder().encode(
+          JSON.stringify({ version, kdf: vault.kdf }),
+        ),
+        tagLength: 128,
+      },
+      kekKey,
+      new TextEncoder().encode(JSON.stringify(vault)),
+    );
+    const encryptedBytes = bytesFromBuffer(encryptedBuffer);
+
+    return {
+      version,
+      kdf: vault.kdf,
+      encrypted_vault: {
+        iv: uint8ArrayToBase64(iv),
+        tag: uint8ArrayToBase64(encryptedBytes.slice(-16)),
+        ciphertext: uint8ArrayToBase64(encryptedBytes.slice(0, -16)),
+      },
+    };
   },
 
   async encrypt(plaintext: string) {
@@ -184,6 +255,7 @@ const cryptoService = {
 
   async destroyKey() {
     secureKey = null;
+    kekKey = null;
   },
 
   async getSingleEntry(encryptedEntry: EncryptedData): Promise<string> {
