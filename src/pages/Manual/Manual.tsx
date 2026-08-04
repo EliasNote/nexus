@@ -28,6 +28,27 @@ const Manual = () => {
     setSelected(index);
   };
 
+  const handleContentScroll = () => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    const headings = container.querySelectorAll<HTMLElement>('h1');
+    const containerTop = container.getBoundingClientRect().top;
+
+    let activeIndex = 0;
+
+    headings.forEach((heading, index) => {
+      if (
+        heading.getBoundingClientRect().top <=
+        containerTop
+      ) {
+        activeIndex = index;
+      }
+    })
+
+    setSelected(activeIndex);
+  }
+
   return (
     <main className="flex flex-col bg-dark-background max-h-full h-full w-full">
       <div className="flex flex-row w-full gap-2 items-center justify-start h-[60px] px-[100px] border-b border-zinc-800 py-4">
@@ -51,7 +72,7 @@ const Manual = () => {
             return <button key={index} className={`shrink-0 cursor-pointer text-start w-[270px] h-[40px] px-5 border-l-3 border-transparent  ${index === selected ? 'bg-zinc-800 text-white border-l-brand' : 'text-zinc-500 hover:bg-zinc-900/70'}`} onClick={() => scrollToHeading(index)}>{x.text}</button>
           })}
         </div>
-        <div ref={contentRef} className="markdown-content text-white flex-1 h-full p-[50px] pt-[20px] overflow-y-auto">
+        <div ref={contentRef} onScroll={handleContentScroll} className="markdown-content text-white flex-1 h-full p-[50px] pt-[20px] overflow-y-auto">
           <ManualContent />
         </div>
       </div>
