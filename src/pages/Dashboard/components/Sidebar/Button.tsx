@@ -54,8 +54,8 @@ export const Button = ({
 
   const handleSelect = () => {
     if (isRenameFolder) return;
+    if (!isSyncButton) setSelected(id);
 
-    setSelected(id);
     onClick?.();
   };
 

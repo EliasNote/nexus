@@ -8,6 +8,7 @@ import {
   CloudOff,
   CloudUpload,
   LogOut,
+  Settings,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -17,6 +18,7 @@ export const SIDEBAR_BUTTONS_IDS = {
   trash: "trash",
   generator: "generator",
   audit: "audit",
+  config: "config",
 };
 
 export const defaults = (iconsSize: number) => [
@@ -34,7 +36,7 @@ export const defaults = (iconsSize: number) => [
     id: SIDEBAR_BUTTONS_IDS.trash,
     title: "LIXEIRA",
     icon: <Trash2 size={iconsSize} />,
-  },
+  }
 ];
 
 export const tools = (iconsSize: number) => [
@@ -85,6 +87,11 @@ export const footers = (
     icon: cloudIcons(iconsSize)[
       isSaving ? "isSaving" : isPendingSync ? "unsynced" : "synced"
     ],
+  },
+  {
+    id: "config",
+    title: "CONFIGURAÇÃO",
+    icon: <Settings size={iconsSize} />,
   },
   {
     id: "logout",

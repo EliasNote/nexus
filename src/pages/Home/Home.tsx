@@ -5,8 +5,6 @@ import { dashboardRoute, manualRoute } from "@/App";
 import { useStorageSync } from "@/hooks/storage/useStorageSync";
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { motion } from "framer-motion";
-
-import { CLOUD_OPTIONS } from "@/types/constants";
 import type { EncryptedVault } from "@/types/vault";
 import { createInitialVault } from "@/utils/initialVault";
 import { uint8ArrayToBase64 } from "@/utils/worker";
@@ -15,6 +13,7 @@ import LetterGlitch from "./components/LetterGlitch";
 import { IconButton } from "./components/IconButton";
 import { Step } from "./components/Step";
 import { loadSettings } from "@/config/settingsStore";
+import { CLOUD_OPTIONS } from "@/utils/constants";
 
 export const Home = () => {
   const { upload, download, exists } = useStorageSync();

@@ -9,6 +9,7 @@ import { useAutoSave } from "@/hooks/useSave";
 import { SIDEBAR_BUTTONS_IDS } from "./components/Sidebar/Buttons";
 import { Generator } from "./components/Generator/Generator";
 import { Audit } from "./components/Audit/Audit";
+import { Config } from "./components/Config/Config";
 
 
 
@@ -157,9 +158,8 @@ const Dashboard = () => {
       />
       {{
         [SIDEBAR_BUTTONS_IDS.generator]: <Generator />,
-        [SIDEBAR_BUTTONS_IDS.audit]: (
-          <Audit onChangeCredential={handleChangeCredentialFromAudit} />
-        ),
+        [SIDEBAR_BUTTONS_IDS.audit]: <Audit onChangeCredential={handleChangeCredentialFromAudit} />,
+        [SIDEBAR_BUTTONS_IDS.config]: <Config />,
       }[selected] || (
         <>
           <SidebarCredentials

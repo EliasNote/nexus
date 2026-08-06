@@ -12,7 +12,7 @@ import { AuditTypeCard } from "./components/AuditTypeCard";
 import type { AuditType } from "@/types/types";
 import { useState } from "react";
 import { AuditCredential } from "./components/AuditCredential";
-import { REUSED_GROUP_COLORS } from "@/types/constants";
+import { REUSED_GROUP_COLORS } from "@/utils/constants";
 
 const getReusedColorClass = (ids?: string[]) => {
   if (!ids?.length) return undefined;

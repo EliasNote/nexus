@@ -1,4 +1,6 @@
+import type { StorageProvider } from "@/hooks/storage/types";
 import type { LucideIcon } from "lucide-react";
+import { HardDrive } from "lucide-react";
 
 export type iconsInputProp = {
   id: string;
@@ -46,3 +48,11 @@ export interface GoogleAuthProvider {
   refresh: () => Promise<GoogleToken | null>;
   disconnect: () => void | Promise<void>;
 }
+
+export type CloudOption = {
+  id: Exclude<StorageProvider, null>;
+  title: string;
+  subtitle: string;
+  type: Array<"web" | "desktop">;
+  icon: typeof HardDrive;
+};
