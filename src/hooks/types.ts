@@ -1,6 +1,6 @@
 import type {
+  Vault,
   EncryptedVault,
-  EncryptedVaultEnvelope,
   VaultSummarizedData,
 } from "@/types/vault";
 
@@ -37,8 +37,8 @@ export interface VaultStorage {
   isRepo?(): Promise<boolean>;
   isLoading?: boolean;
   initialize?(remoteUrl: string): Promise<void>;
-  download(): Promise<EncryptedVaultEnvelope>;
-  upload(vault: EncryptedVaultEnvelope): Promise<void>;
+  download(): Promise<EncryptedVault>;
+  upload(vault: EncryptedVault): Promise<void>;
   delete(): Promise<void>;
 }
 
@@ -48,8 +48,8 @@ export type CloudState = {
     provider: StorageProvider,
   ) => void;
 
-  vault: EncryptedVault | null;
-  setVault: (vault: EncryptedVault | null) => void;
+  vault: Vault | null;
+  setVault: (vault: Vault | null) => void;
 
   vaultPath: string | null;
   setVaultPath: (vaultPath: string | null) => void;

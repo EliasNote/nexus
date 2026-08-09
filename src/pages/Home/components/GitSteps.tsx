@@ -7,8 +7,8 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import { useGitRepository } from "@/hooks/storage/adapters/git-repository/useGitRepository";
-import { useStorageSync } from "@/hooks/storage/useStorageSync";
+import { useGitRepository } from "@/hooks/providers/git/useGitRepository";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import { formatGitHubRemoteUrl } from "@/utils/utils";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { saveSettings } from "@/config/settingsStore";

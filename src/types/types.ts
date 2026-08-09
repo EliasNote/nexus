@@ -1,4 +1,4 @@
-import type { StorageProvider } from "@/hooks/storage/types";
+import type { StorageProvider } from "@/hooks/types";
 import type { LucideIcon } from "lucide-react";
 import { HardDrive } from "lucide-react";
 

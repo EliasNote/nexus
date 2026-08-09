@@ -1,19 +1,18 @@
 import type {
   Credential,
-  DecryptedVault,
   EncryptedData,
+  Vault,
   EncryptedVault,
-  EncryptedVaultEnvelope,
   EntrySummary,
-  Folder,
   LoginCredential,
   VaultSummarizedData,
+  Directory,
 } from "@/types/vault";
 import { expose } from "comlink";
 import { argon2id } from "hash-wasm";
 import { sha1 } from "js-sha1";
 import { ZxcvbnFactory } from "@zxcvbn-ts/core";
-import { version } from "./initialVault";
+import { getBaseVault, version } from "./initialVault";
 
 let secureKey: CryptoKey | null = null;
 let kekKey: CryptoKey | null = null;
@@ -47,16 +46,102 @@ export const uint8ArrayToBase64 = (bytes: Uint8Array): string => {
   return btoa(binary);
 };
 
+const verifyCompromised = async (password: string): Promise<boolean> => {
+  const hash = sha1(password).toUpperCase();
+  const prefix = hash.slice(0, 5);
+  const suffix = hash.slice(5);
+
+  const compromisedPasswords = await fetch(
+    `https://api.pwnedpasswords.com/range/${prefix}`,
+  ).then((res) => res.text());
+
+  return compromisedPasswords.includes(suffix);
+};
+
+const verifyWeak = (password: string): boolean => {
+  const result = zxcvbn.check(password);
+  return result.score < 3;
+};
+
+const verifyReused = (
+  id: string,
+  password: string,
+  credentials: Credential[],
+): { isTrue: boolean; reusedIds: string[] } => {
+  const reusedIds = credentials
+    .filter(
+      (credential) =>
+        (credential as LoginCredential).password === password && credential.id !== id,
+    )
+    .map((credential) => credential.id);
+
+  const isTrue = reusedIds.length > 0;
+  const groupIds = isTrue
+    ? Array.from(new Set([id, ...reusedIds])).sort()
+    : [];
+
+  return { isTrue, reusedIds: groupIds };
+};
+
+const verifyReneval = (lastPasswordChange: Date): boolean => {
+  const days = 90;
+  const timeSinceLastChange =
+    new Date().getTime() - lastPasswordChange.getTime();
+  return timeSinceLastChange > days * 24 * 60 * 60 * 1000;
+}
+
+const encryptData = async (plaintext: string): Promise<EncryptedData> => {
+  if (!secureKey) throw new Error("Chave não importada no Worker");
+  const iv = crypto.getRandomValues(createBytes(12));
+  const encryptedBuffer = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
+    secureKey,
+    new TextEncoder().encode(plaintext).buffer as ArrayBuffer,
+  );
+  const encryptedBytes = bytesFromBuffer(encryptedBuffer);
+  return {
+    ciphertext: uint8ArrayToBase64(encryptedBytes.slice(0, -16)),
+    tag: uint8ArrayToBase64(encryptedBytes.slice(-16)),
+    iv: uint8ArrayToBase64(iv),
+  };
+};
+
+const decryptData = async (data: EncryptedData): Promise<string> => {
+  if (!secureKey) throw new Error("Chave não importada no Worker");
+  const ciphertext = base64ToUint8Array(data.ciphertext);
+  const iv = base64ToUint8Array(data.iv);
+  const tag = base64ToUint8Array(data.tag);
+  const combined = createBytes(ciphertext.length + tag.length);
+  combined.set(ciphertext);
+  combined.set(tag, ciphertext.length);
+
+  const decryptedBuffer = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: iv.buffer as ArrayBuffer, tagLength: 128 },
+    secureKey,
+    combined.buffer as ArrayBuffer,
+  );
+  return new TextDecoder().decode(decryptedBuffer);
+};
+
 const cryptoService = {
-  async setupVaultKeys(password: string, saltBase64: string) {
+  async setupInitialVault(password: string): Promise<Vault> {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const saltBase64 = uint8ArrayToBase64(salt);
     const saltBytes = base64ToUint8Array(saltBase64);
+
+    const kdf = {
+      salt: saltBase64,
+      memory: 65536,
+      iterations: 3,
+      parallelism: 1,
+    };
 
     const kekBytes = await argon2id({
       password,
       salt: saltBytes,
-      iterations: 3,
-      memorySize: 65536,
-      parallelism: 1,
+      iterations: kdf.iterations,
+      memorySize: kdf.memory,
+      parallelism: kdf.parallelism,
       hashLength: 32,
       outputType: "binary",
     });
@@ -90,17 +175,19 @@ const cryptoService = {
 
     const encryptedDekBytes = bytesFromBuffer(encryptedDekBuffer);
 
-    return {
-      iv: uint8ArrayToBase64(iv),
-      tag: uint8ArrayToBase64(encryptedDekBytes.slice(-16)),
-      ciphertext: uint8ArrayToBase64(encryptedDekBytes.slice(0, -16)),
+    const encryptedDek: EncryptedData = {
+        iv: uint8ArrayToBase64(iv),
+        tag: uint8ArrayToBase64(encryptedDekBytes.slice(-16)),
+        ciphertext: uint8ArrayToBase64(encryptedDekBytes.slice(0, -16)),
     };
+
+    return await getBaseVault(kdf, encryptedDek, await encryptData("[]"));
   },
 
-  async openVault(
+  async decryptVault(
     password: string,
-    envelope: EncryptedVaultEnvelope,
-  ): Promise<EncryptedVault> {
+    envelope: EncryptedVault,
+  ): Promise<Vault> {
     secureKey = null;
     kekKey = null;
 
@@ -148,7 +235,7 @@ const cryptoService = {
       );
       const encryptedVault = JSON.parse(
         new TextDecoder().decode(vaultBuffer),
-      ) as EncryptedVault;
+      ) as Vault;
 
       if (
         JSON.stringify(encryptedVault.kdf) !== JSON.stringify(envelope.kdf)
@@ -188,9 +275,9 @@ const cryptoService = {
     }
   },
 
-  async sealVault(
-    vault: EncryptedVault,
-  ): Promise<EncryptedVaultEnvelope> {
+  async encryptVault(
+    vault: Vault,
+  ): Promise<EncryptedVault> {
     if (!kekKey) throw new Error("KEK não importada no Worker");
 
     const iv = crypto.getRandomValues(createBytes(12));
@@ -219,182 +306,82 @@ const cryptoService = {
     };
   },
 
-  async encrypt(plaintext: string) {
-    if (!secureKey) throw new Error("Chave não importada no Worker");
-    const iv = crypto.getRandomValues(createBytes(12));
-    const encryptedBuffer = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
-      secureKey,
-      new TextEncoder().encode(plaintext).buffer as ArrayBuffer,
-    );
-    const encryptedBytes = bytesFromBuffer(encryptedBuffer);
-    return {
-      ciphertext: encryptedBytes.slice(0, -16),
-      tag: encryptedBytes.slice(-16),
-      iv,
-    };
-  },
-
-  async decrypt(
-    ciphertext: CryptoBytes,
-    iv: CryptoBytes,
-    tag: CryptoBytes,
-  ): Promise<string> {
-    if (!secureKey) throw new Error("Chave não importada no Worker");
-    const combined = createBytes(ciphertext.length + tag.length);
-    combined.set(ciphertext);
-    combined.set(tag, ciphertext.length);
-
-    const decryptedBuffer = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv.buffer as ArrayBuffer, tagLength: 128 },
-      secureKey,
-      combined.buffer as ArrayBuffer,
-    );
-    return new TextDecoder().decode(decryptedBuffer);
-  },
-
   async destroyKey() {
     secureKey = null;
     kekKey = null;
   },
 
   async getSingleEntry(encryptedEntry: EncryptedData): Promise<string> {
-    return await this.decrypt(
-      base64ToUint8Array(encryptedEntry.ciphertext),
-      base64ToUint8Array(encryptedEntry.iv),
-      base64ToUint8Array(encryptedEntry.tag),
-    );
+    return await decryptData(encryptedEntry);
   },
 
-  async verifyCompromised(password: string): Promise<boolean> {
-    const hash = sha1(password).toUpperCase();
-    const prefix = hash.slice(0, 5);
-    const suffix = hash.slice(5);
-
-    const compromisedPasswords = await fetch(
-      `https://api.pwnedpasswords.com/range/${prefix}`,
-    ).then((res) => res.text());
-
-    return compromisedPasswords.includes(suffix);
-  },
-
-  verifyWeak(password: string): boolean {
-    const result = zxcvbn.check(password);
-    return result.score < 3;
-  },
-
-  verifyReused(
-    id: string,
-    password: string,
-    decryptedVault: DecryptedVault,
-  ): { isTrue: boolean; reusedIds: string[] } {
-    const reusedIds = Object.values(decryptedVault.entries)
-      .filter(
-        (entry) =>
-          (entry as LoginCredential).password === password && entry.id !== id,
-      )
-      .map((entry) => entry.id);
-
-    const isTrue = reusedIds.length > 0;
-    const groupIds = isTrue
-      ? Array.from(new Set([id, ...reusedIds])).sort()
-      : [];
-
-    return { isTrue, reusedIds: groupIds };
-  },
-
-  verifyReneval(lastPasswordChange: Date): boolean {
-    const days = 90;
-    const timeSinceLastChange =
-      new Date().getTime() - lastPasswordChange.getTime();
-    return timeSinceLastChange > days * 24 * 60 * 60 * 1000;
-  },
-
-  async getFolderAndEntryData(
-    vault: DecryptedVault,
+  async getInitialData(
+    vault: Vault,
   ): Promise<VaultSummarizedData> {
-    const foldersData = vault.folders.map((f) => ({
+    const directories: Directory[] = JSON.parse(await decryptData(vault.directories));
+    const directoriesData = directories.map((f) => ({
       id: f.id,
       name: f.name,
       icon: f.icon,
       colorHex: f.colorHex,
     }));
 
-    const entriesData: EntrySummary[] = await Promise.all(
-      vault.entries.map(async (v) => {
+    const credentials: Credential[] = await Promise.all(
+      Object.values(vault.credentials).map(async (encryptedEntry) =>
+        JSON.parse(await decryptData(encryptedEntry)),
+      ),
+    );
+
+    const credentialsData: EntrySummary[] = await Promise.all(
+      credentials.map(async (c) => {
         let isCompromised = false;
         let isWeak = false;
         let isReused = false;
         let isRenewal = false;
         let reusedIds: string[] = [];
 
-        const password = v.password;
+        const password = c.password;
 
         if (password) {
-          isCompromised = await this.verifyCompromised(password);
-          isWeak = this.verifyWeak(password);
-          const result = this.verifyReused(v.id, password, vault);
+          isCompromised = await verifyCompromised(password);
+          isWeak = verifyWeak(password);
+          const result = verifyReused(c.id, password, credentials);
           isReused = result.isTrue;
           reusedIds = result.reusedIds;
-          isRenewal = this.verifyReneval(new Date(v.lastPasswordChange!));
+          isRenewal = verifyReneval(new Date(c.lastPasswordChange!));
         }
 
-        const entryData = {
-          id: v.id,
-          type: v.type,
-          title: v.title,
-          username: v.type === "login" ? v.username : null,
-          holderName: v.type === "card" ? v.holderName : null,
-          name: v.type === "note" ? v.name : null,
-          auditData: {
+        const entryData: EntrySummary = {
+          id: c.id,
+          type: c.type,
+          title: c.title,
+          autoSaveInterval: vault.autoSaveInterval,
+          username: c.type === "login" ? c.username : null,
+          holderName: c.type === "card" ? c.holderName : null,
+          name: c.type === "note" ? c.name : null,
+          auditInfo: {
             isCompromised: isCompromised,
             isWeak: isWeak,
             isReused: isReused,
             isRenewal: isRenewal,
           },
           reusedIds: reusedIds,
-          foldersIds: v.foldersIds,
-          isFavorite: v.isFavorite,
-          isDeleted: v.isDeleted,
+          directoriesIds: c.directoriesIds,
+          isFavorite: c.isFavorite,
+          isDeleted: c.isDeleted,
         };
         return entryData;
       }),
     );
 
-    return { folders: foldersData, entries: entriesData };
-  },
-
-  async getInitialData(
-    encryptedVault: EncryptedVault,
-  ): Promise<VaultSummarizedData> {
-    const decryptedFolders = await this.decrypt(
-      base64ToUint8Array(encryptedVault.folders.ciphertext),
-      base64ToUint8Array(encryptedVault.folders.iv),
-      base64ToUint8Array(encryptedVault.folders.tag),
-    );
-    const folders = JSON.parse(decryptedFolders);
-
-    const entries: Credential[] = [];
-    for (const encryptedEntry of Object.values(encryptedVault.entries)) {
-      const decryptedEntryStr = await this.getSingleEntry(encryptedEntry);
-
-      entries.push(JSON.parse(decryptedEntryStr));
-    }
-
-    const tempDecryptedVault: DecryptedVault = {
-      version: encryptedVault.version,
-      folders,
-      entries,
-    };
-
-    return await this.getFolderAndEntryData(tempDecryptedVault);
+    return { directories: directoriesData, credentials: credentialsData };
   },
 
   async getPassword(
-    encryptedVault: EncryptedVault,
+    encryptedVault: Vault,
     id: string,
   ): Promise<string | null> {
-    const encryptedEntry = encryptedVault.entries[id];
+    const encryptedEntry = encryptedVault.credentials[id];
     if (!encryptedEntry) return null;
 
     const decryptedStr = await this.getSingleEntry(encryptedEntry);
@@ -404,20 +391,17 @@ const cryptoService = {
   },
 
   async updateVaultFromSummary(
-    encryptedVault: EncryptedVault,
+    encryptedVault: Vault,
     summary: VaultSummarizedData,
-  ): Promise<EncryptedVault> {
-    const foldersResult = await this.encrypt(JSON.stringify(summary.folders));
-    const newFolders: EncryptedData = {
-      ciphertext: uint8ArrayToBase64(foldersResult.ciphertext),
-      iv: uint8ArrayToBase64(foldersResult.iv),
-      tag: uint8ArrayToBase64(foldersResult.tag),
-    };
+  ): Promise<Vault> {
+    const newDirectories = await encryptData(
+      JSON.stringify(summary.directories),
+    );
 
-    const newEntries: { [uuid: string]: EncryptedData } = {};
-    const summaryMap = new Map(summary.entries.map((e) => [e.id, e]));
+    const newCredentials: { [uuid: string]: EncryptedData } = {};
+    const summaryMap = new Map(summary.credentials.map((e) => [e.id, e]));
 
-    for (const [id, encryptedEntry] of Object.entries(encryptedVault.entries)) {
+    for (const [id, encryptedEntry] of Object.entries(encryptedVault.credentials)) {
       const summaryEntry = summaryMap.get(id);
 
       if (!summaryEntry) {
@@ -442,51 +426,46 @@ const cryptoService = {
           summaryEntry.type === "note"
             ? summaryEntry.name
             : decryptedEntry.name,
-        foldersIds: summaryEntry.foldersIds,
+        directoriesIds: summaryEntry.directoriesIds,
         isFavorite: summaryEntry.isFavorite,
         isDeleted: summaryEntry.isDeleted,
       };
 
-      const encryptedResult = await this.encrypt(JSON.stringify(mergedEntry));
-      newEntries[id] = {
-        ciphertext: uint8ArrayToBase64(encryptedResult.ciphertext),
-        iv: uint8ArrayToBase64(encryptedResult.iv),
-        tag: uint8ArrayToBase64(encryptedResult.tag),
-      };
+      newCredentials[id] = await encryptData(JSON.stringify(mergedEntry));
     }
 
     return {
       ...encryptedVault,
-      folders: newFolders,
-      entries: newEntries,
+      directories: newDirectories,
+      credentials: newCredentials,
     };
   },
 
   async getCredential(
     id: string,
-    encryptedVault: EncryptedVault,
+    encryptedVault: Vault,
   ): Promise<Credential | null> {
-    const encryptedEntry = encryptedVault.entries[id];
+    const encryptedEntry = encryptedVault.credentials[id];
     if (!encryptedEntry) return null;
     const decryptedStr = await this.getSingleEntry(encryptedEntry);
     return JSON.parse(decryptedStr);
   },
 
   async updateVaultFromCredential(
-    encryptedVault: EncryptedVault,
+    encryptedVault: Vault,
     credential: Credential,
-  ): Promise<EncryptedVault> {
-    const updatedEntries = await this.updateEntries(encryptedVault, credential);
+  ): Promise<Vault> {
+    const updatedCredentials = await this.updateCredentials(encryptedVault, credential);
     return {
       ...encryptedVault,
-      entries: updatedEntries,
+      credentials: updatedCredentials,
     };
   },
 
   async updateVaultFromCredentialAndTrackPasswordChange(
-    encryptedVault: EncryptedVault,
+    encryptedVault: Vault,
     credential: Credential,
-  ): Promise<EncryptedVault> {
+  ): Promise<Vault> {
     const previousCredential = await this.getCredential(
       credential.id,
       encryptedVault,
@@ -508,52 +487,20 @@ const cryptoService = {
     return this.updateVaultFromCredential(encryptedVault, updatedCredential);
   },
 
-  async updateEntries(
-    encryptedVault: EncryptedVault,
+  async updateCredentials(
+    encryptedVault: Vault,
     credential: Credential,
   ): Promise<{ [uuid: string]: EncryptedData }> {
-    const updatedEntries = { ...encryptedVault.entries };
+    const updatedCredentials = { ...encryptedVault.credentials };
 
     if (credential) {
-      const encryptedResult = await this.encrypt(JSON.stringify(credential));
-
-      updatedEntries[credential.id] = {
-        ciphertext: uint8ArrayToBase64(encryptedResult.ciphertext),
-        iv: uint8ArrayToBase64(encryptedResult.iv),
-        tag: uint8ArrayToBase64(encryptedResult.tag),
-      };
+      updatedCredentials[credential.id] = await encryptData(
+        JSON.stringify(credential),
+      );
     }
-    return updatedEntries;
+    return updatedCredentials;
   },
 
-  async encryptVault(
-    vaultEntries: Credential[],
-    folders: Folder[] = [],
-  ): Promise<{
-    folders: EncryptedData;
-    entries: { [uuid: string]: EncryptedData };
-  }> {
-    const foldersString = JSON.stringify(folders);
-    const encryptedFolders = await this.encrypt(foldersString);
-    const encryptedFoldersData = {
-      iv: uint8ArrayToBase64(encryptedFolders.iv),
-      tag: uint8ArrayToBase64(encryptedFolders.tag),
-      ciphertext: uint8ArrayToBase64(encryptedFolders.ciphertext),
-    };
-
-    const entries: { [uuid: string]: EncryptedData } = {};
-    for (const entry of vaultEntries) {
-      const entryString = JSON.stringify(entry);
-      const result = await this.encrypt(entryString);
-      entries[entry.id] = {
-        iv: uint8ArrayToBase64(result.iv),
-        tag: uint8ArrayToBase64(result.tag),
-        ciphertext: uint8ArrayToBase64(result.ciphertext),
-      };
-    }
-
-    return { folders: encryptedFoldersData, entries };
-  },
 };
 
 export type CryptoService = typeof cryptoService;

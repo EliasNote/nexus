@@ -2,11 +2,11 @@ import { isTauri } from "@tauri-apps/api/core";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboardRoute, manualRoute } from "@/App";
-import { useStorageSync } from "@/hooks/storage/useStorageSync";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { motion } from "framer-motion";
-import type { EncryptedVault } from "@/types/vault";
-import { createInitialVault } from "@/utils/initialVault";
+import type { Vault } from "@/types/vault";
+import { getBaseVault } from "@/utils/initialVault";
 import { uint8ArrayToBase64 } from "@/utils/worker";
 import { Input } from "../Dashboard/components/Credential/components/Input";
 import LetterGlitch from "./components/LetterGlitch";
@@ -69,9 +69,7 @@ export const Home = () => {
 
   const handleConcluir = async () => {
     try {
-      const masterPassword = password;
-
-      if (!masterPassword) {
+      if (!password) {
         setErrorContent("Digite sua senha mestra para continuar.");
         return;
       }
@@ -80,14 +78,14 @@ export const Home = () => {
 
       if (data) {
         console.log("Vault existe");
-        const envelope = await download();
-        if (!envelope) return;
+        const encryptedVault = await download();
+        if (!encryptedVault) return;
 
-        let encryptedVault: EncryptedVault;
+        let vault: Vault;
         try {
-          encryptedVault = await cryptoService.openVault(
-            masterPassword,
-            envelope,
+          vault = await cryptoService.decryptVault(
+            password,
+            encryptedVault,
           );
         } catch (error) {
           setErrorContent("Senha incorreta ou cofre corrompido.");
@@ -97,49 +95,23 @@ export const Home = () => {
 
         setErrorContent(null);
         const summaryVault =
-          await cryptoService.getInitialData(encryptedVault);
+          await cryptoService.getInitialData(vault);
 
-        console.log("Cofre: ", summaryVault);
-
-        const interval = encryptedVault.autoSaveInterval ?? 1;
+        const interval = vault.autoSaveInterval ?? 1;
         useCloudStore.getState().setAutoSaveInterval(interval);
 
         setSummaryVault(summaryVault);
-        setVault(encryptedVault);
+        setVault(vault);
       } else {
         console.log("Vault não existe, fazendo upload");
 
-        const vault = await createInitialVault();
-        const saltBytes = crypto.getRandomValues(new Uint8Array(16));
-        const salt = uint8ArrayToBase64(saltBytes);
+        const vault = await cryptoService.setupInitialVault(password);
 
-        const kdf = {
-          salt,
-          memory: 65536,
-          iterations: 3,
-          parallelism: 1,
-        };
-        const encryptedDek = await cryptoService.setupVaultKeys(password, salt);
+        await upload(await cryptoService.encryptVault(vault));
 
-        const encryptedContent = await cryptoService.encryptVault(
-          vault.entries,
-          vault.folders,
-        );
-
-        const cofreFinal: EncryptedVault = {
-          version: "1.0",
-          autoSaveInterval: 1,
-          kdf,
-          encrypted_dek: encryptedDek,
-          folders: encryptedContent.folders,
-          entries: encryptedContent.entries,
-        };
-
-        await upload(await cryptoService.sealVault(cofreFinal));
-
-        useCloudStore.getState().setAutoSaveInterval(1);
-        setVault(cofreFinal);
-        setSummaryVault(await cryptoService.getFolderAndEntryData(vault));
+        // useCloudStore.getState().setAutoSaveInterval(1);
+        setVault(vault);
+        setSummaryVault(await cryptoService.getDirectoryAndEntryData(vault));
       }
 
       if (inputRef.current) {

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useStorageSync } from "./storage/useStorageSync";
+import { useStorageSync } from "./useStorageSync";
 import { cryptoService, useCloudStore } from "./useCloudStore";
 
 export const useAutoSave = () => {
@@ -23,7 +23,7 @@ export const useAutoSave = () => {
   }, [upload]);
 
   useEffect(() => {
-    const intervalMs = autoSaveInterval * 60 * 1000;
+    const intervalMs = autoSaveInterval;
 
     const timer = window.setInterval(async () => {
       const state = useCloudStore.getState();

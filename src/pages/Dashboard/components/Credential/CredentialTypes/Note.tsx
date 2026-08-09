@@ -2,13 +2,13 @@ import { Folder, NotepadText } from "lucide-react";
 import { DirectorySelect } from "./../components/DirectorySelect";
 import { TextArea } from "./../components/TextArea";
 import type {
-  Folder as FolderType,
+  Directory as DirectoryType,
   Credential,
   NoteCredential,
 } from "@/types/vault";
 
 export const Note = ({
-  folders,
+  directories,
   isEdit,
   setIsEdit,
   credential,
@@ -16,7 +16,7 @@ export const Note = ({
   autoFocusId,
   setAutoFocusId,
 }: {
-  folders: FolderType[];
+  directories: DirectoryType[];
   isEdit: boolean;
   setIsEdit: (isEdit: boolean) => void;
   credential: NoteCredential;
@@ -41,12 +41,12 @@ export const Note = ({
         isEdit={isEdit}
         iconTop={Folder}
         topName="DIRETÓRIOS"
-        selectedFoldersIds={credential.foldersIds ?? []}
-        setSelectedFoldersIds={(ids) => handleChange("foldersIds", ids)}
-        folders={folders}
-        autoFocus={autoFocusId === "foldersIds"}
+        selectedDirectoriesIds={credential.directoriesIds ?? []}
+        setSelectedDirectoriesIds={(ids) => handleChange("directoriesIds", ids)}
+        directories={directories}
+        autoFocus={autoFocusId === "directoriesIds"}
         onDoubleClick={() => {
-          setAutoFocusId("foldersIds");
+          setAutoFocusId("directoriesIds");
           setIsEdit(true);
         }}
       />

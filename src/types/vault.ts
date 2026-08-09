@@ -13,14 +13,14 @@ export const CREDENTIAL_TYPES_LABELS = {
 export type CredentialType =
   (typeof CREDENTIAL_TYPES)[keyof typeof CREDENTIAL_TYPES];
 
-export type Folder = {
+export type Directory = {
   id: string;
   name: string;
   icon?: string;
   colorHex?: string;
 };
 
-export type AuditData = {
+export type AuditInfo = {
   isCompromised?: boolean;
   isWeak?: boolean;
   isReused?: boolean;
@@ -31,26 +31,27 @@ export interface EntrySummary {
   id: string;
   type: CredentialType;
   title: string;
+  autoSaveInterval: number;
   username?: string | null | undefined;
   holderName?: string | null | undefined;
   name?: string | null | undefined;
-  auditData?: AuditData;
+  auditInfo?: AuditInfo;
   reusedIds?: string[];
-  foldersIds?: string[];
+  directoriesIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;
 }
 
 export interface VaultSummarizedData {
-  folders: Folder[];
-  entries: EntrySummary[];
+  directories: Directory[];
+  credentials: EntrySummary[];
 }
 
 export type CommonMetadata = {
   id: string;
   title: string;
   notes?: string;
-  foldersIds?: string[];
+  directoriesIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;
   createdAt: string;
@@ -84,12 +85,6 @@ export type NoteCredential = CommonMetadata & {
 export type Credential =
   LoginCredential | CreditCardCredential | NoteCredential;
 
-export type DecryptedVault = {
-  version: string;
-  folders: Folder[];
-  entries: Credential[];
-};
-
 export type EncryptedData = {
   iv: string;
   tag: string;
@@ -103,18 +98,18 @@ export type KdfConfig = {
   parallelism: number;
 };
 
-export type EncryptedVault = {
+export type Vault = {
   version: string;
-  autoSaveInterval?: number;
+  autoSaveInterval: number;
   kdf: KdfConfig;
   encrypted_dek: EncryptedData;
-  folders: EncryptedData;
-  entries: {
+  directories: EncryptedData;
+  credentials: {
     [uuid: string]: EncryptedData;
   };
 };
 
-export type EncryptedVaultEnvelope = {
+export type EncryptedVault = {
   version: string;
   kdf: KdfConfig;
   encrypted_vault: EncryptedData;

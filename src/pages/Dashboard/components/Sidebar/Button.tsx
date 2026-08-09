@@ -10,9 +10,9 @@ export const Button = ({
   onClick,
   isSyncButton,
   isSyncButtonAllowed,
-  isFolder,
-  onRenameFolder,
-  onDeleteFolder,
+  isDirectory,
+  onRenameDirectory,
+  onDeleteDirectory,
 }: {
   id: number | string;
   selectedId: number | string;
@@ -22,13 +22,13 @@ export const Button = ({
   onClick?: () => void;
   isSyncButton?: boolean;
   isSyncButtonAllowed?: boolean;
-  isFolder?: boolean;
-  onRenameFolder?: (name: string) => void | Promise<void>;
-  onDeleteFolder?: () => void;
+  isDirectory?: boolean;
+  onRenameDirectory?: (name: string) => void | Promise<void>;
+  onDeleteDirectory?: () => void;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [titleText, setTitleText] = useState(title);
-  const [isRenameFolder, setIsRenameFolder] = useState(false);
+  const [isRenameDirectory, setIsRenameDirectory] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isSelected = id === selectedId && !isSyncButton;
@@ -46,14 +46,14 @@ export const Button = ({
   }, []);
 
   useEffect(() => {
-    if (isRenameFolder) {
+    if (isRenameDirectory) {
       inputRef.current?.focus();
       inputRef.current?.select();
     }
-  }, [isRenameFolder]);
+  }, [isRenameDirectory]);
 
   const handleSelect = () => {
-    if (isRenameFolder) return;
+    if (isRenameDirectory) return;
     if (!isSyncButton) setSelected(id);
 
     onClick?.();
@@ -61,7 +61,7 @@ export const Button = ({
 
   const cancelRename = () => {
     setTitleText(title);
-    setIsRenameFolder(false);
+    setIsRenameDirectory(false);
   };
 
   const confirmRename = async () => {
@@ -73,11 +73,11 @@ export const Button = ({
     }
 
     if (trimmedTitle !== title) {
-      await onRenameFolder?.(trimmedTitle);
+      await onRenameDirectory?.(trimmedTitle);
     }
 
     setTitleText(trimmedTitle);
-    setIsRenameFolder(false);
+    setIsRenameDirectory(false);
   };
 
   return (
@@ -95,7 +95,7 @@ export const Button = ({
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <span className={iconStyle}>{icon}</span>
-        {isFolder && isRenameFolder ? (
+        {isDirectory && isRenameDirectory ? (
           <input
             ref={inputRef}
             type="text"
@@ -122,13 +122,13 @@ export const Button = ({
           <span
             className={`font-medium truncate ${isSelected ? "text-white" : isSyncButtonAllowed ? "text-zinc-500 group-hover:text-brand" : "text-zinc-500 group-hover:text-zinc-400"}`}
           >
-            {isFolder && `/`}
+            {isDirectory && `/`}
             {titleText}
           </span>
         )}
       </div>
 
-      {isFolder && !isRenameFolder && (
+      {isDirectory && !isRenameDirectory && (
         <div className="relative" ref={menuRef}>
           <button
             type="button"
@@ -152,7 +152,7 @@ export const Button = ({
                 className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-zinc-300 hover:bg-zinc-800 hover:text-white cursor-pointer"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  setIsRenameFolder(true);
+                  setIsRenameDirectory(true);
                 }}
               >
                 <Pencil size={14} />
@@ -164,7 +164,7 @@ export const Button = ({
                 className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-red-alert hover:bg-red-alert hover:text-white cursor-pointer"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  onDeleteFolder?.();
+                  onDeleteDirectory?.();
                 }}
               >
                 <Trash2 size={14} />

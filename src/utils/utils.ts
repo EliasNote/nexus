@@ -49,7 +49,7 @@ export const updateSummaryVaultCredential = (
     name: updatedCredential.type === "note" ? updatedCredential.name : null,
     auditData: currentEntry?.auditData,
     reusedIds: currentEntry?.reusedIds,
-    foldersIds: updatedCredential.foldersIds,
+    directoriesIds: updatedCredential.directoriesIds,
     isFavorite: updatedCredential.isFavorite,
     isDeleted: updatedCredential.isDeleted,
   };

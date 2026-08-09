@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useStorageSync } from "@/hooks/storage/useStorageSync";
-import type { StorageProvider } from "@/hooks/storage/types";
+import { useStorageSync } from "@/hooks/useStorageSync";
+import type { StorageProvider } from "@/hooks/types";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { GitSteps } from "./GitSteps";
 import { saveSettings } from "@/config/settingsStore";

@@ -9,13 +9,13 @@ import { Input } from "./../components/Input";
 import { DirectorySelect } from "./../components/DirectorySelect";
 import { TextArea } from "./../components/TextArea";
 import type {
-  Folder as FolderType,
+  Directory as DirectoryType,
   LoginCredential,
   Credential,
 } from "@/types/vault";
 
 export const Login = ({
-  folders,
+  directories,
   isEdit,
   setIsEdit,
   isCreate,
@@ -25,7 +25,7 @@ export const Login = ({
   setAutoFocusId,
 
 }: {
-  folders: FolderType[];
+  directories: DirectoryType[];
   isEdit: boolean;
   setIsEdit: (isEdit: boolean) => void;
   isCreate: Credential["type"] | null;
@@ -97,12 +97,12 @@ export const Login = ({
         isEdit={isEdit}
         iconTop={Folder}
         topName="DIRETÓRIOS"
-        selectedFoldersIds={credential.foldersIds ?? []}
-        setSelectedFoldersIds={(ids) => handleChange("foldersIds", ids)}
-        folders={folders}
-        autoFocus={autoFocusId === "foldersIds"}
+        selectedDirectoriesIds={credential.directoriesIds ?? []}
+        setSelectedDirectoriesIds={(ids) => handleChange("directoriesIds", ids)}
+        directories={directories}
+        autoFocus={autoFocusId === "directoriesIds"}
         onDoubleClick={() => {
-          setAutoFocusId("foldersIds");
+          setAutoFocusId("directoriesIds");
           setIsEdit(true);
         }}
       />

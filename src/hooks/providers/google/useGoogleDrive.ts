@@ -1,6 +1,6 @@
 import { useCloudStore } from "@/hooks/useCloudStore";
 import type { GoogleToken } from "@/types/types";
-import type { EncryptedVaultEnvelope } from "@/types/vault";
+import type { EncryptedVault } from "@/types/vault";
 import { useGoogleWebAuth } from "./webAuth";
 import type {
   AuthSession,
@@ -116,7 +116,7 @@ export function useGoogleDrive(): VaultStorage & {
     return data.files?.[0]?.id ?? null;
   };
 
-  const download = async (): Promise<EncryptedVaultEnvelope> => {
+  const download = async (): Promise<EncryptedVault> => {
     try {
       const accessToken = requireToken(token);
       const fileId = await exists();
@@ -134,7 +134,7 @@ export function useGoogleDrive(): VaultStorage & {
         throw await parseGoogleError(response);
       }
 
-      return (await response.json()) as EncryptedVaultEnvelope;
+      return (await response.json()) as EncryptedVault;
     } catch (error) {
       console.log(error);
       throw error;
@@ -142,7 +142,7 @@ export function useGoogleDrive(): VaultStorage & {
   };
 
   const upload = async (
-    vault: EncryptedVaultEnvelope,
+    vault: EncryptedVault,
   ): Promise<void> => {
     try {
       const accessToken = requireToken(token);

@@ -1,26 +1,26 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { Folder } from "@/types/vault";
+import type { Directory } from "@/types/vault";
 
 export const DirectorySelect = ({
   iconTop: Icontop,
   topName,
   isEdit,
-  folders,
+  directories,
   disabled,
-  selectedFoldersIds,
-  setSelectedFoldersIds,
+  selectedDirectoriesIds,
+  setSelectedDirectoriesIds,
   autoFocus,
   onDoubleClick,
 }: {
   iconTop: LucideIcon;
   topName: string;
   isEdit?: boolean;
-  folders: Folder[];
+  directories: Directory[];
   disabled?: boolean;
-  selectedFoldersIds: string[];
-  setSelectedFoldersIds: (ids: string[]) => void;
+  selectedDirectoriesIds: string[];
+  setSelectedDirectoriesIds: (ids: string[]) => void;
   autoFocus?: boolean;
   onDoubleClick?: () => void;
 }) => {
@@ -46,18 +46,18 @@ export const DirectorySelect = ({
     }
   }, [autoFocus, disabled]);
 
-  const toggleFolder = (id: string) => {
-    const newIds = selectedFoldersIds.includes(id)
-      ? selectedFoldersIds.filter((i) => i !== id)
-      : [...selectedFoldersIds, id];
+  const toggleDirectory = (id: string) => {
+    const newIds = selectedDirectoriesIds.includes(id)
+      ? selectedDirectoriesIds.filter((i) => i !== id)
+      : [...selectedDirectoriesIds, id];
 
-    setSelectedFoldersIds(newIds);
+    setSelectedDirectoriesIds(newIds);
   };
 
-  const safeFolders = Array.isArray(folders) ? folders : [];
+  const safeDirectories = Array.isArray(directories) ? directories : [];
 
-  const selectedFolders = safeFolders.filter((f) =>
-    selectedFoldersIds.includes(f.id),
+  const selectedDirectories = safeDirectories.filter((directory) =>
+    selectedDirectoriesIds.includes(directory.id),
   );
 
   return (
@@ -82,19 +82,19 @@ export const DirectorySelect = ({
           className={`flex items-center justify-between bg-zinc-900 border ${isOpen ? "border-zinc-600" : "border-zinc-800"} h-[45px] w-full px-3 ${disabled ? "pointer-events-none" : "cursor-pointer"} transition-colors`}
         >
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-            {selectedFolders.length > 0 ? (
-              selectedFolders.map((f) => (
+            {selectedDirectories.length > 0 ? (
+              selectedDirectories.map((directory) => (
                 <span
-                  key={f.id}
+                  key={directory.id}
                   className="flex items-center gap-1 bg-zinc-800 text-white text-[12px] px-2 py-0.5 whitespace-nowrap border border-zinc-700"
                 >
-                  {f.name}
+                  {directory.name}
                   <X
                     size={14}
                     className={`${isEdit && "hover:text-red-500 cursor-pointer"}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleFolder(f.id);
+                      toggleDirectory(directory.id);
                     }}
                   />
                 </span>
@@ -113,19 +113,19 @@ export const DirectorySelect = ({
 
         {isOpen && (
           <div className="absolute top-[50px] left-0 w-full bg-zinc-900 border border-zinc-700 z-50 shadow-2xl max-h-[200px] overflow-y-auto">
-            {folders.map((folder) => (
+            {directories.map((directory) => (
               <div
-                key={folder.id}
-                onClick={() => toggleFolder(folder.id)}
+                key={directory.id}
+                onClick={() => toggleDirectory(directory.id)}
                 className="flex items-center justify-between px-4 py-2 hover:bg-zinc-800 cursor-pointer text-sm text-zinc-300 transition-colors"
               >
-                <span>{folder.name}</span>
-                {selectedFoldersIds.includes(folder.id) && (
+                <span>{directory.name}</span>
+                {selectedDirectoriesIds.includes(directory.id) && (
                   <Check size={16} className="text-brand" />
                 )}
               </div>
             ))}
-            {folders.length === 0 && (
+            {directories.length === 0 && (
               <div className="p-4 text-zinc-500 text-center text-sm">
                 Crie um diretório na barra lateral primeiro.
               </div>

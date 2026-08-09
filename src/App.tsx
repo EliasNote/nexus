@@ -1,7 +1,7 @@
 ﻿import { useEffect } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
-import { useStorageSync } from "./hooks/storage/useStorageSync";
+import { useStorageSync } from "./hooks/useStorageSync";
 import { useCloudStore } from "./hooks/useCloudStore";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Home from "./pages/Home/Home";

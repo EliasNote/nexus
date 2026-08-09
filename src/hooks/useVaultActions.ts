@@ -1,10 +1,10 @@
 import type {
   Credential,
-  Folder,
+  Directory,
   VaultSummarizedData,
 } from "@/types/vault";
 import { cryptoService, useCloudStore } from "./useCloudStore";
-import { useStorageSync } from "./storage/useStorageSync";
+import { useStorageSync } from "./useStorageSync";
 import { updateSummaryVaultCredential } from "@/utils/utils";
 
 export const useVaultActions = () => {
@@ -89,20 +89,20 @@ export const useVaultActions = () => {
     setSummaryVault(updatedSummaryVault);
   };
 
-  const createFolder = async (folderName: string) => {
+  const createDirectory = async (directoryName: string) => {
     if (!vault || !summaryVault) return;
 
-    const trimmedName = folderName.trim();
+    const trimmedName = directoryName.trim();
     if (!trimmedName) return;
 
-    const newFolder: Folder = {
+    const newDirectory: Directory = {
       id: crypto.randomUUID(),
       name: trimmedName,
     };
 
     const updatedSummaryVault: VaultSummarizedData = {
       ...summaryVault,
-      folders: [...summaryVault.folders, newFolder],
+      directories: [...summaryVault.directories, newDirectory],
     };
 
     const newVault = await cryptoService.updateVaultFromSummary(
@@ -114,19 +114,19 @@ export const useVaultActions = () => {
     setVault(newVault);
     setSummaryVault(updatedSummaryVault);
 
-    return newFolder;
+    return newDirectory;
   };
 
-  const renameFolder = async (folderId: string, folderName: string) => {
+  const renameDirectory = async (directoryId: string, directoryName: string) => {
     if (!vault || !summaryVault) return;
 
-    const trimmedName = folderName.trim();
+    const trimmedName = directoryName.trim();
     if (!trimmedName) return;
 
     const updatedSummaryVault: VaultSummarizedData = {
       ...summaryVault,
-      folders: summaryVault.folders.map((folder) =>
-        folder.id === folderId ? { ...folder, name: trimmedName } : folder,
+      directories: summaryVault.directories.map((directory) =>
+        directory.id === directoryId ? { ...directory, name: trimmedName } : directory,
       ),
     };
 
@@ -140,15 +140,15 @@ export const useVaultActions = () => {
     setSummaryVault(updatedSummaryVault);
   };
 
-  const deleteFolder = async (folderId: string) => {
+  const deleteDirectory = async (directoryId: string) => {
     if (!vault || !summaryVault) return;
 
     const updatedSummaryVault: VaultSummarizedData = {
       ...summaryVault,
-      folders: summaryVault.folders.filter((folder) => folder.id !== folderId),
+      directories: summaryVault.directories.filter((directory) => directory.id !== directoryId),
       entries: summaryVault.entries.map((entry) => ({
         ...entry,
-        foldersIds: entry.foldersIds?.filter((id) => id !== folderId),
+        directoriesIds: entry.directoriesIds?.filter((id) => id !== directoryId),
       })),
     };
 
@@ -165,9 +165,9 @@ export const useVaultActions = () => {
   return {
     saveCredential,
     deleteCredential,
-    createFolder,
-    renameFolder,
-    deleteFolder,
+    createDirectory,
+    renameDirectory,
+    deleteDirectory,
     saveVault,
   };
 };

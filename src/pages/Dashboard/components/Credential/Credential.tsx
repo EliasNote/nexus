@@ -38,7 +38,7 @@ export const Credential = ({
 
   const summaryVault = useCloudStore((state) => state.summaryVault);
 
-  const folders = summaryVault?.folders ?? [];
+  const directories = summaryVault?.directories ?? [];
 
   const [autoFocusId, setAutoFocusId] = useState<string | null>(isEditFromAudit ? "password" : null);
 
@@ -85,7 +85,7 @@ export const Credential = ({
         {tempVault?.type === "login" && (
           <Login
             key={isCreate ? "new" : tempVault.id}
-            folders={folders}
+            directories={directories}
             isEdit={isEditable}
             setIsEdit={setIsEdit}
             isCreate={isCreate}
@@ -98,7 +98,7 @@ export const Credential = ({
         {tempVault?.type === "card" && (
           <Card
             key={isCreate ? "new" : tempVault.id}
-            folders={folders}
+            directories={directories}
             isEdit={isEditable}
             setIsEdit={setIsEdit}
             isCreate={isCreate}
@@ -111,7 +111,7 @@ export const Credential = ({
         {tempVault?.type === "note" && (
           <Note
             key={isCreate ? "new" : tempVault.id}
-            folders={folders}
+            directories={directories}
             isEdit={isEditable}
             setIsEdit={setIsEdit}
             credential={tempVault}

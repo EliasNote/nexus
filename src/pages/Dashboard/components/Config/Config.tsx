@@ -38,14 +38,6 @@ export const Config = () => {
                       className="flex items-center gap-1 bg-zinc-800 text-white text-[12px] px-2 py-0.5 whitespace-nowrap border border-zinc-700"
                     >
                       {f.name}
-                      <X
-                        size={14}
-                        className={`${isEdit && "hover:text-red-500 cursor-pointer"}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFolder(f.id);
-                        }}
-                      />
                     </span>
                   ))
                 ) : (

@@ -3,7 +3,7 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
 import { cryptoService, useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
-import type { Credential as CredentialType, Folder } from "@/types/vault";
+import type { Credential as CredentialType, Directory } from "@/types/vault";
 import { AddButton } from "./components/Credential/AddButton";
 import { useAutoSave } from "@/hooks/useSave";
 import { SIDEBAR_BUTTONS_IDS } from "./components/Sidebar/Buttons";
@@ -30,8 +30,8 @@ const Dashboard = () => {
   const [tempVault, setTempVault] = useState<CredentialType | null>(credential);
   const [isLoadingCredential] = useState(false);
 
-  const folders: Folder[] = useMemo(() => {
-    return summaryVault?.folders || [];
+  const directories: Directory[] = useMemo(() => {
+    return summaryVault?.directories || [];
   }, [summaryVault]);
 
   const getTitle = () => {
@@ -44,8 +44,8 @@ const Dashboard = () => {
         return "LIXEIRA";
       default:
         if (typeof selected === "string") {
-          const targetFolder = folders.find((f) => f.id === selected);
-          return targetFolder?.name || "";
+          const targetDirectory = directories.find((f) => f.id === selected);
+          return targetDirectory?.name || "";
         };
         return "TODOS OS ITENS";
     }
@@ -69,16 +69,16 @@ const Dashboard = () => {
         );
       default:
         if (selected as string) {
-          const targetFolder = folders.find((f) => f.id === selected);
-          return targetFolder
+          const targetDirectory = directories.find((f) => f.id === selected);
+          return targetDirectory
             ? summaryVault.entries.filter((c) =>
-                c.foldersIds?.includes(targetFolder.id),
+                c.directoriesIds?.includes(targetDirectory.id),
               )
             : [];
         }
         return [];
     }
-  }, [selected, summaryVault, folders]);
+  }, [selected, summaryVault, directories]);
 
   const clearDecryptedCredential = (id?: string | null) => {
     setCredential(null);
@@ -119,7 +119,7 @@ const Dashboard = () => {
       title: "Nova Credencial",
       isFavorite: false,
       isDeleted: false,
-      foldersIds: [],
+      directoriesIds: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       audit: { leak: false, weak: false, reused: false, renewal: false },
@@ -154,7 +154,7 @@ const Dashboard = () => {
       <Sidebar
         selected={selected}
         setSelected={setSelected}
-        folders={folders}
+        directories={directories}
       />
       {{
         [SIDEBAR_BUTTONS_IDS.generator]: <Generator />,

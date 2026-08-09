@@ -1,11 +1,14 @@
-import type { DecryptedVault } from "@/types/vault";
+import type { Vault, KdfConfig, EncryptedData } from "@/types/vault";
 
 export const version = "1.0";
 
-export const createInitialVault = async (): Promise<DecryptedVault> => {
+export const getBaseVault = async (kdf: KdfConfig, encrypted_dek: EncryptedData, directories: EncryptedData): Promise<Vault> => {
   return {
     version: version,
-    folders: [],
-    entries: [],
+    autoSaveInterval: 1000,
+    kdf: kdf,
+    encrypted_dek: encrypted_dek,
+    directories: directories,
+    credentials: {},
   };
 };

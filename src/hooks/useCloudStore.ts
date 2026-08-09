@@ -1,7 +1,7 @@
 ﻿import { create } from "zustand";
 import { wrap } from "comlink";
 import type { CryptoService } from "../utils/worker";
-import type { CloudState } from "./storage/types";
+import type { CloudState } from "./types";
 
 const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
   type: "module",

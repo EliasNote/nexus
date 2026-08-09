@@ -7,26 +7,26 @@ import {
   Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useStorageSync } from "@/hooks/storage/useStorageSync";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import { useSaveNow } from "@/hooks/useSave";
 import { useVaultActions } from "@/hooks/useVaultActions";
 import { useCloudStore } from "@/hooks/useCloudStore";
-import type { Folder } from "@/types/vault";
+import type { Directory } from "@/types/vault";
 import { Button } from "./Button";
 import { getAllButtons, SIDEBAR_BUTTONS_IDS } from "./Buttons";
 
 const Sidebar = ({
   selected,
   setSelected,
-  folders,
+  directories,
 }: {
   selected: number | string;
   setSelected: (id: number | string) => void;
-  folders: Folder[];
+  directories: Directory[];
 }) => {
   const { disconnect } = useStorageSync();
-  const [newFolder, setNewFolder] = useState("");
-  const [isAddFolder, setIsAddFolder] = useState(false);
+  const [newDirectory, setNewDirectory] = useState("");
+  const [isAddDirectory, setIsAddDirectory] = useState(false);
   const { isPendingSync, setIsPendingSync, isSaving } = useCloudStore(
     (state) => state,
   );
@@ -43,22 +43,22 @@ const Sidebar = ({
     isSaving,
   );
 
-  const { createFolder, renameFolder, deleteFolder } = useVaultActions();
+  const { createDirectory, renameDirectory, deleteDirectory } = useVaultActions();
 
   const onSave = async () => {
-    await createFolder(newFolder);
-    setNewFolder("");
-    setIsAddFolder(false);
+    await createDirectory(newDirectory);
+    setNewDirectory("");
+    setIsAddDirectory(false);
   };
 
-  const handleDeleteFolder = async (folder: Folder) => {
+  const handleDeleteDirectory = async (directory: Directory) => {
     const shouldDelete = window.confirm(
-      `Excluir o diretorio "${folder.name}"? As credenciais nao serao apagadas.`,
+      `Excluir o diretorio "${directory.name}"? As credenciais nao serao apagadas.`,
     );
     if (!shouldDelete) return;
 
-    await deleteFolder(folder.id);
-    if (selected === folder.id) setSelected(SIDEBAR_BUTTONS_IDS.all);
+    await deleteDirectory(directory.id);
+    if (selected === directory.id) setSelected(SIDEBAR_BUTTONS_IDS.all);
   };
 
   const verifyLogout = () => {
@@ -145,19 +145,19 @@ const Sidebar = ({
             <motion.button
               className="cursor-pointer text-zinc-300 hover:text-brand"
               whileHover={{ rotate: 180 }}
-              onClick={() => setIsAddFolder(!isAddFolder)}
+              onClick={() => setIsAddDirectory(!isAddDirectory)}
             >
-              {isAddFolder ? <Minus size={22} /> : <Plus size={22} />}
+              {isAddDirectory ? <Minus size={22} /> : <Plus size={22} />}
             </motion.button>
           </div>
         </div>
         <div className="flex flex-col gap-[5px] overflow-y-auto overflow-x-hidden flex-1">
-          {isAddFolder && (
+          {isAddDirectory && (
             <div className="flex flex-col gap-2 items-center px-2">
               <input
                 type="text"
-                value={newFolder}
-                onChange={(e) => setNewFolder(e.target.value)}
+                value={newDirectory}
+                onChange={(e) => setNewDirectory(e.target.value)}
                 className="bg-zinc-900 text-white px-2 py-1.5 outline-none border border-zinc-700 focus:border-brand text-sm w-full"
                 placeholder="Novo diretório"
                 autoFocus
@@ -165,8 +165,8 @@ const Sidebar = ({
                   if (e.key === "Enter") {
                     onSave();
                   } else if (e.key === "Escape") {
-                    setIsAddFolder(false);
-                    setNewFolder("");
+                    setIsAddDirectory(false);
+                    setNewDirectory("");
                   }
                 }}
               />
@@ -178,17 +178,17 @@ const Sidebar = ({
               </button>
             </div>
           )}
-          {folders.map((f) => (
+          {directories.map((directory) => (
             <Button
-              key={f.id}
-              id={f.id}
+              key={directory.id}
+              id={directory.id}
               selectedId={selected}
-              title={f.name}
+              title={directory.name}
               setSelected={setSelected}
               icon={<FolderIcon size={20} />}
-              isFolder={true}
-              onRenameFolder={(name) => renameFolder(f.id, name)}
-              onDeleteFolder={() => handleDeleteFolder(f)}
+              isDirectory={true}
+              onRenameDirectory={(name) => renameDirectory(directory.id, name)}
+              onDeleteDirectory={() => handleDeleteDirectory(directory)}
             />
           ))}
         </div>

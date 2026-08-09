@@ -6,7 +6,7 @@ import {
   remove,
   writeTextFile,
 } from "@tauri-apps/plugin-fs";
-import type { EncryptedVaultEnvelope } from "@/types/vault";
+import type { EncryptedVault } from "@/types/vault";
 import type { VaultStorage } from "../../types";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { join } from "@tauri-apps/api/path";
@@ -33,7 +33,7 @@ export function useLocalFile(): VaultStorage {
     return vaultExists ? "local" : null;
   }
 
-  async function download(): Promise<EncryptedVaultEnvelope> {
+  async function download(): Promise<EncryptedVault> {
     const { path, baseDir } = await resolvePath();
     const content = await readTextFile(path, { baseDir });
 
@@ -42,13 +42,13 @@ export function useLocalFile(): VaultStorage {
     }
 
     try {
-      return JSON.parse(content) as EncryptedVaultEnvelope;
+      return JSON.parse(content) as EncryptedVault;
     } catch {
       throw new Error("O cofre local está inválido.");
     }
   }
 
-  async function upload(vault: EncryptedVaultEnvelope): Promise<void> {
+  async function upload(vault: EncryptedVault): Promise<void> {
     const { path, baseDir } = await resolvePath();
     const { vaultPath } = useCloudStore.getState();
 
