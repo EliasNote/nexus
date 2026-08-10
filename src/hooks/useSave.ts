@@ -1,19 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useStorageSync } from "./useStorageSync";
 import { cryptoService, useCloudStore } from "./useCloudStore";
+import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
 
 export const useAutoSave = () => {
-  const autoSaveInterval = useCloudStore(
-    (state) => state.autoSaveInterval,
-  );
-
-  const setIsPendingSync = useCloudStore(
-    (state) => state.setIsPendingSync,
-  );
-
-  const setIsSaving = useCloudStore(
-    (state) => state.setIsSaving,
-  );
+  const { setIsPendingSync, setIsSaving, summaryVault } = useCloudStore();
 
   const { upload } = useStorageSync();
   const uploadRef = useRef(upload);
@@ -23,7 +14,9 @@ export const useAutoSave = () => {
   }, [upload]);
 
   useEffect(() => {
-    const intervalMs = autoSaveInterval;
+    const autoSaveInterval = summaryVault?.autoSaveInterval;
+    const minInterval = AUTO_SAVE_INTERVAL_OPTIONS[0].value;
+    const intervalMs = autoSaveInterval ? autoSaveInterval < minInterval ? minInterval : autoSaveInterval : minInterval;
 
     const timer = window.setInterval(async () => {
       const state = useCloudStore.getState();
@@ -36,8 +29,8 @@ export const useAutoSave = () => {
       try {
         setIsSaving(true);
 
-        const envelope = await cryptoService.sealVault(currentVault);
-        await uploadRef.current(envelope);
+        const vault = await cryptoService.encryptVault(currentVault);
+        await uploadRef.current(vault);
 
         setIsPendingSync(false);
       } catch (error) {
@@ -54,9 +47,9 @@ export const useAutoSave = () => {
       window.clearInterval(timer);
     };
   }, [
-    autoSaveInterval,
     setIsPendingSync,
     setIsSaving,
+    summaryVault
   ]);
 };
 
@@ -87,8 +80,8 @@ export const useSaveNow = () => {
     try {
       setIsSaving(true);
 
-      const envelope = await cryptoService.sealVault(currentVault);
-      await uploadRef.current(envelope);
+      const vault = await cryptoService.encryptVault(currentVault);
+      await uploadRef.current(vault);
 
       setIsPendingSync(false);
     } catch (error) {

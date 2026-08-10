@@ -3,7 +3,7 @@ import type {
   EncryptedData,
   Vault,
   EncryptedVault,
-  EntrySummary,
+  CredentialSummary,
   LoginCredential,
   VaultSummarizedData,
   Directory,
@@ -121,6 +121,10 @@ const decryptData = async (data: EncryptedData): Promise<string> => {
     combined.buffer as ArrayBuffer,
   );
   return new TextDecoder().decode(decryptedBuffer);
+};
+
+const getSingleCredential = async (encryptedCredential: EncryptedData): Promise<string> => {
+  return await decryptData(encryptedCredential);
 };
 
 const cryptoService = {
@@ -311,10 +315,6 @@ const cryptoService = {
     kekKey = null;
   },
 
-  async getSingleEntry(encryptedEntry: EncryptedData): Promise<string> {
-    return await decryptData(encryptedEntry);
-  },
-
   async getInitialData(
     vault: Vault,
   ): Promise<VaultSummarizedData> {
@@ -327,12 +327,12 @@ const cryptoService = {
     }));
 
     const credentials: Credential[] = await Promise.all(
-      Object.values(vault.credentials).map(async (encryptedEntry) =>
-        JSON.parse(await decryptData(encryptedEntry)),
+      Object.values(vault.credentials).map(async (encryptedCredential) =>
+        JSON.parse(await decryptData(encryptedCredential)),
       ),
     );
 
-    const credentialsData: EntrySummary[] = await Promise.all(
+    const credentialsData: CredentialSummary[] = await Promise.all(
       credentials.map(async (c) => {
         let isCompromised = false;
         let isWeak = false;
@@ -351,11 +351,10 @@ const cryptoService = {
           isRenewal = verifyReneval(new Date(c.lastPasswordChange!));
         }
 
-        const entryData: EntrySummary = {
+        const credentialData: CredentialSummary = {
           id: c.id,
           type: c.type,
           title: c.title,
-          autoSaveInterval: vault.autoSaveInterval,
           username: c.type === "login" ? c.username : null,
           holderName: c.type === "card" ? c.holderName : null,
           name: c.type === "note" ? c.name : null,
@@ -370,24 +369,24 @@ const cryptoService = {
           isFavorite: c.isFavorite,
           isDeleted: c.isDeleted,
         };
-        return entryData;
+        return credentialData;
       }),
     );
 
-    return { directories: directoriesData, credentials: credentialsData };
+    return { autoSaveInterval: vault.autoSaveInterval, directories: directoriesData, credentials: credentialsData };
   },
 
   async getPassword(
     encryptedVault: Vault,
     id: string,
   ): Promise<string | null> {
-    const encryptedEntry = encryptedVault.credentials[id];
-    if (!encryptedEntry) return null;
+    const encryptedCredential = encryptedVault.credentials[id];
+    if (!encryptedCredential) return null;
 
-    const decryptedStr = await this.getSingleEntry(encryptedEntry);
-    const entry = JSON.parse(decryptedStr);
+    const decryptedStr = await getSingleCredential(encryptedCredential);
+    const credential = JSON.parse(decryptedStr);
 
-    return entry.password || null;
+    return credential.password || null;
   },
 
   async updateVaultFromSummary(
@@ -401,37 +400,37 @@ const cryptoService = {
     const newCredentials: { [uuid: string]: EncryptedData } = {};
     const summaryMap = new Map(summary.credentials.map((e) => [e.id, e]));
 
-    for (const [id, encryptedEntry] of Object.entries(encryptedVault.credentials)) {
-      const summaryEntry = summaryMap.get(id);
+    for (const [id, encryptedCredential] of Object.entries(encryptedVault.credentials)) {
+      const summaryCredential = summaryMap.get(id);
 
-      if (!summaryEntry) {
+      if (!summaryCredential) {
         continue;
       }
 
-      const decryptedStr = await this.getSingleEntry(encryptedEntry);
-      const decryptedEntry = JSON.parse(decryptedStr);
+      const decryptedStr = await getSingleCredential(encryptedCredential);
+      const decryptedCredential = JSON.parse(decryptedStr);
 
-      const mergedEntry = {
-        ...decryptedEntry,
-        title: summaryEntry.title,
+      const mergedCredential = {
+        ...decryptedCredential,
+        title: summaryCredential.title,
         username:
-          summaryEntry.type === "login"
-            ? summaryEntry.username
-            : decryptedEntry.username,
+          summaryCredential.type === "login"
+            ? summaryCredential.username
+            : decryptedCredential.username,
         holderName:
-          summaryEntry.type === "card"
-            ? summaryEntry.holderName
-            : decryptedEntry.holderName,
+          summaryCredential.type === "card"
+            ? summaryCredential.holderName
+            : decryptedCredential.holderName,
         name:
-          summaryEntry.type === "note"
-            ? summaryEntry.name
-            : decryptedEntry.name,
-        directoriesIds: summaryEntry.directoriesIds,
-        isFavorite: summaryEntry.isFavorite,
-        isDeleted: summaryEntry.isDeleted,
+          summaryCredential.type === "note"
+            ? summaryCredential.name
+            : decryptedCredential.name,
+        directoriesIds: summaryCredential.directoriesIds,
+        isFavorite: summaryCredential.isFavorite,
+        isDeleted: summaryCredential.isDeleted,
       };
 
-      newCredentials[id] = await encryptData(JSON.stringify(mergedEntry));
+      newCredentials[id] = await encryptData(JSON.stringify(mergedCredential));
     }
 
     return {
@@ -445,9 +444,9 @@ const cryptoService = {
     id: string,
     encryptedVault: Vault,
   ): Promise<Credential | null> {
-    const encryptedEntry = encryptedVault.credentials[id];
-    if (!encryptedEntry) return null;
-    const decryptedStr = await this.getSingleEntry(encryptedEntry);
+    const encryptedCredential = encryptedVault.credentials[id];
+    if (!encryptedCredential) return null;
+    const decryptedStr = await getSingleCredential(encryptedCredential);
     return JSON.parse(decryptedStr);
   },
 

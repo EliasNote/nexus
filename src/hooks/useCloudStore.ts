@@ -65,12 +65,6 @@ export const useCloudStore = create<CloudState>(
       set({ isSaving });
     },
 
-    autoSaveInterval: 1,
-
-    setAutoSaveInterval: (autoSaveInterval) => {
-      set({ autoSaveInterval });
-    },
-
     clearSession: () => {
       cryptoService.destroyKey();
       set({

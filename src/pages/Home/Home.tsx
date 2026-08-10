@@ -6,8 +6,6 @@ import { useStorageSync } from "@/hooks/useStorageSync";
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { motion } from "framer-motion";
 import type { Vault } from "@/types/vault";
-import { getBaseVault } from "@/utils/initialVault";
-import { uint8ArrayToBase64 } from "@/utils/worker";
 import { Input } from "../Dashboard/components/Credential/components/Input";
 import LetterGlitch from "./components/LetterGlitch";
 import { IconButton } from "./components/IconButton";
@@ -16,7 +14,7 @@ import { loadSettings } from "@/config/settingsStore";
 import { CLOUD_OPTIONS } from "@/utils/constants";
 
 export const Home = () => {
-  const { upload, download, exists } = useStorageSync();
+  const { upload, download, exists, remove } = useStorageSync();
   const isDesktop = isTauri();
 
   const navigate = useNavigate();
@@ -95,10 +93,7 @@ export const Home = () => {
 
         setErrorContent(null);
         const summaryVault =
-          await cryptoService.getInitialData(vault);
-
-        const interval = vault.autoSaveInterval ?? 1;
-        useCloudStore.getState().setAutoSaveInterval(interval);
+        await cryptoService.getInitialData(vault);
 
         setSummaryVault(summaryVault);
         setVault(vault);
@@ -111,7 +106,7 @@ export const Home = () => {
 
         // useCloudStore.getState().setAutoSaveInterval(1);
         setVault(vault);
-        setSummaryVault(await cryptoService.getDirectoryAndEntryData(vault));
+        setSummaryVault(await cryptoService.getInitialData(vault));
       }
 
       if (inputRef.current) {
@@ -148,6 +143,7 @@ export const Home = () => {
         classname="fixed inset-0 z-0 pointer-events-none"
       />
       <section className="relative z-10 flex h-full items-center justify-center">
+        {/*<button className="bg-red-500 w-100 h-50" onClick={remove}>APAGAR ESSA COISA</button>*/}
         {currentStep === 0 && (
           <Step key="step0" direction={direction}>
             <div className="flex flex-col items-center justify-center gap-[20px]">

@@ -269,15 +269,15 @@ const LetterGlitch = ({
     };
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        isVisibleRef.current = entry.isIntersecting;
+      ([credential]) => {
+        isVisibleRef.current = credential.isIntersecting;
 
-        if (entry.isIntersecting && animationRef.current === null) {
+        if (credential.isIntersecting && animationRef.current === null) {
           const now = performance.now();
           lastGlitchTime.current = now;
           lastDrawTime.current = now;
           animationRef.current = requestAnimationFrame(animate);
-        } else if (!entry.isIntersecting && animationRef.current !== null) {
+        } else if (!credential.isIntersecting && animationRef.current !== null) {
           cancelAnimationFrame(animationRef.current);
           animationRef.current = null;
         }

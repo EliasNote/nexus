@@ -1,4 +1,4 @@
-import type { Credential, CredentialType, EntrySummary } from "@/types/vault";
+import type { Credential, CredentialType, CredentialSummary } from "@/types/vault";
 import { AddButton } from "../AddButton";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 
@@ -10,10 +10,10 @@ export const Footer = ({
 }: {
   isCreate: CredentialType | null;
   tempVault: Credential;
-  summaryVault: EntrySummary | undefined;
+  summaryVault: CredentialSummary | undefined;
   handleStartCreate: (type: CredentialType) => void;
 }) => {
-  const isCompromised = summaryVault?.auditData?.isCompromised;
+  const isCompromised = summaryVault?.auditInfo?.isCompromised;
 
   return (
     <div

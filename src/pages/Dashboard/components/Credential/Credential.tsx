@@ -125,7 +125,7 @@ export const Credential = ({
         isCreate={isCreate}
         tempVault={tempVault}
         summaryVault={
-          summaryVault?.entries.filter((x) => x.id === tempVault.id)[0]
+          summaryVault?.credentials.filter((x) => x.id === tempVault.id)[0]
         }
         handleStartCreate={handleStartCreate}
       />

@@ -95,19 +95,19 @@ export const REUSED_GROUP_COLORS = [
 
 export const AUTO_SAVE_INTERVAL_OPTIONS = [
   {
-    id: 30,
-    name: "30 segundos",
+    value: 30000,
+    title: "30 segundos",
   },
   {
-    id: 60,
-    name: "1 minuto",
+    value: 60000,
+    title: "1 minuto",
   },
   {
-    id: 300,
-    name: "5 minutos",
+    value: 300000,
+    title: "5 minutos",
   },
   {
-    id: 600,
-    name: "10 minutos",
+    value: 600000,
+    title: "10 minutos",
   }
 ];

@@ -76,7 +76,7 @@ export const useVaultActions = () => {
 
     const updatedSummaryVault: VaultSummarizedData = {
       ...summaryVault,
-      entries: summaryVault.entries.filter((e) => e.id !== credentialId),
+      credentials: summaryVault.credentials.filter((e) => e.id !== credentialId),
     };
 
     const newVault = await cryptoService.updateVaultFromSummary(
@@ -146,9 +146,9 @@ export const useVaultActions = () => {
     const updatedSummaryVault: VaultSummarizedData = {
       ...summaryVault,
       directories: summaryVault.directories.filter((directory) => directory.id !== directoryId),
-      entries: summaryVault.entries.map((entry) => ({
-        ...entry,
-        directoriesIds: entry.directoriesIds?.filter((id) => id !== directoryId),
+      credentials: summaryVault.credentials.map((credential) => ({
+        ...credential,
+        directoriesIds: credential.directoriesIds?.filter((id) => id !== directoryId),
       })),
     };
 

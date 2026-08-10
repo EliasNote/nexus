@@ -1,5 +1,5 @@
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
-import type { EntrySummary } from "@/types/vault";
+import type { CredentialSummary } from "@/types/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
@@ -11,7 +11,7 @@ const Credential = ({
 }: {
   selected: boolean;
   setSelectedSideCredential: (id: string | null) => void;
-  credential: EntrySummary;
+  credential: CredentialSummary;
 }) => {
   const [copied, setCopied] = useState(false);
   const vault = useCloudStore.getState().vault;

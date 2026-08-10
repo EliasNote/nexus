@@ -31,7 +31,7 @@ export const Audit = ({
   onChangeCredential: (credentialId: string) => void;
 }) => {
   const vault = useCloudStore((state) => state.vault);
-  const summaryEntries = useCloudStore((state) => state.summaryVault?.entries);
+  const summaryCredentials = useCloudStore((state) => state.summaryVault?.credentials);
   const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
   const [selectedOptionId, setSelectedOptionId] = useState("compromised");
   const [isChecking, setIsChecking] = useState(false);
@@ -44,7 +44,7 @@ export const Audit = ({
         "Estas senhas foram encontradas em vazamentos de dados públicos conhecidos. Altere-as imediatamente.",
       icon: Database,
       total:
-        summaryEntries?.filter((entry) => entry.auditData?.isCompromised)
+        summaryCredentials?.filter((credential) => credential.auditInfo?.isCompromised)
           ?.length ?? 0,
     },
     {
@@ -53,7 +53,7 @@ export const Audit = ({
       phrase: "Senhas fracas devem ser substituídas por senhas mais fortes.",
       icon: TriangleAlert,
       total:
-        summaryEntries?.filter((entry) => entry.auditData?.isWeak)?.length ?? 0,
+        summaryCredentials?.filter((credential) => credential.auditInfo?.isWeak)?.length ?? 0,
     },
     {
       id: "reused",
@@ -62,7 +62,7 @@ export const Audit = ({
         "O uso da mesma senha em múltiplos serviços aumenta o risco de efeito dominó em caso de vazamento.",
       icon: Files,
       total:
-        summaryEntries?.filter((entry) => entry.auditData?.isReused)?.length ??
+        summaryCredentials?.filter((credential) => credential.auditInfo?.isReused)?.length ??
         0,
     },
     {
@@ -72,7 +72,7 @@ export const Audit = ({
         "É recomendado que senhas que não são alteradas há mais de 90 dias sejam renovadas preventivamente.",
       icon: Clock,
       total:
-        summaryEntries?.filter((entry) => entry.auditData?.isRenewal)?.length ??
+        summaryCredentials?.filter((credential) => credential.auditInfo?.isRenewal)?.length ??
         0,
     },
   ];
@@ -174,27 +174,27 @@ export const Audit = ({
           </div>
         </div>
         <div className="flex flex-col gap-1 max-h-full overflow-y-auto">
-          {summaryEntries
+          {summaryCredentials
             ?.filter((x) => !x.isDeleted)
-            ?.filter((entry) => {
+            ?.filter((credential) => {
               if (selectedOptionId === auditTypesData[0].id)
-                return entry.auditData?.isCompromised;
+                return credential.auditInfo?.isCompromised;
               if (selectedOptionId === auditTypesData[1].id)
-                return entry.auditData?.isWeak;
+                return credential.auditInfo?.isWeak;
               if (selectedOptionId === auditTypesData[2].id)
-                return entry.auditData?.isReused;
+                return credential.auditInfo?.isReused;
               if (selectedOptionId === auditTypesData[3].id)
-                return entry.auditData?.isRenewal;
+                return credential.auditInfo?.isRenewal;
               return true;
             })
-            .map((entry) => (
+            .map((credential) => (
               <AuditCredential
-                key={entry.id}
-                entrySummary={entry}
+                key={credential.id}
+                credentialSummary={credential}
                 onChangeCredential={onChangeCredential}
                 reusedColorClass={
                   selectedOptionId === "reused"
-                    ? getReusedColorClass(entry.reusedIds)
+                    ? getReusedColorClass(credential.reusedIds)
                     : undefined
                 }
               />

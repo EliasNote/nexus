@@ -74,8 +74,5 @@ export type CloudState = {
   isSaving: boolean;
   setIsSaving: (value: boolean) => void;
 
-  autoSaveInterval: number;
-  setAutoSaveInterval: (value: number) => void;
-
   clearSession: () => void;
 };

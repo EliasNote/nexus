@@ -1,4 +1,4 @@
-import type { EntrySummary } from "@/types/vault";
+import type { CredentialSummary } from "@/types/vault";
 import SideCredential from "./SideCredential";
 import { useState, useMemo } from "react";
 
@@ -10,7 +10,7 @@ const SidebarCredentials = ({
 }: {
   selectedSideCredential: string | null;
   setSelectedSideCredential: (id: string | null) => void;
-  credentials: EntrySummary[] | undefined;
+  credentials: CredentialSummary[] | undefined;
   topTitle: string;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");

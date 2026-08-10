@@ -27,11 +27,10 @@ export type AuditInfo = {
   isRenewal?: boolean;
 };
 
-export interface EntrySummary {
+export interface CredentialSummary {
   id: string;
   type: CredentialType;
   title: string;
-  autoSaveInterval: number;
   username?: string | null | undefined;
   holderName?: string | null | undefined;
   name?: string | null | undefined;
@@ -43,8 +42,9 @@ export interface EntrySummary {
 }
 
 export interface VaultSummarizedData {
+  autoSaveInterval: number;
   directories: Directory[];
-  credentials: EntrySummary[];
+  credentials: CredentialSummary[];
 }
 
 export type CommonMetadata = {

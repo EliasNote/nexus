@@ -52,26 +52,26 @@ const Dashboard = () => {
   }
 
   const credentials = useMemo(() => {
-    if (!summaryVault?.entries) return [];
+    if (!summaryVault?.credentials) return [];
 
     switch (selected) {
       case SIDEBAR_BUTTONS_IDS.all:
-        return summaryVault.entries.filter(
+        return summaryVault.credentials.filter(
           (credential) => !credential.isDeleted,
         );
       case SIDEBAR_BUTTONS_IDS.favorites:
-        return summaryVault.entries.filter(
+        return summaryVault.credentials.filter(
           (credential) => credential.isFavorite && !credential.isDeleted,
         );
       case SIDEBAR_BUTTONS_IDS.trash:
-        return summaryVault.entries.filter(
+        return summaryVault.credentials.filter(
           (credential) => credential.isDeleted,
         );
       default:
         if (selected as string) {
           const targetDirectory = directories.find((f) => f.id === selected);
           return targetDirectory
-            ? summaryVault.entries.filter((c) =>
+            ? summaryVault.credentials.filter((c) =>
                 c.directoriesIds?.includes(targetDirectory.id),
               )
             : [];
@@ -112,7 +112,7 @@ const Dashboard = () => {
     }
   }, [selectedSideCredential, vault]);
 
-  const newEntry = (type: CredentialType["type"]) =>
+  const newCredential = (type: CredentialType["type"]) =>
     ({
       id: crypto.randomUUID(),
       type: type,
@@ -137,7 +137,7 @@ const Dashboard = () => {
   const handleStartCreate = (type: CredentialType["type"]) => {
     clearDecryptedCredential();
 
-    setTempVault(newEntry(type));
+    setTempVault(newCredential(type));
     setIsCreate(type);
   };
 
@@ -170,7 +170,7 @@ const Dashboard = () => {
           />
           {(selectedSideCredential && credential && tempVault) || isCreate ? (
             <Credential
-              tempVault={tempVault || newEntry(isCreate!)}
+              tempVault={tempVault || newCredential(isCreate!)}
               setTempVault={setTempVault}
               isEdit={isEdit}
               setIsEdit={setIsEdit}

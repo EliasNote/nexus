@@ -1,5 +1,5 @@
 import { useCloudStore } from "@/hooks/useCloudStore";
-import type { Credential, EntrySummary, VaultSummarizedData } from "@/types/vault";
+import type { Credential, CredentialSummary, VaultSummarizedData } from "@/types/vault";
 import { isTauri } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
@@ -35,10 +35,10 @@ export const updateSummaryVaultCredential = (
 ): VaultSummarizedData => {
   const setSummaryVault = useCloudStore.getState().setSummaryVault;
 
-  const currentEntry = vault.entries.find(
-    (entry) => entry.id === updatedCredential.id,
+  const currentCredential = vault.credentials.find(
+    (credential) => credential.id === updatedCredential.id,
   );
-  const summaryEntry: EntrySummary = {
+  const summaryCredential: CredentialSummary = {
     id: updatedCredential.id,
     type: updatedCredential.type,
     title: updatedCredential.title,
@@ -47,22 +47,22 @@ export const updateSummaryVaultCredential = (
     holderName:
       updatedCredential.type === "card" ? updatedCredential.holderName : null,
     name: updatedCredential.type === "note" ? updatedCredential.name : null,
-    auditData: currentEntry?.auditData,
-    reusedIds: currentEntry?.reusedIds,
+    auditInfo: currentCredential?.auditInfo,
+    reusedIds: currentCredential?.reusedIds,
     directoriesIds: updatedCredential.directoriesIds,
     isFavorite: updatedCredential.isFavorite,
     isDeleted: updatedCredential.isDeleted,
   };
 
-  const newEntries = currentEntry
-    ? vault.entries.map((entry) =>
-        entry.id === updatedCredential.id ? summaryEntry : entry,
+  const newCredentials = currentCredential
+    ? vault.credentials.map((credential) =>
+        credential.id === updatedCredential.id ? summaryCredential : credential,
       )
-    : [summaryEntry, ...vault.entries];
+    : [summaryCredential, ...vault.credentials];
 
   const result = {
     ...vault,
-    entries: newEntries,
+    credentials: newCredentials,
   };
 
   setSummaryVault(result);
