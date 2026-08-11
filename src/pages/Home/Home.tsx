@@ -14,7 +14,7 @@ import { loadSettings } from "@/config/settingsStore";
 import { CLOUD_OPTIONS } from "@/utils/constants";
 
 export const Home = () => {
-  const { upload, download, exists, remove } = useStorageSync();
+  const { upload, download, exists } = useStorageSync();
   const isDesktop = isTauri();
 
   const navigate = useNavigate();
