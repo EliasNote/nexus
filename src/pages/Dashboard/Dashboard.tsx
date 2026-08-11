@@ -16,7 +16,7 @@ import { Config } from "./components/Config/Config";
 const Dashboard = () => {
   useAutoSave();
 
-  const [selected, setSelected] = useState<number | string>(0);
+  const [selected, setSelected] = useState<number | string>("all");
 
   const vault = useCloudStore((state) => state.vault);
   const summaryVault = useCloudStore((state) => state.summaryVault);

@@ -88,11 +88,11 @@ export const footers = (
       isSaving ? "isSaving" : isPendingSync ? "unsynced" : "synced"
     ],
   },
-  {
-    id: "config",
-    title: "CONFIGURAÇÕES",
-    icon: <Settings size={iconsSize} />,
-  },
+  // {
+  //   id: "config",
+  //   title: "CONFIGURAÇÕES",
+  //   icon: <Settings size={iconsSize} />,
+  // },
   {
     id: "logout",
     title: "SAIR",
