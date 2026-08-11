@@ -8,7 +8,7 @@ import {
   CloudOff,
   CloudUpload,
   LogOut,
-  Settings,
+  // Settings,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
