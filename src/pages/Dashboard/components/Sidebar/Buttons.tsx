@@ -90,7 +90,7 @@ export const footers = (
   },
   {
     id: "config",
-    title: "CONFIGURAÇÃO",
+    title: "CONFIGURAÇÕES",
     icon: <Settings size={iconsSize} />,
   },
   {

@@ -390,17 +390,18 @@ const cryptoService = {
   },
 
   async updateVaultFromSummary(
-    encryptedVault: Vault,
+    vault: Vault,
     summary: VaultSummarizedData,
   ): Promise<Vault> {
     const newDirectories = await encryptData(
       JSON.stringify(summary.directories),
     );
 
+    const newAutoSaveInterval = summary.autoSaveInterval;
     const newCredentials: { [uuid: string]: EncryptedData } = {};
     const summaryMap = new Map(summary.credentials.map((e) => [e.id, e]));
 
-    for (const [id, encryptedCredential] of Object.entries(encryptedVault.credentials)) {
+    for (const [id, encryptedCredential] of Object.entries(vault.credentials)) {
       const summaryCredential = summaryMap.get(id);
 
       if (!summaryCredential) {
@@ -434,7 +435,8 @@ const cryptoService = {
     }
 
     return {
-      ...encryptedVault,
+      ...vault,
+      autoSaveInterval: newAutoSaveInterval,
       directories: newDirectories,
       credentials: newCredentials,
     };
@@ -442,32 +444,32 @@ const cryptoService = {
 
   async getCredential(
     id: string,
-    encryptedVault: Vault,
+    vault: Vault,
   ): Promise<Credential | null> {
-    const encryptedCredential = encryptedVault.credentials[id];
+    const encryptedCredential = vault.credentials[id];
     if (!encryptedCredential) return null;
     const decryptedStr = await getSingleCredential(encryptedCredential);
     return JSON.parse(decryptedStr);
   },
 
   async updateVaultFromCredential(
-    encryptedVault: Vault,
+    vault: Vault,
     credential: Credential,
   ): Promise<Vault> {
-    const updatedCredentials = await this.updateCredentials(encryptedVault, credential);
+    const updatedCredentials = await this.updateCredentials(vault, credential);
     return {
-      ...encryptedVault,
+      ...vault,
       credentials: updatedCredentials,
     };
   },
 
   async updateVaultFromCredentialAndTrackPasswordChange(
-    encryptedVault: Vault,
+    vault: Vault,
     credential: Credential,
   ): Promise<Vault> {
     const previousCredential = await this.getCredential(
       credential.id,
-      encryptedVault,
+      vault,
     );
     const now = new Date().toISOString();
     const currentPassword = credential.password ?? "";
@@ -483,14 +485,14 @@ const cryptoService = {
       lastPasswordChange: passwordChanged ? now : credential.lastPasswordChange,
     };
 
-    return this.updateVaultFromCredential(encryptedVault, updatedCredential);
+    return this.updateVaultFromCredential(vault, updatedCredential);
   },
 
   async updateCredentials(
-    encryptedVault: Vault,
+    vault: Vault,
     credential: Credential,
   ): Promise<{ [uuid: string]: EncryptedData }> {
-    const updatedCredentials = { ...encryptedVault.credentials };
+    const updatedCredentials = { ...vault.credentials };
 
     if (credential) {
       updatedCredentials[credential.id] = await encryptData(

@@ -29,7 +29,7 @@ export const useVaultActions = () => {
       return;
     }
 
-    await upload(await cryptoService.sealVault(vault));
+    await upload(await cryptoService.encryptVault(vault));
     setIsPendingSync(false);
   };
 

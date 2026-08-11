@@ -22,9 +22,7 @@ export const useAutoSave = () => {
       const state = useCloudStore.getState();
       const currentVault = state.vault;
 
-      if (!state.isPendingSync || !currentVault) {
-        return;
-      }
+      if (!state.isPendingSync || !currentVault) return;
 
       try {
         setIsSaving(true);

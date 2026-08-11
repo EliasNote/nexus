@@ -92,8 +92,7 @@ export const Home = () => {
         }
 
         setErrorContent(null);
-        const summaryVault =
-        await cryptoService.getInitialData(vault);
+        const summaryVault = await cryptoService.getInitialData(vault);
 
         setSummaryVault(summaryVault);
         setVault(vault);
