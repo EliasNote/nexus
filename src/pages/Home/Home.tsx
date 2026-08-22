@@ -82,8 +82,8 @@ export const Home = () => {
         let vault: Vault;
         try {
           vault = await cryptoService.decryptVault(
-            password,
             encryptedVault,
+            password,
           );
         } catch (error) {
           setErrorContent("Senha incorreta ou cofre corrompido.");

@@ -21,6 +21,7 @@ export const Input = ({
   isCreate,
   errorContent,
   onDoubleClick,
+  handleInputFocus,
 }: {
   iconTop?: LucideIcon;
   topName?: string;
@@ -36,6 +37,7 @@ export const Input = ({
   isCreate?: boolean;
   errorContent?: string | null;
   onDoubleClick?: () => void;
+  handleInputFocus?: () => void
 }) => {
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +85,9 @@ export const Input = ({
             type={isPasswordIcon ? (showPassword ? "text" : "password") : "text"}
             placeholder={placeholder}
             value={value}
+            onFocus={() => {
+              if (handleInputFocus) handleInputFocus();
+            }}
             onChange={(e) => onChange?.(e.target.value)}
             aria-invalid={Boolean(errorContent)}
             aria-describedby={errorContent ? "input-error-message" : undefined}

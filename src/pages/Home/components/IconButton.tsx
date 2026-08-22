@@ -12,10 +12,10 @@ export const IconButton = ({
   title,
   subtitle,
 }: {
-  id: StorageProvider;
+  id?: StorageProvider;
   icon: ReactNode;
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
 }) => {
   const { connect } = useStorageSync();
 
@@ -91,14 +91,18 @@ export const IconButton = ({
           </div>
 
           <div className="min-w-0 gap-1 flex flex-col justify-center items-start leading-tight">
-            <span className="text-[14px] font-bold text-white">
+            {title && <span className="text-[14px] font-bold text-white">
               {title}
             </span>
+            }
+
 
             <div className="flex flex-col items-start">
-              <span className="text-[12px] text-zinc-600">
-                {subtitle}
-              </span>
+              {subtitle &&
+                <span className="text-[12px] text-zinc-600">
+                  {subtitle}
+                </span>
+              }
 
               {id === "local" && vaultPath && (
                 <span

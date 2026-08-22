@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "tauri": "tauri",
+    "tauri": "WEBKIT_DISABLE_COMPOSITING_MODE=0 tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
   },

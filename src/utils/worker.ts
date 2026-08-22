@@ -189,31 +189,34 @@ const cryptoService = {
   },
 
   async decryptVault(
-    password: string,
     envelope: EncryptedVault,
+    password?: string,
   ): Promise<Vault> {
-    secureKey = null;
-    kekKey = null;
+    let KEK;
+    if (password) {
+      secureKey = null;
+      kekKey = null;
 
-    const saltBytes = base64ToUint8Array(envelope.kdf.salt);
-    const kekBytes = await argon2id({
-      password,
-      salt: saltBytes,
-      iterations: 3,
-      memorySize: 65536,
-      parallelism: 1,
-      hashLength: 32,
-      outputType: "binary",
-    });
+      const saltBytes = base64ToUint8Array(envelope.kdf.salt);
+      const kekBytes = await argon2id({
+        password,
+        salt: saltBytes,
+        iterations: 3,
+        memorySize: 65536,
+        parallelism: 1,
+        hashLength: 32,
+        outputType: "binary",
+      });
 
-    const KEK = await crypto.subtle.importKey(
-      "raw",
-      kekBytes.buffer as ArrayBuffer,
-      { name: "AES-GCM" },
-      false,
-      ["encrypt", "decrypt"],
-    );
-    kekBytes.fill(0);
+      KEK = await crypto.subtle.importKey(
+        "raw",
+        kekBytes.buffer as ArrayBuffer,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt", "decrypt"],
+      );
+      kekBytes.fill(0);
+    }
 
     const vaultIv = base64ToUint8Array(envelope.encrypted_vault.iv);
     const vaultCiphertext = base64ToUint8Array(
@@ -225,6 +228,7 @@ const cryptoService = {
     combinedVault.set(vaultTag, vaultCiphertext.length);
 
     try {
+      const currentKek = password ? KEK : kekKey;
       const vaultBuffer = await crypto.subtle.decrypt(
         {
           name: "AES-GCM",
@@ -234,31 +238,32 @@ const cryptoService = {
           ),
           tagLength: 128,
         },
-        KEK,
+        currentKek!,
         combinedVault,
       );
-      const encryptedVault = JSON.parse(
+
+      const vault = JSON.parse(
         new TextDecoder().decode(vaultBuffer),
       ) as Vault;
 
       if (
-        JSON.stringify(encryptedVault.kdf) !== JSON.stringify(envelope.kdf)
+        JSON.stringify(vault.kdf) !== JSON.stringify(envelope.kdf)
       ) {
         throw new Error("Configuração KDF inconsistente");
       }
 
-      const dekIv = base64ToUint8Array(encryptedVault.encrypted_dek.iv);
+      const dekIv = base64ToUint8Array(vault.encrypted_dek.iv);
       const dekCiphertext = base64ToUint8Array(
-        encryptedVault.encrypted_dek.ciphertext,
+        vault.encrypted_dek.ciphertext,
       );
-      const dekTag = base64ToUint8Array(encryptedVault.encrypted_dek.tag);
+      const dekTag = base64ToUint8Array(vault.encrypted_dek.tag);
       const combinedDek = createBytes(dekCiphertext.length + dekTag.length);
       combinedDek.set(dekCiphertext);
       combinedDek.set(dekTag, dekCiphertext.length);
 
       const rawDekBuffer = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: dekIv, tagLength: 128 },
-        KEK,
+        currentKek!,
         combinedDek,
       );
 
@@ -269,9 +274,9 @@ const cryptoService = {
         false,
         ["encrypt", "decrypt"],
       );
-      kekKey = KEK;
+      kekKey = currentKek!;
 
-      return encryptedVault;
+      return vault;
     } catch (e) {
       secureKey = null;
       kekKey = null;
