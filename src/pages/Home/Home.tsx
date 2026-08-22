@@ -210,6 +210,7 @@ export const Home = () => {
               <div className="flex w-full flex-col items-start">
                 <p className="mb-1.5 text-sm font-bold">SENHA MESTRA</p>
                 <Input
+                  autoFocus={true}
                   isPasswordIcon={true}
                   value={password}
                   onChange={(val) => {
