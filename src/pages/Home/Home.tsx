@@ -1,4 +1,5 @@
 import { isTauri } from "@tauri-apps/api/core";
+import { exists as fsExists } from "@tauri-apps/plugin-fs";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboardRoute, manualRoute } from "@/App";
@@ -42,8 +43,11 @@ export const Home = () => {
       const settings = await loadSettings();
 
       if (settings) {
-        setVaultPath(settings.vaultPath);
-        setActiveProvider(settings.provider);
+        const pathStillExists = await fsExists(settings.vaultPath);
+        if (pathStillExists) {
+          setVaultPath(settings.vaultPath);
+          setActiveProvider(settings.provider);
+        }
       }
       setIsConfigLoaded(true);
       console.log("isConfigLoaded", isConfigLoaded);
@@ -74,12 +78,18 @@ export const Home = () => {
         return;
       }
 
+      setIsLoading(true);
+      setErrorContent(null);
+
       const data = await exists();
 
       if (data) {
         console.log("Vault existe");
         const encryptedVault = await download();
-        if (!encryptedVault) return;
+
+        if (!encryptedVault) {
+          throw new Error("Não foi possível carregar o arquivo do cofre.");
+        }
 
         let vault: Vault;
         try {
@@ -88,24 +98,19 @@ export const Home = () => {
             password,
           );
         } catch (error) {
+          console.error("Erro ao descriptografar:", error);
           setErrorContent("Senha incorreta ou cofre corrompido.");
-          console.error("Erro: ", error);
+          setIsLoading(false);
           return;
         }
 
-        setErrorContent(null);
         const summaryVault = await cryptoService.getInitialData(vault);
-
         setSummaryVault(summaryVault);
         setVault(vault);
       } else {
-        console.log("Vault não existe, fazendo upload");
-
+        console.log("Vault não existe, inicializando novo cofre");
         const vault = await cryptoService.setupInitialVault(password);
-
         await upload(await cryptoService.encryptVault(vault));
-
-        // useCloudStore.getState().setAutoSaveInterval(1);
         setVault(vault);
         setSummaryVault(await cryptoService.getInitialData(vault));
       }
@@ -114,11 +119,11 @@ export const Home = () => {
         inputRef.current.value = "";
       }
       setPassword("");
-
       setIsLoading(false);
       navigate(dashboardRoute);
     } catch (error) {
-      console.error("Erro: ", error);
+      console.error("Erro geral: ", error);
+      setErrorContent(error instanceof Error ? error.message : "Erro ao abrir o cofre.");
       setIsLoading(false);
     }
   };

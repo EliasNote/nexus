@@ -2,7 +2,7 @@ import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
 import { AlertTriangle, Check, ChevronDown, Download, Save, Settings, Upload } from "lucide-react";
 import { save, open } from "@tauri-apps/plugin-dialog";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "../Credential/components/Header/components/Button";
 import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
@@ -27,6 +27,7 @@ export const Config = () => {
   const { upload } = useStorageSync();
   const [tempEncryptedVault, setTempEncryptedVault] = useState<EncryptedVault | null>(null);
   const [importVaultStep, setImportVaultStep] = useState<boolean>(false);
+  const isMouseDownOnBackdrop = useRef(false);
 
   const toggleOption = (id: number) => setSelectedOptionId(id);
   const onSave = async () => {
@@ -289,7 +290,15 @@ export const Config = () => {
           )}
           {(isWrongPassword || isLoading) &&
             <div className="absolute top-0 left-0 w-screen h-screen backdrop-blur-xs bg-black/80 flex items-center justify-center"
-              onClick={() => setIsWrongPassword(false)}>
+              onMouseDown={(e) => {
+                isMouseDownOnBackdrop.current = e.target === e.currentTarget;
+              }}
+              onClick={(e) => {
+                if (e.target === e.currentTarget && isMouseDownOnBackdrop.current) {
+                  setIsWrongPassword(false);
+                }
+                isMouseDownOnBackdrop.current = false;
+              }}>
               {isLoading &&
                 <div className="flex flex-col items-center gap-3">
                   <img src="/loading.webp" className="h-18 w-18 object-contain" alt="" />
