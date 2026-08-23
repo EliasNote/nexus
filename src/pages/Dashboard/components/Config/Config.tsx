@@ -1,15 +1,17 @@
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
-import { Check, ChevronDown, Download, Save, Settings, Upload } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, Download, Save, Settings, Upload } from "lucide-react";
 import { save, open } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
 import { Button } from "../Credential/components/Header/components/Button";
-import type { VaultSummarizedData } from "@/types/vault";
+import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { isTauri } from "@tauri-apps/api/core";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { Input } from "../Credential/components/Input";
 import { motion } from "framer-motion";
+import { BlueButton } from "@/pages/Home/components/BlueButton";
+import { GrayButton } from "@/pages/Home/components/GrayButton";
 
 export const Config = () => {
   const { summaryVault, setSummaryVault, vault, setVault, setIsPendingSync } = useCloudStore.getState();
@@ -23,7 +25,8 @@ export const Config = () => {
   const [errorContent, setErrorContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { upload } = useStorageSync();
-  const [tempEncryptedVault, setTempEncryptedVault] = useState("");
+  const [tempEncryptedVault, setTempEncryptedVault] = useState<EncryptedVault | null>(null);
+  const [importVaultStep, setImportVaultStep] = useState<boolean>(false);
 
   const toggleOption = (id: number) => setSelectedOptionId(id);
   const onSave = async () => {
@@ -40,30 +43,29 @@ export const Config = () => {
     setIsPendingSync(true);
   };
 
-  const handleInputFocus = () => {
-    setErrorContent(null);
-  };
-
   const handleConfirmar = async () => {
     if (!password) {
       setErrorContent("Digite a senha do cofre");
       return;
     }
 
+    setIsWrongPassword(false);
     setIsLoading(true);
     try {
-      const encryptedVault = JSON.parse(tempEncryptedVault);
-      const decryptedVault = await cryptoService.decryptVault(encryptedVault, password);
+      console.log("ENCRYPTED VAULT: ", tempEncryptedVault!);
+      console.log("PASSWORD: ", password);
+
+      const decryptedVault = await cryptoService.decryptVault(tempEncryptedVault!, password);
 
       setVault(decryptedVault);
       setSummaryVault(await cryptoService.getInitialData(decryptedVault));
-      await upload(encryptedVault);
+      await upload(tempEncryptedVault!);
 
       console.log("Vault importado com sucesso!");
       setIsLoading(false);
       setIsWrongPassword(false);
       setPassword("");
-      setTempEncryptedVault("");
+      setTempEncryptedVault(null);
     } catch (e) {
       console.error(e);
       setIsLoading(false);
@@ -142,7 +144,7 @@ export const Config = () => {
       });
     }
 
-    const encryptedVault = JSON.parse(content);
+    const encryptedVault: EncryptedVault = JSON.parse(content);
 
     try {
       const decryptedVault = await cryptoService.decryptVault(encryptedVault);
@@ -158,7 +160,6 @@ export const Config = () => {
       setTempEncryptedVault(encryptedVault);
       setIsLoading(false);
       setIsWrongPassword(true);
-      setErrorContent("Senha incorreta")
     }
   };
 
@@ -228,14 +229,69 @@ export const Config = () => {
         <div className="w-full flex flex-col gap-2">
           <h3 className="font-bold border-l-4 border-brand pl-2">EXPORTAR/IMPORTAR</h3>
           <div className="flex gap-2">
-            <button className="bg-zinc-900 border border-zinc-800 font-medium cursor-pointer py-4 flex-1 flex items-center justify-center gap-2 hover:border-zinc-700 hover:bg-zinc-800" onClick={onExport}><Download/> EXPORTAR</button>
-            <button className="bg-zinc-900 border border-zinc-800 font-medium cursor-pointer py-4 flex-1 flex items-center justify-center gap-2 hover:border-zinc-700 hover:bg-zinc-800" onClick={onImport}><Upload/> IMPORTAR</button>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              className="bg-zinc-900 border border-zinc-800 font-medium cursor-pointer py-5 flex-1 flex items-center justify-center gap-2 hover:border-zinc-700 hover:bg-zinc-800 active:bg-zinc-700 select-none"
+              onClick={onExport}
+            >
+              <Download /> EXPORTAR
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              className="bg-zinc-900 border border-zinc-800 font-medium cursor-pointer py-5 flex-1 flex items-center justify-center gap-2 hover:border-zinc-700 hover:bg-zinc-800 active:bg-zinc-700 select-none"
+              onClick={() => setImportVaultStep(true)}
+            >
+              <Upload /> IMPORTAR
+            </motion.button>
           </div>
+          {importVaultStep && (
+            <div
+              className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
+              onClick={() => setImportVaultStep(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-zinc-900 border border-zinc-800 max-w-md w-full p-6 flex flex-col items-center text-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+                  <AlertTriangle size={24} />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <h4 className="text-lg font-bold text-white">Substituir Cofre Atual?</h4>
+                  <p className="text-sm text-zinc-100">
+                    Esta ação irá <strong className="text-red-500">sobrescrever todos os dados</strong> do seu cofre atual pelo arquivo importado. Deseja continuar?
+                  </p>
+                </div>
+
+                <div className="flex gap-3 w-full mt-2">
+                  <GrayButton
+                    text="Voltar"
+                    className="flex-1 py-2.5"
+                    onClick={() => setImportVaultStep(false)}
+                  />
+                  <BlueButton
+                    text="Continuar"
+                    className="flex-1"
+                    onClick={async () => {
+                      setImportVaultStep(false);
+                      await onImport();
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )}
           {(isWrongPassword || isLoading) &&
             <div className="absolute top-0 left-0 w-screen h-screen backdrop-blur-xs bg-black/80 flex items-center justify-center"
               onClick={() => setIsWrongPassword(false)}>
               {isLoading &&
-                <div className="flex flex-col items-center gap-3" role="status" aria-live="polite">
+                <div className="flex flex-col items-center gap-3">
                   <img src="/loading.webp" className="h-18 w-18 object-contain" alt="" />
                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-zinc-300">Abrindo seu cofre...</motion.p>
                 </div>
@@ -243,26 +299,37 @@ export const Config = () => {
               {isWrongPassword &&
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="flex flex-col max-w-100 w-full items-center gap-2">
-                    <Input
-                      autoFocus={true}
-                      handleInputFocus={handleInputFocus}
-                      isPasswordIcon={true}
-                      value={password}
-                      onChange={(val) => {
-                        setPassword(val);
-                        if (errorContent) setErrorContent("Senha Incorreta");
-                      }}
-                      errorContent={errorContent}
-                    />
-                  <button
-                    className="px-7 py-2.5 text-base bg-brand border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-fit"
-                    onClick={async () => {
-                      await handleConfirmar();
+                  className="flex flex-col max-w-90 w-full items-center gap-2">
+                  <p className="font-medium whitespace-nowrap">Digite a senha de acesso do cofre importado</p>
+                  <Input
+                    autoFocus={true}
+                    isPasswordIcon={true}
+                    value={password}
+                    onChange={(val) => {
+                      setPassword(val);
+                      if (errorContent) setErrorContent("Senha Incorreta");
                     }}
-                  >
-                    Confirmar
-                  </button>
+                    errorContent={errorContent}
+                  />
+                  <div className="flex w-full gap-2">
+                    <GrayButton
+                      text="Voltar"
+                      className="flex-1 py-2.5"
+                      onClick={() => {
+                        setIsWrongPassword(false);
+                        setIsLoading(false);
+                        setPassword("");
+                        setErrorContent(null);
+                      }}
+                    />
+                    <BlueButton
+                    className="flex-1"
+                      text="Concluir"
+                      onClick={async () => {
+                        await handleConfirmar();
+                      }}
+                    />
+                  </div>
                 </div>
               }
             </div>

@@ -12,6 +12,8 @@ import { IconButton } from "./components/IconButton";
 import { Step } from "./components/Step";
 import { loadSettings } from "@/config/settingsStore";
 import { CLOUD_OPTIONS } from "@/utils/constants";
+import { BlueButton } from "./components/BlueButton";
+import { GrayButton } from "./components/GrayButton";
 
 export const Home = () => {
   const { upload, download, exists } = useStorageSync();
@@ -121,12 +123,6 @@ export const Home = () => {
     }
   };
 
-  const nextButtonStyle =
-    "px-7 py-2.5 text-base bg-brand border font-bold border-[#5C8FFF] text-white shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
-
-  const prevButtonStyle =
-    "px-7 text-base py-2.5 bg-zinc-800 border font-bold border-zinc-600 text-white shadow-lg cursor-pointer";
-
   const canContinue =
     (isConfigLoaded && activeProvider === "local" && vaultPath !== null) ||
     (isConfigLoaded && activeProvider === "git" && vaultPath !== null) ||
@@ -151,10 +147,8 @@ export const Home = () => {
                 <h1 className="font-medium">Nexus</h1>
               </div>
               <div className="flex gap-3">
-                <button className={nextButtonStyle} onClick={nextStep}>
-                  Começar
-                </button>
-                <button className={prevButtonStyle} onClick={() => navigate(manualRoute)}>Manual</button>
+                <BlueButton text="Começar" onClick={nextStep} />
+                <GrayButton text="Manual" onClick={() => navigate(manualRoute)} />
               </div>
             </div>
           </Step>
@@ -190,16 +184,12 @@ export const Home = () => {
                 })}
               </div>
               <div className="flex gap-3 items-start">
-                <button
-                  className={nextButtonStyle}
+                <BlueButton
+                  text="Próximo"
                   onClick={nextStep}
                   disabled={!canContinue}
-                >
-                  Próximo
-                </button>
-                <button className={prevButtonStyle} onClick={prevStep}>
-                  Anterior
-                </button>
+                />
+                <GrayButton text="Anterior" onClick={prevStep} />
               </div>
             </div>
           </Step>
@@ -221,19 +211,15 @@ export const Home = () => {
                 />
               </div>
               <div className="flex gap-3">
-                <button
-                  className={nextButtonStyle}
+                <BlueButton
+                  text="Concluir"
                   onClick={async () => {
                     setIsLoading(true);
                     await handleConcluir();
                     setIsLoading(false);
                   }}
-                >
-                  Concluir
-                </button>
-                <button className={prevButtonStyle} onClick={prevStep}>
-                  Anterior
-                </button>
+                />
+                <GrayButton text="Anterior" onClick={prevStep} />
               </div>
             </div>
           </Step>
