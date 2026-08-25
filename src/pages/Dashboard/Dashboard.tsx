@@ -11,8 +11,6 @@ import { Generator } from "./components/Generator/Generator";
 import { Audit } from "./components/Audit/Audit";
 import { Config } from "./components/Config/Config";
 
-
-
 const Dashboard = () => {
   useAutoSave();
 

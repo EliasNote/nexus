@@ -34,9 +34,11 @@ export const Home = () => {
   const activeProvider = useCloudStore((state) => state.activeProvider);
   const vaultPath = useCloudStore((state) => state.vaultPath);
   const setVault = useCloudStore((state) => state.setVault);
+  const setEncryptedVault = useCloudStore((state) => state.setEncryptedVault);
   const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
   const setVaultPath = useCloudStore((state) => state.setVaultPath);
   const setActiveProvider = useCloudStore((state) => state.setActiveProvider);
+
 
   useEffect(() => {
     const init = async () => {
@@ -106,11 +108,14 @@ export const Home = () => {
 
         const summaryVault = await cryptoService.getInitialData(vault);
         setSummaryVault(summaryVault);
+        setEncryptedVault(encryptedVault);
         setVault(vault);
       } else {
         console.log("Vault não existe, inicializando novo cofre");
         const vault = await cryptoService.setupInitialVault(password);
-        await upload(await cryptoService.encryptVault(vault));
+        const encryptedVault = await cryptoService.encryptVault(vault);
+        await upload(encryptedVault);
+        setEncryptedVault(encryptedVault);
         setVault(vault);
         setSummaryVault(await cryptoService.getInitialData(vault));
       }

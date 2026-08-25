@@ -17,6 +17,12 @@ export const useCloudStore = create<CloudState>(
       set({ activeProvider: provider });
     },
 
+    encryptedVault: null,
+
+    setEncryptedVault: (encryptedVault) => {
+      set({ encryptedVault });
+    },
+
     vault: null,
 
     setVault: (vault) => {

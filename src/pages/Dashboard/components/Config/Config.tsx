@@ -1,6 +1,6 @@
 import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
-import { AlertTriangle, Check, ChevronDown, Download, Save, Settings, Upload } from "lucide-react";
+import { Check, ChevronDown, Download, Save, Settings, Trash2, Upload } from "lucide-react";
 import { save, open } from "@tauri-apps/plugin-dialog";
 import { useState, useRef } from "react";
 import { Button } from "../Credential/components/Header/components/Button";
@@ -12,21 +12,28 @@ import { Input } from "../Credential/components/Input";
 import { motion } from "framer-motion";
 import { BlueButton } from "@/pages/Home/components/BlueButton";
 import { GrayButton } from "@/pages/Home/components/GrayButton";
+import { Loading } from "@/components/Loading";
+import { Step } from "./components/Step";
 
 export const Config = () => {
-  const { summaryVault, setSummaryVault, vault, setVault, setIsPendingSync } = useCloudStore.getState();
+  const { summaryVault, setSummaryVault, vault, setVault, setIsPendingSync, encryptedVault, setEncryptedVault } = useCloudStore.getState();
+  const { remove, disconnect } = useStorageSync();
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState<number>(
     AUTO_SAVE_INTERVAL_OPTIONS.findIndex((x) => x.value == summaryVault?.autoSaveInterval)
   );
-  const [isWrongPassword, setIsWrongPassword] = useState(false);
-  const [password, setPassword] = useState("");
+  const [isImportPasswordOpen, setIsImportPasswordOpen] = useState(false);
+  const [passwordImport, setPasswordImport] = useState("");
+  const [passwordDelete, setPasswordDelete] = useState("");
   const [errorContent, setErrorContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { upload } = useStorageSync();
   const [tempEncryptedVault, setTempEncryptedVault] = useState<EncryptedVault | null>(null);
   const [importVaultStep, setImportVaultStep] = useState<boolean>(false);
+  const [deleteVaultStep, setDeleteVaultStep] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const isMouseDownOnBackdrop = useRef(false);
 
   const toggleOption = (id: number) => setSelectedOptionId(id);
@@ -45,33 +52,36 @@ export const Config = () => {
   };
 
   const handleConfirmar = async () => {
-    if (!password) {
+    if (!passwordImport) {
       setErrorContent("Digite a senha do cofre");
       return;
     }
 
-    setIsWrongPassword(false);
+    setErrorContent(null);
     setIsLoading(true);
     try {
       console.log("ENCRYPTED VAULT: ", tempEncryptedVault!);
-      console.log("PASSWORD: ", password);
+      console.log("PASSWORD: ", passwordImport);
 
-      const decryptedVault = await cryptoService.decryptVault(tempEncryptedVault!, password);
+      const decryptedVault = await cryptoService.decryptVault(tempEncryptedVault!, passwordImport);
 
       setVault(decryptedVault);
       setSummaryVault(await cryptoService.getInitialData(decryptedVault));
       await upload(tempEncryptedVault!);
+      setEncryptedVault(tempEncryptedVault!);
 
       console.log("Vault importado com sucesso!");
       setIsLoading(false);
-      setIsWrongPassword(false);
-      setPassword("");
+      setIsModalOpen(false);
+      setIsImportPasswordOpen(false);
+      setPasswordImport("");
       setTempEncryptedVault(null);
     } catch (e) {
       console.error(e);
       setIsLoading(false);
-      setIsWrongPassword(true);
-      setErrorContent("Senha incorreta")
+      setIsModalOpen(true);
+      setIsImportPasswordOpen(true);
+      setErrorContent("Senha incorreta");
     }
   };
 
@@ -145,22 +155,45 @@ export const Config = () => {
       });
     }
 
-    const encryptedVault: EncryptedVault = JSON.parse(content);
+    try {
+      const encryptedVault: EncryptedVault = JSON.parse(content);
+      setTempEncryptedVault(encryptedVault);
+      setPasswordImport("");
+      setErrorContent(null);
+      setIsImportPasswordOpen(true);
+      setIsModalOpen(true);
+    } catch (e) {
+      console.error("Erro ao ler arquivo do cofre:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!passwordDelete) {
+      setErrorContent("Digite a senha do cofre");
+      return;
+    }
+
+    setIsLoading(true);
+    setIsDelete(false);
 
     try {
-      const decryptedVault = await cryptoService.decryptVault(encryptedVault);
-
-      setVault(decryptedVault);
-      setSummaryVault(await cryptoService.getInitialData(decryptedVault));
-      await upload(encryptedVault);
-
-      console.log("Vault importado com sucesso!");
-      setIsLoading(false)
+      await cryptoService.decryptVault(encryptedVault!, passwordDelete);
+      await remove();
+      setVault(null);
+      setSummaryVault(null);
+      setEncryptedVault(null);
+      disconnect();
+      setIsModalOpen(false);
     } catch (e) {
       console.error(e);
-      setTempEncryptedVault(encryptedVault);
       setIsLoading(false);
-      setIsWrongPassword(true);
+      setIsModalOpen(true);
+      setIsDelete(true);
+      setErrorContent("Senha incorreta");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -247,104 +280,143 @@ export const Config = () => {
             </motion.button>
           </div>
           {importVaultStep && (
-            <div
-              className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
-              onClick={() => setImportVaultStep(false)}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-zinc-900 border border-zinc-800 max-w-md w-full p-6 flex flex-col items-center text-center gap-4"
-              >
-                <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
-                  <AlertTriangle size={24} />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <h4 className="text-lg font-bold text-white">Substituir Cofre Atual?</h4>
-                  <p className="text-sm text-zinc-100">
-                    Esta ação irá <strong className="text-red-500">sobrescrever todos os dados</strong> do seu cofre atual pelo arquivo importado. Deseja continuar?
-                  </p>
-                </div>
-
-                <div className="flex gap-3 w-full mt-2">
-                  <GrayButton
-                    text="Voltar"
-                    className="flex-1 py-2.5"
-                    onClick={() => setImportVaultStep(false)}
-                  />
-                  <BlueButton
-                    text="Continuar"
-                    className="flex-1"
-                    onClick={async () => {
-                      setImportVaultStep(false);
-                      await onImport();
-                    }}
-                  />
-                </div>
-              </motion.div>
-            </div>
-          )}
-          {(isWrongPassword || isLoading) &&
-            <div className="absolute top-0 left-0 w-screen h-screen backdrop-blur-xs bg-black/80 flex items-center justify-center"
-              onMouseDown={(e) => {
-                isMouseDownOnBackdrop.current = e.target === e.currentTarget;
+            <Step
+              setImportVaultStep={setImportVaultStep}
+              title={"Substituir Cofre Atual?"}
+              onClickGrayButton={() => setImportVaultStep(false)}
+              onClickBlueButton={async () => {
+                setImportVaultStep(false);
+                await onImport();
               }}
-              onClick={(e) => {
-                if (e.target === e.currentTarget && isMouseDownOnBackdrop.current) {
-                  setIsWrongPassword(false);
-                }
-                isMouseDownOnBackdrop.current = false;
-              }}>
-              {isLoading &&
-                <div className="flex flex-col items-center gap-3">
-                  <img src="/loading.webp" className="h-18 w-18 object-contain" alt="" />
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-zinc-300">Abrindo seu cofre...</motion.p>
-                </div>
-              }
-              {isWrongPassword &&
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex flex-col max-w-90 w-full items-center gap-2">
-                  <p className="font-medium whitespace-nowrap">Digite a senha de acesso do cofre importado</p>
-                  <Input
-                    autoFocus={true}
-                    isPasswordIcon={true}
-                    value={password}
-                    onChange={(val) => {
-                      setPassword(val);
-                      if (errorContent) setErrorContent("Senha Incorreta");
-                    }}
-                    errorContent={errorContent}
-                  />
-                  <div className="flex w-full gap-2">
-                    <GrayButton
-                      text="Voltar"
-                      className="flex-1 py-2.5"
-                      onClick={() => {
-                        setIsWrongPassword(false);
-                        setIsLoading(false);
-                        setPassword("");
-                        setErrorContent(null);
-                      }}
-                    />
-                    <BlueButton
-                    className="flex-1"
-                      text="Concluir"
-                      onClick={async () => {
-                        await handleConfirmar();
-                      }}
-                    />
-                  </div>
-                </div>
-              }
-            </div>
-          }
+            >
+              Esta ação irá <strong className="text-red-500">sobrescrever todos os dados</strong> do seu cofre atual pelo arquivo importado. Deseja continuar?
+            </Step>
+
+          )}
+        </div>
+        <div className="flex flex-col w-full gap-2">
+          <h3 className="font-bold border-l-4 border-red-alert pl-2">DELETAR COFRE</h3>
+          <Button
+            iconsSize={18}
+            icon={Trash2}
+            onClick={() => {
+              setDeleteVaultStep(true);
+            }}
+            color="border-red-alert text-red-alert hover:bg-red-alert w-fit m-auto"
+            label={"DELETAR"}
+          />
+          {deleteVaultStep && (
+            <Step
+              setImportVaultStep={setDeleteVaultStep}
+              title="Deletar o cofre permanentemente?"
+              onClickGrayButton={() => setDeleteVaultStep(false)}
+              onClickBlueButton={() => {
+                setDeleteVaultStep(false);
+                setIsDelete(true);
+                setIsModalOpen(true);
+              }}
+            >
+              Esta ação irá <strong className="text-red-500">apagar permanentemente</strong> seu cofre. Deseja continuar?
+            </Step>
+          )}
         </div>
       </div>
+      {isModalOpen && (
+        <div className="absolute top-0 left-0 w-screen h-screen backdrop-blur-xs bg-black/75 flex items-center justify-center"
+          onMouseDown={(e) => {
+            isMouseDownOnBackdrop.current = e.target === e.currentTarget;
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && isMouseDownOnBackdrop.current) {
+              setIsModalOpen(false);
+              setIsImportPasswordOpen(false);
+              setIsDelete(false);
+              setPasswordImport("");
+              setPasswordDelete("");
+              setErrorContent(null);
+              setTempEncryptedVault(null);
+            }
+            isMouseDownOnBackdrop.current = false;
+          }}>
+          {isLoading && (
+            <Loading text="Abrindo o cofre importado..." />
+          )}
+          {!isLoading && isImportPasswordOpen && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="flex flex-col max-w-90 w-full items-center gap-2">
+              <p className="font-medium whitespace-nowrap">Digite a senha de acesso do cofre importado</p>
+              <Input
+                autoFocus={true}
+                isPasswordIcon={true}
+                value={passwordImport}
+                onChange={(val) => {
+                  setPasswordImport(val);
+                  if (errorContent) setErrorContent(null);
+                }}
+                errorContent={errorContent}
+              />
+              <div className="flex w-full gap-2">
+                <GrayButton
+                  text="Voltar"
+                  className="flex-1 py-2.5"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsImportPasswordOpen(false);
+                    setIsLoading(false);
+                    setPasswordImport("");
+                    setErrorContent(null);
+                    setTempEncryptedVault(null);
+                  }}
+                />
+                <BlueButton
+                  className="flex-1"
+                  text="Concluir"
+                  onClick={async () => {
+                    await handleConfirmar();
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          {!isLoading && isDelete && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="flex flex-col max-w-90 w-full items-center gap-2">
+              <p className="font-medium whitespace-nowrap">Digite a senha do seu cofre para confirmar a exclusão</p>
+              <Input
+                autoFocus={true}
+                isPasswordIcon={true}
+                value={passwordDelete}
+                onChange={(val) => {
+                  setPasswordDelete(val);
+                  if (errorContent) setErrorContent(null);
+                }}
+                errorContent={errorContent}
+              />
+              <div className="flex w-full gap-2">
+                <GrayButton
+                  text="Voltar"
+                  className="flex-1 py-2.5"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsDelete(false);
+                    setPasswordDelete("");
+                    setErrorContent(null);
+                  }}
+                />
+                <BlueButton
+                  className="flex-1 bg-red-alert hover:bg-red-alert/90 active:bg-red-alert/95 border-none"
+                  text="DELETAR"
+                  onClick={async () => {
+                    await handleDelete();
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 };

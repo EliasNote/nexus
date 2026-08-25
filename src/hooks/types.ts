@@ -48,6 +48,9 @@ export type CloudState = {
     provider: StorageProvider,
   ) => void;
 
+  encryptedVault: EncryptedVault | null;
+  setEncryptedVault: (encryptedVault: EncryptedVault | null) => void;
+
   vault: Vault | null;
   setVault: (vault: Vault | null) => void;
 
