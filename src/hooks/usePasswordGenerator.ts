@@ -1,39 +1,42 @@
-export function generateCustomPassword(options: {
-  length?: number;
-  lowercase?: boolean;
-  minCharLowercase?: number;
-  uppercase?: boolean;
-  minCharUppercase?: number;
-  numbers?: boolean;
-  minCharNumbers?: number;
-  symbols?: boolean;
-  minCharSymbols?: number;
-  customSymbols?: string;
-  standardSymbols?: boolean;
-  excludeAmbiguous?: boolean;
-  excludeCharacters?: string;
-}): string {
+export interface GeneratorConfig {
+  length: number;
+  lowercase: boolean;
+  minLowercase: number;
+  uppercase: boolean;
+  minUppercase: number;
+  numbers: boolean;
+  minNumbers: number;
+  symbols: boolean;
+  minSymbols: number;
+  standardSymbols: boolean;
+  includeChars: string;
+  excludeAmbiguous: boolean;
+  excludeChars: string;
+}
+
+export function generateCustomPassword(options: GeneratorConfig): string {
   const {
     length = 4,
     lowercase = true,
-    minCharLowercase = 0,
+    minLowercase = 0,
     uppercase = true,
-    minCharUppercase = 0,
+    minUppercase = 0,
     numbers = true,
-    minCharNumbers = 0,
+    minNumbers = 0,
     symbols = true,
-    minCharSymbols = 0,
-    customSymbols = "!@#$%^&*()_+-=[]{}|;:,.<>?",
+    minSymbols = 0,
+    includeChars = "",
     standardSymbols = true,
     excludeAmbiguous = false,
-    excludeCharacters = "",
-  } = options;
+    excludeChars = "",
+  }: GeneratorConfig = options;
 
   const standardSymbolsChars = "!@#$%*()_+-=";
+  const allSymbolsChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
   let lowerChars = "abcdefghijklmnopqrstuvwxyz";
   let upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let numberChars = "0123456789";
-  let symbolChars = standardSymbols ? standardSymbolsChars : customSymbols;
+  let symbolChars = standardSymbols ? standardSymbolsChars : allSymbolsChars;
 
   if (excludeAmbiguous) {
     const ambiguousSet = new Set("il1Lo0IO".split(""));
@@ -44,8 +47,8 @@ export function generateCustomPassword(options: {
     });
   }
 
-  if (excludeCharacters) {
-    const excludeSet = new Set(excludeCharacters.split(""));
+  if (excludeChars) {
+    const excludeSet = new Set(excludeChars.split(""));
     excludeSet.forEach((c) => {
       lowerChars = lowerChars.replaceAll(c, "");
       upperChars = upperChars.replaceAll(c, "");
@@ -56,6 +59,16 @@ export function generateCustomPassword(options: {
 
   let pool = "";
   const guaranteed: string[] = [];
+
+  // Adiciona os caracteres obrigatórios digitados pelo usuário
+  if (includeChars) {
+    for (const char of includeChars) {
+      // Se não estiver na lista de exclusão, inclui obrigatoriamente
+      if (!excludeChars.includes(char)) {
+        guaranteed.push(char);
+      }
+    }
+  }
 
   const getRandomChar = (str: string) => {
     if (!str.length) return "";
@@ -73,10 +86,10 @@ export function generateCustomPassword(options: {
     }
   };
 
-  addGuaranteedChars(lowercase, lowerChars, minCharLowercase);
-  addGuaranteedChars(uppercase, upperChars, minCharUppercase);
-  addGuaranteedChars(numbers, numberChars, minCharNumbers);
-  addGuaranteedChars(symbols, symbolChars, minCharSymbols);
+  addGuaranteedChars(lowercase, lowerChars, minLowercase);
+  addGuaranteedChars(uppercase, upperChars, minUppercase);
+  addGuaranteedChars(numbers, numberChars, minNumbers);
+  addGuaranteedChars(symbols, symbolChars, minSymbols);
 
   if (!pool) return "";
 

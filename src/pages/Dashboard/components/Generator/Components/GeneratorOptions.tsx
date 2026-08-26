@@ -1,64 +1,44 @@
 import * as Switch from "@radix-ui/react-switch";
 import { RangeSlider } from "./RangeSlider";
 import { SwitchButton } from "./SwitchButton";
+import type { GeneratorConfig } from "@/hooks/usePasswordGenerator";
 
-export const GeneratorOptions = ({
-  passlength,
-  setPasslength,
-  minLength,
-  maxLength,
-  handleToggle,
-  lowercase,
-  uppercase,
-  numbers,
-  symbols,
-  minLowercase,
-  setMinLowercase,
-  minUppercase,
-  setMinUppercase,
-  minNumbers,
-  setMinNumbers,
-  minSymbols,
-  setMinSymbols,
-  standardSymbols,
-  setStandardSymbols,
-}: {
-  passlength: number;
-  setPasslength: (value: number) => void;
+interface GeneratorOptionsProps {
+  options: GeneratorConfig;
+  setOptions: React.Dispatch<React.SetStateAction<GeneratorConfig>>;
+  handleToggle: (value: string) => void;
   minLength: number;
   maxLength: number;
-  handleToggle: (value: string) => void;
-  lowercase: boolean;
-  uppercase: boolean;
-  numbers: boolean;
-  symbols: boolean;
-  minLowercase: number;
-  setMinLowercase: (value: number) => void;
-  minUppercase: number;
-  setMinUppercase: (value: number) => void;
-  minNumbers: number;
-  setMinNumbers: (value: number) => void;
-  minSymbols: number;
-  setMinSymbols: (value: number) => void;
-  standardSymbols: boolean;
-  setStandardSymbols: (value: boolean) => void;
-}) => {
+}
+
+export const GeneratorOptions = ({
+  options,
+  setOptions,
+  handleToggle,
+  minLength,
+  maxLength,
+}: GeneratorOptionsProps) => {
   const handleMinChange = (
     val: string,
-    setter: (v: number) => void,
+    key: keyof GeneratorConfig,
     maxLimit: number
   ) => {
     if (val === "") {
-      setter(0);
+      setOptions((prev) => ({ ...prev, [key]: 0 }));
       return;
     }
     const num = parseInt(val, 10);
     if (!isNaN(num)) {
-      if (num > maxLimit) {
-        setter(maxLimit);
-        return;
-      }
-      if (num >= 0) setter(num);
+      const otherMins =
+        (key !== "minLowercase" && options.lowercase ? Math.max(options.minLowercase, 1) : 0) +
+        (key !== "minUppercase" && options.uppercase ? Math.max(options.minUppercase, 1) : 0) +
+        (key !== "minNumbers" && options.numbers ? Math.max(options.minNumbers, 1) : 0) +
+        (key !== "minSymbols" && options.symbols ? Math.max(options.minSymbols, 1) : 0);
+
+      const availableMax = Math.max(maxLimit - otherMins, 0);
+      const clamped = Math.min(Math.max(num, 0), availableMax);
+
+      setOptions((prev) => ({ ...prev, [key]: clamped }));
     }
   };
 
@@ -72,12 +52,12 @@ export const GeneratorOptions = ({
           pattern="[0-9]*"
           min={minLength}
           max={maxLength}
-          value={passlength}
+          value={options.length}
           onChange={(e) => {
             const val = e.target.value;
 
             if (val === "") {
-              setPasslength(0);
+              setOptions((prev) => ({ ...prev, length: 0 }));
               return;
             }
 
@@ -85,10 +65,12 @@ export const GeneratorOptions = ({
 
             if (!isNaN(number)) {
               if (number > maxLength) {
-                setPasslength(maxLength);
+                setOptions((prev) => ({ ...prev, length: maxLength }));
                 return;
               }
-              if (number >= 0) setPasslength(number);
+              if (number >= 0) {
+                setOptions((prev) => ({ ...prev, length: number }));
+              }
             }
           }}
         />
@@ -96,15 +78,15 @@ export const GeneratorOptions = ({
       </div>
 
       <RangeSlider
-        value={passlength}
-        onChange={setPasslength}
+        value={options.length}
+        onChange={(val) => setOptions((prev) => ({ ...prev, length: val }))}
         minLength={minLength}
         maxLength={maxLength}
       />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full pt-2">
         <div className="flex flex-col items-center gap-2">
           <SwitchButton
-            checked={lowercase}
+            checked={options.lowercase}
             label={"a-z"}
             value="lowercase"
             handleToggle={handleToggle}
@@ -114,11 +96,11 @@ export const GeneratorOptions = ({
             <input
               type="text"
               pattern="[0-9]*"
-              disabled={!lowercase}
-              value={minLowercase || ""}
+              disabled={!options.lowercase}
+              value={options.minLowercase || ""}
               placeholder="0"
               onChange={(e) =>
-                handleMinChange(e.target.value, setMinLowercase, maxLength)
+                handleMinChange(e.target.value, "minLowercase", maxLength)
               }
               className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
             />
@@ -127,7 +109,7 @@ export const GeneratorOptions = ({
 
         <div className="flex flex-col items-center gap-2">
           <SwitchButton
-            checked={uppercase}
+            checked={options.uppercase}
             label={"A-Z"}
             value="uppercase"
             handleToggle={handleToggle}
@@ -137,11 +119,11 @@ export const GeneratorOptions = ({
             <input
               type="text"
               pattern="[0-9]*"
-              disabled={!uppercase}
-              value={minUppercase || ""}
+              disabled={!options.uppercase}
+              value={options.minUppercase || ""}
               placeholder="0"
               onChange={(e) =>
-                handleMinChange(e.target.value, setMinUppercase, maxLength)
+                handleMinChange(e.target.value, "minUppercase", maxLength)
               }
               className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
             />
@@ -150,7 +132,7 @@ export const GeneratorOptions = ({
 
         <div className="flex flex-col items-center gap-2">
           <SwitchButton
-            checked={numbers}
+            checked={options.numbers}
             label={"0-9"}
             value="numbers"
             handleToggle={handleToggle}
@@ -160,11 +142,11 @@ export const GeneratorOptions = ({
             <input
               type="text"
               pattern="[0-9]*"
-              disabled={!numbers}
-              value={minNumbers || ""}
+              disabled={!options.numbers}
+              value={options.minNumbers || ""}
               placeholder="0"
               onChange={(e) =>
-                handleMinChange(e.target.value, setMinNumbers, maxLength)
+                handleMinChange(e.target.value, "minNumbers", maxLength)
               }
               className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
             />
@@ -173,8 +155,8 @@ export const GeneratorOptions = ({
 
         <div className="flex flex-col items-center justify-center gap-2">
           <SwitchButton
-            checked={symbols}
-            label={standardSymbols ? "!@#$" : "!@#$+"}
+            checked={options.symbols}
+            label={options.standardSymbols ? "!@#$" : "!@#$+"}
             value="symbols"
             handleToggle={handleToggle}
           />
@@ -183,11 +165,11 @@ export const GeneratorOptions = ({
             <input
               type="text"
               pattern="[0-9]*"
-              disabled={!symbols}
-              value={minSymbols || ""}
+              disabled={!options.symbols}
+              value={options.minSymbols || ""}
               placeholder="0"
               onChange={(e) =>
-                handleMinChange(e.target.value, setMinSymbols, maxLength)
+                handleMinChange(e.target.value, "minSymbols", maxLength)
               }
               className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
             />
@@ -195,25 +177,80 @@ export const GeneratorOptions = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 w-full items-center pt-3 border-t border-zinc-800">
-        <div className="flex flex-col">
-          <span className="text-sm font-bold text-white">SÍMBOLOS PADRÕES</span>
-          <span className="text-xs text-zinc-400">
-            {standardSymbols
-              ? "!@#$%*()_+-="
-              : "!@#$%^&*()_+-=[..."}
-          </span>
+      <div className="flex w-full justify-around gap-2 pt-3 border-t border-zinc-800">
+        <div className="flex flex-col gap-1 items-center">
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-bold text-white">SÍMBOLOS PADRÕES</span>
+            <span className="text-xs text-zinc-400">
+              {options.standardSymbols
+                ? "!@#$%*()_+-="
+                : "!@#$%^&*()_+-=[..."}
+            </span>
+          </div>
+          <Switch.Root
+            checked={options.standardSymbols}
+            disabled={!options.symbols}
+            onCheckedChange={(checked) =>
+              setOptions((prev) => ({ ...prev, standardSymbols: checked }))
+            }
+            className="relative h-[25px] w-[42px] cursor-pointer rounded-full bg-zinc-700 outline-none data-[state=checked]:bg-brand disabled:opacity-30 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+          >
+            <Switch.Thumb
+              className="block size-[21px] translate-x-0.5 rounded-full bg-white transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]"
+            />
+          </Switch.Root>
         </div>
-        <Switch.Root
-          checked={standardSymbols}
-          disabled={!symbols}
-          onCheckedChange={setStandardSymbols}
-          className="relative h-[25px] w-[42px] cursor-pointer rounded-full bg-zinc-700 outline-none data-[state=checked]:bg-brand disabled:opacity-30 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
-        >
-          <Switch.Thumb
-            className="block size-[21px] translate-x-0.5 rounded-full bg-white transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]"
+        <div className="flex flex-col gap-1 items-center">
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-bold text-white">REMOVER CARACTERES AMBIGUOS</span>
+            <span className="text-xs text-zinc-400">
+              il1Lo0IO
+            </span>
+          </div>
+          <Switch.Root
+            checked={options.excludeAmbiguous}
+            onCheckedChange={(checked) =>
+              setOptions((prev) => ({ ...prev, excludeAmbiguous: checked }))
+            }
+            className="relative h-[25px] w-[42px] cursor-pointer rounded-full bg-zinc-700 outline-none data-[state=checked]:bg-brand disabled:opacity-30 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+          >
+            <Switch.Thumb
+              className="block size-[21px] translate-x-0.5 rounded-full bg-white transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]"
+            />
+          </Switch.Root>
+        </div>
+      </div>
+
+      <div className="flex flex-col w-full gap-4 pt-3 border-t border-zinc-800">
+        <div className="flex flex-col gap-1 w-full">
+          <label className="text-sm font-bold text-white">
+            CARACTERES OBRIGATÓRIOS
+          </label>
+          <input
+            type="text"
+            placeholder="Ex: @#$_aB1"
+            value={options.includeChars}
+            onChange={(e) =>
+              setOptions((prev) => ({ ...prev, includeChars: e.target.value }))
+            }
+            className="w-full h-9 px-3 bg-zinc-800 border border-zinc-700 text-white text-sm outline-none focus:border-zinc-500"
           />
-        </Switch.Root>
+        </div>
+
+        <div className="flex flex-col gap-1 w-full">
+          <label className="text-sm font-bold text-white">
+            EXCLUIR CARACTERES ESPECÍFICOS
+          </label>
+          <input
+            type="text"
+            placeholder="Ex: abc123"
+            value={options.excludeChars}
+            onChange={(e) =>
+              setOptions((prev) => ({ ...prev, excludeChars: e.target.value }))
+            }
+            className="w-full h-9 px-3 bg-zinc-800 border border-zinc-700 text-white text-sm outline-none focus:border-zinc-500"
+          />
+        </div>
       </div>
     </div>
   );

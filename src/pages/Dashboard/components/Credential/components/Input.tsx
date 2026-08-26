@@ -134,6 +134,7 @@ export const Input = ({
             onClick={(event) => event.stopPropagation()}
           >
             <Generator
+              isCredential={true}
               onChange={onChange}
               onClick={() => setIsGenerate(false)}
             />

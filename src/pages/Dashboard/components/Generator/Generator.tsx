@@ -1,98 +1,83 @@
-import { ArrowRight, Binary, Check, Copy, RefreshCw } from "lucide-react";
+import { ArrowRight, Binary, Check, Copy, RefreshCw, X } from "lucide-react";
 import { Input } from "../Credential/components/Input";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { GeneratorOptions } from "./Components/GeneratorOptions";
 import { copyToClipboard } from "@/utils/utils";
-import { generateCustomPassword } from "@/hooks/usePasswordGenerator";
+import { generateCustomPassword, type GeneratorConfig } from "@/hooks/usePasswordGenerator";
 
 export const Generator = ({
   onChange,
   onClick,
+  isCredential,
 }: {
   onChange?: (value: string) => void;
   onClick?: () => void;
+  isCredential?: boolean;
 }) => {
-  const [passlength, setPasslength] = useState(10);
+  const [options, setOptions] = useState<GeneratorConfig>({
+    length: 10,
+    lowercase: true,
+    minLowercase: 0,
+    uppercase: true,
+    minUppercase: 0,
+    numbers: true,
+    minNumbers: 0,
+    symbols: true,
+    minSymbols: 0,
+    standardSymbols: false,
+    includeChars: "",
+    excludeAmbiguous: false,
+    excludeChars: "",
+  });
   const minLength = 4;
   const maxLength = 128;
 
-  const [lowercase, setLowercase] = useState(true);
-  const [minLowercase, setMinLowercase] = useState(0);
-  const [uppercase, setUppercase] = useState(true);
-  const [minUppercase, setMinUppercase] = useState(0);
-  const [numbers, setNumbers] = useState(true);
-  const [minNumbers, setMinNumbers] = useState(0);
-  const [symbols, setSymbols] = useState(true);
-  const [minSymbols, setMinSymbols] = useState(0);
-  const [standardSymbols, setStandardSymbols] = useState(true);
   const [seed, setSeed] = useState(0);
-
   const [copied, setCopied] = useState(false);
 
-  const values: Record<string, [boolean, (checked: boolean) => void]> = {
-    lowercase: [lowercase, setLowercase],
-    uppercase: [uppercase, setUppercase],
-    numbers: [numbers, setNumbers],
-    symbols: [symbols, setSymbols],
-  };
+  const handleToggle = (key: string) => {
+    const k = key as keyof GeneratorConfig;
+    const booleanKeys: (keyof GeneratorConfig)[] = [
+      "lowercase",
+      "uppercase",
+      "numbers",
+      "symbols",
+    ];
 
-  const handleToggle = (value: string) => {
-    const selected = values[value];
-    const othersSelected: boolean[] = [];
+    const activeCount = booleanKeys.filter((b) => options[b]).length;
 
-    for (const v of Object.values(values)) {
-      if (v[0]) othersSelected.push(v[0]);
-    }
+    if (activeCount === 1 && options[k]) return;
 
-    if (othersSelected.length === 1 && selected[0]) return;
-
-    selected[1](!selected[0]);
+    setOptions((prev) => ({ ...prev, [k]: !prev[k] }));
   };
 
   const requiredMinLength = useMemo(() => {
     let count = 0;
-    if (lowercase) count += Math.max(minLowercase, 1);
-    if (uppercase) count += Math.max(minUppercase, 1);
-    if (numbers) count += Math.max(minNumbers, 1);
-    if (symbols) count += Math.max(minSymbols, 1);
+    if (options.lowercase) count += Math.max(options.minLowercase, 1);
+    if (options.uppercase) count += Math.max(options.minUppercase, 1);
+    if (options.numbers) count += Math.max(options.minNumbers, 1);
+    if (options.symbols) count += Math.max(options.minSymbols, 1);
+    if (options.includeChars) count += options.includeChars.length;
     return count;
-  }, [lowercase, uppercase, numbers, symbols, minLowercase, minUppercase, minNumbers, minSymbols]);
+  }, [options]);
 
-  const effectiveLength = Math.max(passlength, requiredMinLength);
+  const effectiveLength = Math.min(
+    Math.max(options.length, requiredMinLength),
+    maxLength
+  );
 
   const password = useMemo(() => {
     try {
       return generateCustomPassword({
+        ...options,
         length: effectiveLength,
-        lowercase: lowercase,
-        minCharLowercase: minLowercase,
-        uppercase: uppercase,
-        minCharUppercase: minUppercase,
-        numbers: numbers,
-        minCharNumbers: minNumbers,
-        symbols: symbols,
-        minCharSymbols: minSymbols,
-        standardSymbols: standardSymbols,
-        excludeAmbiguous: true,
       });
     } catch (e) {
       console.log(e);
-      return;
+      return "";
     }
-  }, [
-    effectiveLength,
-    numbers,
-    minNumbers,
-    symbols,
-    minSymbols,
-    standardSymbols,
-    uppercase,
-    minUppercase,
-    lowercase,
-    minLowercase,
-    seed,
-  ]);
+  }, [options, effectiveLength, seed]);
 
   const handleCopy = async () => {
     setCopied(true);
@@ -103,7 +88,8 @@ export const Generator = ({
   };
 
   return (
-    <section className="flex justify-center w-full p-7">
+    <section className="flex justify-center w-full p-7 relative">
+      {isCredential && <X className="absolute top-4 right-4 text-white cursor-pointer" onClick={onClick} />}
       <div className="flex items-center flex-col max-w-[700px] w-full gap-10">
         <div className="flex gap-1 items-center justify-center mb-[-20px]">
           <Binary size={32} className="text-brand" />
@@ -114,25 +100,11 @@ export const Generator = ({
         <div className="flex flex-col w-full gap-10">
           <Input value={password} />
           <GeneratorOptions
-            passlength={effectiveLength}
-            setPasslength={setPasslength}
+            options={{ ...options, length: effectiveLength }}
+            setOptions={setOptions}
+            handleToggle={handleToggle}
             minLength={minLength}
             maxLength={maxLength}
-            handleToggle={handleToggle}
-            lowercase={lowercase}
-            uppercase={uppercase}
-            numbers={numbers}
-            symbols={symbols}
-            minLowercase={minLowercase}
-            setMinLowercase={setMinLowercase}
-            minUppercase={minUppercase}
-            setMinUppercase={setMinUppercase}
-            minNumbers={minNumbers}
-            setMinNumbers={setMinNumbers}
-            minSymbols={minSymbols}
-            setMinSymbols={setMinSymbols}
-            standardSymbols={standardSymbols}
-            setStandardSymbols={setStandardSymbols}
           />
           <div className="flex items-center justify-center gap-4">
             {onChange ? (
