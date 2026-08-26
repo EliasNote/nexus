@@ -19,26 +19,56 @@ function requireToken(token: string | null): string {
   return token;
 }
 
-async function parseGoogleError(
-  response: Response,
-): Promise<Error> {
-  const text = await response.text();
+async function parseGoogleError(response: Response): Promise<Error> {
+  const status = response.status;
+  let detailMessage = "";
+  let rawText = "";
 
   try {
-    const data = JSON.parse(text) as {
-      error?: {
-        message?: string;
+    rawText = await response.text();
+
+    if (rawText) {
+      const data = JSON.parse(rawText) as {
+        error?: {
+          message?: string;
+          code?: number;
+          errors?: Array<{ reason?: string; message?: string }>;
+        };
+        error_description?: string;
       };
-    };
+
+      detailMessage =
+        data.error?.message ||
+        data.error_description ||
+        data.error?.errors?.[0]?.message ||
+        rawText;
+    }
+  } catch {
+    detailMessage = rawText;
+  }
+
+  if (status === 401) {
+    return new Error("Sessão expirada. Por favor, conecte-se ao Google novamente.");
+  }
+
+  if (status === 403) {
+    const isPermissionError =
+      detailMessage.toLowerCase().includes("insufficientpermissions") ||
+      detailMessage.toLowerCase().includes("scope") ||
+      detailMessage.toLowerCase().includes("permission");
 
     return new Error(
-      data.error?.message ||
-        text ||
-        "Erro na API do Google.",
+      isPermissionError
+        ? "Permissão insuficiente. Conecte-se novamente ao Google e autorize o acesso ao armazenamento."
+        : `Acesso negado pelo Google Drive: ${detailMessage || "Permissão negada."}`
     );
-  } catch {
-    return new Error(text || "Erro na API do Google.");
   }
+
+  if (status === 404) {
+    return new Error("Arquivo do cofre não encontrado no Google Drive.");
+  }
+
+  return new Error(detailMessage || `Erro na comunicação com o Google Drive (Status: ${status}).`);
 }
 
 export function useGoogleDrive(): VaultStorage & {
@@ -68,7 +98,7 @@ export function useGoogleDrive(): VaultStorage & {
     } catch (error) {
       console.error("Erro no login Google:", error);
       clearSession();
-      return null;
+      throw error;
     }
   };
 
@@ -78,35 +108,38 @@ export function useGoogleDrive(): VaultStorage & {
 
       return response ? applyToken(response) : null;
     } catch (error) {
-      console.error(
-        "Erro ao renovar o token Google:",
-        error,
-      );
-
+      console.error("Erro ao renovar o token Google:", error);
       clearSession();
       return null;
     }
+  };
+
+  const handleApiError = async (response: Response): Promise<never> => {
+    const error = await parseGoogleError(response);
+    if (response.status === 401 || response.status === 403) {
+      clearSession();
+    }
+    throw error;
   };
 
   const exists = async (): Promise<string | null> => {
     const accessToken = requireToken(token);
 
     const query = encodeURIComponent(
-      `name = '${VAULT_FILE_NAME}'`,
+      `name = '${VAULT_FILE_NAME}' and trashed = false`
     );
 
     const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files` +
-        `?spaces=${APP_DATA_SPACE}&q=${query}`,
+      `https://www.googleapis.com/drive/v3/files?spaces=${APP_DATA_SPACE}&q=${query}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      },
+      }
     );
 
     if (!response.ok) {
-      throw await parseGoogleError(response);
+      await handleApiError(response);
     }
 
     const data = (await response.json()) as {
@@ -117,84 +150,76 @@ export function useGoogleDrive(): VaultStorage & {
   };
 
   const download = async (): Promise<EncryptedVault> => {
-    try {
-      const accessToken = requireToken(token);
-      const fileId = await exists();
+    const accessToken = requireToken(token);
+    const fileId = await exists();
 
-      const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw await parseGoogleError(response);
-      }
-
-      return (await response.json()) as EncryptedVault;
-    } catch (error) {
-      console.log(error);
-      throw error;
+    if (!fileId) {
+      throw new Error("Arquivo do cofre não encontrado no Google Drive.");
     }
-  };
 
-  const upload = async (
-    vault: EncryptedVault,
-  ): Promise<void> => {
-    try {
-      const accessToken = requireToken(token);
-      const fileId = await exists();
-
-      const metadata = {
-        name: VAULT_FILE_NAME,
-        parents: fileId
-          ? undefined
-          : [APP_DATA_SPACE],
-      };
-
-      const form = new FormData();
-
-      form.append(
-        "metadata",
-        new Blob([JSON.stringify(metadata)], {
-          type: "application/json",
-        }),
-      );
-
-      form.append(
-        "file",
-        new Blob([JSON.stringify(vault)], {
-          type: "application/json",
-        }),
-      );
-
-      const url = fileId
-        ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
-        : "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-
-      const response = await fetch(url, {
-        method: fileId ? "PATCH" : "POST",
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-        body: form,
-      });
-
-      if (!response.ok) {
-        throw await parseGoogleError(response);
       }
-    } catch(error) {
-      console.log(error);
-      throw error;
+    );
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    return (await response.json()) as EncryptedVault;
+  };
+
+  const upload = async (vault: EncryptedVault): Promise<void> => {
+    const accessToken = requireToken(token);
+    const fileId = await exists();
+
+    const metadata = {
+      name: VAULT_FILE_NAME,
+      parents: fileId ? undefined : [APP_DATA_SPACE],
+    };
+
+    const form = new FormData();
+
+    form.append(
+      "metadata",
+      new Blob([JSON.stringify(metadata)], {
+        type: "application/json",
+      })
+    );
+
+    form.append(
+      "file",
+      new Blob([JSON.stringify(vault)], {
+        type: "application/json",
+      })
+    );
+
+    const url = fileId
+      ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+      : "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+
+    const response = await fetch(url, {
+      method: fileId ? "PATCH" : "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: form,
+    });
+
+    if (!response.ok) {
+      await handleApiError(response);
     }
   };
 
   const deleteVault = async (): Promise<void> => {
     const accessToken = requireToken(token);
     const fileId = await exists();
+
+    if (!fileId) return;
 
     const response = await fetch(
       `https://www.googleapis.com/drive/v3/files/${fileId}`,
@@ -203,16 +228,17 @@ export function useGoogleDrive(): VaultStorage & {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      },
+      }
     );
 
     if (!response.ok && response.status !== 204) {
-      throw await parseGoogleError(response);
+      await handleApiError(response);
     }
   };
 
   const disconnect = (): void => {
     auth.disconnect();
+    clearSession();
   };
 
   return {
