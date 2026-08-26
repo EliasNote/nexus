@@ -1,10 +1,10 @@
 import { ArrowRight, Binary, Check, Copy, RefreshCw } from "lucide-react";
 import { Input } from "../Credential/components/Input";
-import generator from "generate-password-ts";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { GeneratorOptions } from "./Components/GeneratorOptions";
 import { copyToClipboard } from "@/utils/utils";
+import { generateCustomPassword } from "@/hooks/usePasswordGenerator";
 
 export const Generator = ({
   onChange,
@@ -18,9 +18,14 @@ export const Generator = ({
   const maxLength = 128;
 
   const [lowercase, setLowercase] = useState(true);
+  const [minLowercase, setMinLowercase] = useState(0);
   const [uppercase, setUppercase] = useState(true);
+  const [minUppercase, setMinUppercase] = useState(0);
   const [numbers, setNumbers] = useState(true);
+  const [minNumbers, setMinNumbers] = useState(0);
   const [symbols, setSymbols] = useState(true);
+  const [minSymbols, setMinSymbols] = useState(0);
+  const [standardSymbols, setStandardSymbols] = useState(true);
   const [seed, setSeed] = useState(0);
 
   const [copied, setCopied] = useState(false);
@@ -45,22 +50,49 @@ export const Generator = ({
     selected[1](!selected[0]);
   };
 
+  const requiredMinLength = useMemo(() => {
+    let count = 0;
+    if (lowercase) count += Math.max(minLowercase, 1);
+    if (uppercase) count += Math.max(minUppercase, 1);
+    if (numbers) count += Math.max(minNumbers, 1);
+    if (symbols) count += Math.max(minSymbols, 1);
+    return count;
+  }, [lowercase, uppercase, numbers, symbols, minLowercase, minUppercase, minNumbers, minSymbols]);
+
+  const effectiveLength = Math.max(passlength, requiredMinLength);
+
   const password = useMemo(() => {
     try {
-      return generator.generate({
-        length: passlength,
-        numbers: numbers,
-        symbols: symbols,
-        uppercase: uppercase,
+      return generateCustomPassword({
+        length: effectiveLength,
         lowercase: lowercase,
-        strict: true,
-        excludeSimilarCharacters: true,
+        minCharLowercase: minLowercase,
+        uppercase: uppercase,
+        minCharUppercase: minUppercase,
+        numbers: numbers,
+        minCharNumbers: minNumbers,
+        symbols: symbols,
+        minCharSymbols: minSymbols,
+        standardSymbols: standardSymbols,
+        excludeAmbiguous: true,
       });
     } catch (e) {
       console.log(e);
       return;
     }
-  }, [passlength, numbers, symbols, uppercase, lowercase, seed]);
+  }, [
+    effectiveLength,
+    numbers,
+    minNumbers,
+    symbols,
+    minSymbols,
+    standardSymbols,
+    uppercase,
+    minUppercase,
+    lowercase,
+    minLowercase,
+    seed,
+  ]);
 
   const handleCopy = async () => {
     setCopied(true);
@@ -82,7 +114,7 @@ export const Generator = ({
         <div className="flex flex-col w-full gap-10">
           <Input value={password} />
           <GeneratorOptions
-            passlength={passlength}
+            passlength={effectiveLength}
             setPasslength={setPasslength}
             minLength={minLength}
             maxLength={maxLength}
@@ -91,6 +123,16 @@ export const Generator = ({
             uppercase={uppercase}
             numbers={numbers}
             symbols={symbols}
+            minLowercase={minLowercase}
+            setMinLowercase={setMinLowercase}
+            minUppercase={minUppercase}
+            setMinUppercase={setMinUppercase}
+            minNumbers={minNumbers}
+            setMinNumbers={setMinNumbers}
+            minSymbols={minSymbols}
+            setMinSymbols={setMinSymbols}
+            standardSymbols={standardSymbols}
+            setStandardSymbols={setStandardSymbols}
           />
           <div className="flex items-center justify-center gap-4">
             {onChange ? (

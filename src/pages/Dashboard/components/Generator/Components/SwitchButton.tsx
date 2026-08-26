@@ -6,7 +6,7 @@ export const SwitchButton = ({
   handleToggle,
   checked,
 }: {
-  label: string;
+  label: React.ReactNode;
   value: string;
   handleToggle: (value: string) => void;
   checked: boolean;
