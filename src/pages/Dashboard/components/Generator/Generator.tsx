@@ -90,8 +90,8 @@ export const Generator = ({
   return (
     <section className="flex justify-center w-full p-7 relative">
       {isCredential && <X className="absolute top-4 right-4 text-white cursor-pointer" onClick={onClick} />}
-      <div className="flex items-center flex-col max-w-[700px] w-full gap-10">
-        <div className="flex gap-1 items-center justify-center mb-[-20px]">
+      <div className="flex items-center flex-col max-w-[700px] w-full gap-5">
+        <div className="flex gap-1 items-center justify-center">
           <Binary size={32} className="text-brand" />
           <h2 className="text-[24px] text-white font-bold">
             GERADOR DE SENHAS

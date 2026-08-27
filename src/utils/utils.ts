@@ -1,5 +1,6 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { REUSED_GROUP_COLORS } from "./constants";
 
 export const getGithubUserData = async (token: string) => {
   const userRes = await fetch("https://api.github.com/user", {
@@ -41,12 +42,25 @@ export function formatGitHubRemoteUrl(value: string): string {
 }
 
 export function getHeadings(content: string) {
-    return content
-      .replace(/^\uFEFF/, "")
-      .split("\n")
-      .filter((line) => /^#\s/.test(line))
-      .map((line) => ({
-        level: 1,
-        text: line.replace(/^#{1,6}\s*/, "").trim(),
-      }));
-  }
+  return content
+    .replace(/^\uFEFF/, "")
+    .split("\n")
+    .filter((line) => /^#\s/.test(line))
+    .map((line) => ({
+      level: 1,
+      text: line.replace(/^#{1,6}\s*/, "").trim(),
+    }));
+}
+
+
+export const getReusedColorClass = (ids?: string[]) => {
+  if (!ids?.length) return undefined;
+
+  const groupKey = [...ids].sort().join(":");
+  const colorIndex = [...groupKey].reduce(
+    (acc, char) => acc + char.charCodeAt(0),
+    0,
+  );
+
+  return REUSED_GROUP_COLORS[colorIndex % REUSED_GROUP_COLORS.length];
+};

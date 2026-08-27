@@ -54,7 +54,6 @@ export const useVaultActions = () => {
   const buildSummaryCredential = (
     credentialData: Credential,
     auditInfo?: AuditInfo,
-    reusedIds?: string[],
   ): CredentialSummary => {
     const current = summaryVault?.credentials.find((c) => c.id === credentialData.id);
 
@@ -66,7 +65,6 @@ export const useVaultActions = () => {
       holderName: credentialData.type === "card" ? credentialData.holderName : null,
       name: credentialData.type === "note" ? credentialData.name : null,
       auditInfo: auditInfo ?? current?.auditInfo,
-      reusedIds: reusedIds ?? current?.reusedIds,
       directoriesIds: credentialData.directoriesIds,
       isFavorite: credentialData.isFavorite,
       isDeleted: credentialData.isDeleted,

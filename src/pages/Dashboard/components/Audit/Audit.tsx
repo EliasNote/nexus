@@ -5,26 +5,14 @@ import {
   Database,
   Files,
   Shield,
-  ShieldQuestionMark,
   TriangleAlert,
 } from "lucide-react";
 import { AuditTypeCard } from "./components/AuditTypeCard";
 import type { AuditType } from "@/types/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuditCredential } from "./components/AuditCredential";
-import { REUSED_GROUP_COLORS } from "@/utils/constants";
+import { getReusedColorClass } from "@/utils/utils";
 
-const getReusedColorClass = (ids?: string[]) => {
-  if (!ids?.length) return undefined;
-
-  const groupKey = [...ids].sort().join(":");
-  const colorIndex = [...groupKey].reduce(
-    (acc, char) => acc + char.charCodeAt(0),
-    0,
-  );
-
-  return REUSED_GROUP_COLORS[colorIndex % REUSED_GROUP_COLORS.length];
-};
 export const Audit = ({
   onChangeCredential,
 }: {
@@ -32,6 +20,7 @@ export const Audit = ({
 }) => {
   const vault = useCloudStore((state) => state.vault);
   const summaryCredentials = useCloudStore((state) => state.summaryVault?.credentials);
+  const summaryVault = useCloudStore((state) => state.summaryVault);
   const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
   const [selectedOptionId, setSelectedOptionId] = useState("compromised");
   const [isChecking, setIsChecking] = useState(false);
@@ -62,7 +51,7 @@ export const Audit = ({
         "O uso da mesma senha em múltiplos serviços aumenta o risco de efeito dominó em caso de vazamento.",
       icon: Files,
       total:
-        summaryCredentials?.filter((credential) => credential.auditInfo?.isReused)?.length ??
+        summaryCredentials?.filter((credential) => credential.auditInfo?.reusedsIds?.length)?.length ??
         0,
     },
     {
@@ -117,7 +106,7 @@ export const Audit = ({
     try {
       setIsChecking(true);
       setCheckError(null);
-      const updatedSummary = await cryptoService.getInitialData(vault);
+      const updatedSummary = await cryptoService.verifyCredentials(vault, summaryVault!);
       setSummaryVault(updatedSummary);
     } catch (error) {
       console.error(error);
@@ -127,25 +116,27 @@ export const Audit = ({
     }
   };
 
+  useEffect(() => {
+    const initAudit = async () => {
+      if (vault && summaryVault) {
+        await handleCheckPasswords();
+      }
+    };
+
+    initAudit();
+  }, [])
+
   return (
     <section className="flex flex-col items-center h-full w-full p-10">
       <div className="max-w-[700px] w-full h-full flex flex-col gap-5">
-        <div className="flex items-center flex-col w-full">
-          <div className="flex items-center justify-between mb-8 w-full">
+        <div className="flex gap-5 items-center flex-col w-full">
+          <div className="flex items-center justify-center w-full">
             <div className="flex gap-1 items-center justify-center">
               <Shield size={32} className="text-brand" />
               <h2 className="text-[24px] text-white font-bold">
                 AUDITORIA DE SEGURANÇA
               </h2>
             </div>
-            <button
-              disabled={!vault || isChecking}
-              onClick={handleCheckPasswords}
-              className="flex items-center border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50 text-white h-fit gap-2 px-4 py-3 cursor-pointer"
-            >
-              {isChecking ? "VERIFICANDO..." : "VERIFICAR SENHAS"}
-              <ShieldQuestionMark className="ml-2" strokeWidth={2} size={22} />
-            </button>
           </div>
           <div className="flex flex-row w-full border border-zinc-800">
             {auditTypesData.map((data, index) => (
@@ -182,10 +173,18 @@ export const Audit = ({
               if (selectedOptionId === auditTypesData[1].id)
                 return credential.auditInfo?.isWeak;
               if (selectedOptionId === auditTypesData[2].id)
-                return credential.auditInfo?.isReused;
+                return !!credential.auditInfo?.reusedsIds?.length;
               if (selectedOptionId === auditTypesData[3].id)
                 return credential.auditInfo?.isRenewal;
               return true;
+            })
+            .sort((a, b) => {
+              if (selectedOptionId === "reused") {
+                const groupA = [...(a.auditInfo?.reusedsIds || [])].sort().join(":");
+                const groupB = [...(b.auditInfo?.reusedsIds || [])].sort().join(":");
+                return groupA.localeCompare(groupB);
+              }
+              return 0;
             })
             .map((credential) => (
               <AuditCredential
@@ -194,7 +193,7 @@ export const Audit = ({
                 onChangeCredential={onChangeCredential}
                 reusedColorClass={
                   selectedOptionId === "reused"
-                    ? getReusedColorClass(credential.reusedIds)
+                    ? getReusedColorClass(credential.auditInfo?.reusedsIds)
                     : undefined
                 }
               />

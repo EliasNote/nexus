@@ -23,7 +23,7 @@ export type Directory = {
 export type AuditInfo = {
   isCompromised?: boolean;
   isWeak?: boolean;
-  isReused?: boolean;
+  reusedsIds?: string[];
   isRenewal?: boolean;
 };
 
@@ -35,7 +35,6 @@ export interface CredentialSummary {
   holderName?: string | null | undefined;
   name?: string | null | undefined;
   auditInfo?: AuditInfo;
-  reusedIds?: string[];
   directoriesIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;

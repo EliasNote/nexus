@@ -59,15 +59,16 @@ export const Header = ({
 
     const password = tempCredential.password;
     const isPasswordChanged = originalCredential ? password !== originalCredential.password : false;
-    let auditInfo: AuditInfo = { isCompromised: false, isWeak: false, isReused: false, isRenewal: false };
+    let auditInfo: AuditInfo = { isCompromised: false, isWeak: false, reusedsIds: [], isRenewal: false };
 
     if (password) {
       const isCompromised = await cryptoService.verifyCompromised(password);
+      const isWeak = await cryptoService.verifyWeak(password);
+      auditInfo = { isCompromised, isWeak };
       if (!isCreate && isPasswordChanged) {
-        const tempSummaryCredential: CredentialSummary = { ...summaryCredential!, auditInfo: { isCompromised } };
+        const tempSummaryCredential: CredentialSummary = { ...summaryCredential!, auditInfo };
         updateSummaryCredential(tempSummaryCredential)
       }
-      auditInfo = { isCompromised };
     }
 
     await saveCredential(tempCredential, isTrashed, isRestore, auditInfo);
