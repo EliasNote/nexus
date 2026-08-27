@@ -11,8 +11,8 @@ export const Credential = ({
   credential,
   setCredential,
   setSelectedSideCredential,
-  tempVault,
-  setTempVault,
+  tempCredential,
+  setTempCredential,
   isEdit,
   setIsEdit,
   isCreate,
@@ -24,8 +24,8 @@ export const Credential = ({
   credential: CredentialType;
   setCredential: (credential: CredentialType | null) => void;
   setSelectedSideCredential: (id: string | null) => void;
-  tempVault: CredentialType;
-  setTempVault: React.Dispatch<React.SetStateAction<CredentialType | null>>;
+  tempCredential: CredentialType;
+  setTempCredential: React.Dispatch<React.SetStateAction<CredentialType | null>>;
   isEdit: boolean;
   setIsEdit: (isEdit: boolean) => void;
   isCreate: CredentialType["type"] | null;
@@ -37,13 +37,14 @@ export const Credential = ({
   const iconsSize = 18;
 
   const summaryVault = useCloudStore((state) => state.summaryVault);
+  const summaryCredential = summaryVault?.credentials.filter((x) => x.id === tempCredential.id)[0]
 
   const directories = summaryVault?.directories ?? [];
 
   const [autoFocusId, setAutoFocusId] = useState<string | null>(isEditFromAudit ? "password" : null);
 
   const handleEditClick = (focusId: string = "title") => {
-    setTempVault(credential || null);
+    setTempCredential(credential || null);
     setAutoFocusId(focusId);
     setIsEdit(true);
   };
@@ -60,7 +61,7 @@ export const Credential = ({
   };
 
   const handleRemoveCredential = async () => {
-    setTempVault(null);
+    setTempCredential(null);
     setCredential(null);
     setSelectedSideCredential(null);
   };
@@ -68,8 +69,10 @@ export const Credential = ({
   return (
     <section className="flex flex-col h-full w-full">
       <Header
-        tempVault={tempVault}
-        setTempVault={setTempVault}
+        originalCredential={credential}
+        tempCredential={tempCredential}
+        setTempCredential={setTempCredential}
+        summaryCredential={summaryCredential}
         iconsSize={iconsSize}
         isLoadingCredential={isLoadingCredential}
         handleRemoveCredential={handleRemoveCredential}
@@ -82,40 +85,40 @@ export const Credential = ({
         autoFocus={autoFocusId === "title"}
       />
       <div className="flex flex-1 h-full w-full flex-col overflow-y-auto">
-        {tempVault?.type === "login" && (
+        {tempCredential?.type === "login" && (
           <Login
-            key={isCreate ? "new" : tempVault.id}
+            key={isCreate ? "new" : tempCredential.id}
             directories={directories}
             isEdit={isEditable}
             setIsEdit={setIsEdit}
             isCreate={isCreate}
-            credential={tempVault}
-            setCredential={setTempVault}
+            credential={tempCredential}
+            setCredential={setTempCredential}
             autoFocusId={autoFocusId}
             setAutoFocusId={setAutoFocusId}
           />
         )}
-        {tempVault?.type === "card" && (
+        {tempCredential?.type === "card" && (
           <Card
-            key={isCreate ? "new" : tempVault.id}
+            key={isCreate ? "new" : tempCredential.id}
             directories={directories}
             isEdit={isEditable}
             setIsEdit={setIsEdit}
             isCreate={isCreate}
-            credential={tempVault}
-            setCredential={setTempVault}
+            credential={tempCredential}
+            setCredential={setTempCredential}
             autoFocusId={autoFocusId}
             setAutoFocusId={setAutoFocusId}
           />
         )}
-        {tempVault?.type === "note" && (
+        {tempCredential?.type === "note" && (
           <Note
-            key={isCreate ? "new" : tempVault.id}
+            key={isCreate ? "new" : tempCredential.id}
             directories={directories}
             isEdit={isEditable}
             setIsEdit={setIsEdit}
-            credential={tempVault}
-            setCredential={setTempVault}
+            credential={tempCredential}
+            setCredential={setTempCredential}
             autoFocusId={autoFocusId}
             setAutoFocusId={setAutoFocusId}
           />
@@ -123,10 +126,8 @@ export const Credential = ({
       </div>
       <Footer
         isCreate={isCreate}
-        tempVault={tempVault}
-        summaryVault={
-          summaryVault?.credentials.filter((x) => x.id === tempVault.id)[0]
-        }
+        tempCredential={tempCredential}
+        summaryCredential={summaryCredential}
         handleStartCreate={handleStartCreate}
       />
     </section>

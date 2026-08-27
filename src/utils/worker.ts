@@ -128,6 +128,10 @@ const getSingleCredential = async (encryptedCredential: EncryptedData): Promise<
 };
 
 const cryptoService = {
+  async verifyCompromised(password: string): Promise<boolean> {
+    return await verifyCompromised(password);
+  },
+
   async setupInitialVault(password: string): Promise<Vault> {
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const saltBase64 = uint8ArrayToBase64(salt);

@@ -1,6 +1,8 @@
 import {
   CREDENTIAL_TYPES_LABELS,
+  type AuditInfo,
   type Credential,
+  type CredentialSummary,
   type CredentialType,
 } from "@/types/vault";
 import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
@@ -10,10 +12,13 @@ import { motion } from "framer-motion";
 import { Button } from "./components/Button";
 import { useVaultActions } from "@/hooks/useVaultActions";
 import { useEffect, useRef } from "react";
+import { cryptoService } from "@/hooks/useCloudStore";
 
 export const Header = ({
-  tempVault,
-  setTempVault,
+  originalCredential,
+  tempCredential,
+  setTempCredential,
+  summaryCredential,
   iconsSize,
   isLoadingCredential,
   handleRemoveCredential,
@@ -25,8 +30,10 @@ export const Header = ({
   handleCancel,
   autoFocus,
 }: {
-  tempVault: Credential;
-  setTempVault: React.Dispatch<React.SetStateAction<Credential | null>>;
+  originalCredential: Credential;
+  tempCredential: Credential;
+  setTempCredential: React.Dispatch<React.SetStateAction<Credential | null>>;
+  summaryCredential: CredentialSummary | undefined;
   iconsSize: number;
   isLoadingCredential: boolean;
   isEdit: boolean;
@@ -37,9 +44,9 @@ export const Header = ({
   handleCancel: () => void;
   handleRemoveCredential: () => void;
   autoFocus?: boolean;
-}) => {
+  }) => {
   const isWriting = isEdit || isCreate;
-  const { saveCredential, deleteCredential } = useVaultActions();
+  const { saveCredential, deleteCredential, updateSummaryCredential } = useVaultActions();
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -47,8 +54,23 @@ export const Header = ({
       titleInputRef.current?.focus();
     }
   }, [autoFocus, isWriting]);
+
   const onSave = async (isTrashed: boolean, isRestore: boolean) => {
-    await saveCredential(tempVault, isTrashed, isRestore);
+
+    const password = tempCredential.password;
+    const isPasswordChanged = originalCredential ? password !== originalCredential.password : false;
+    let auditInfo: AuditInfo = { isCompromised: false, isWeak: false, isReused: false, isRenewal: false };
+
+    if (password) {
+      const isCompromised = await cryptoService.verifyCompromised(password);
+      if (!isCreate && isPasswordChanged) {
+        const tempSummaryCredential: CredentialSummary = { ...summaryCredential!, auditInfo: { isCompromised } };
+        updateSummaryCredential(tempSummaryCredential)
+      }
+      auditInfo = { isCompromised };
+    }
+
+    await saveCredential(tempCredential, isTrashed, isRestore, auditInfo);
 
     if (isTrashed) {
       handleRemoveCredential();
@@ -72,7 +94,7 @@ export const Header = ({
   };
 
   const onDelete = async () => {
-    await deleteCredential(tempVault?.id);
+    await deleteCredential(tempCredential?.id);
 
     handleRemoveCredential();
     setIsEdit(false);
@@ -83,7 +105,7 @@ export const Header = ({
     <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-zinc-800 shrink-0">
       <div className="flex gap-2.5">
         <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">
-          {(tempVault?.title?.[0] || "?").toUpperCase()}
+          {(tempCredential?.title?.[0] || "?").toUpperCase()}
         </div>
 
         <div className="flex flex-col items-start" onDoubleClick={() => !isWriting && handleEditClick()}>
@@ -93,9 +115,9 @@ export const Header = ({
                 ref={titleInputRef}
                 type="text"
                 className={`flex-1 bg-transparent px-3 text-[16px] text-white font-bold outline-none placeholder:text-zinc-500 ${!isWriting ? "pointer-events-none" : ""}`}
-                value={tempVault?.title || ""}
+                value={tempCredential?.title || ""}
                 onChange={(e) =>
-                  setTempVault((prev) =>
+                  setTempCredential((prev) =>
                     prev ? { ...prev, title: e.target.value } : null,
                   )
                 }
@@ -104,26 +126,26 @@ export const Header = ({
             </div>
           ) : (
             <h2 className="text-[18px] text-zinc-300 font-bold max-w-100 truncate cursor-default">
-              {tempVault?.title}
+              {tempCredential?.title}
             </h2>
           )}
 
           <div className="flex">
             <span className="flex items-center justify-center px-3 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[14px] font-bold uppercase">
-              {CREDENTIAL_TYPES_LABELS[tempVault?.type ?? ""]}
+              {CREDENTIAL_TYPES_LABELS[tempCredential?.type ?? ""]}
             </span>
 
             <button
               className={`flex items-center justify-center px-3 py-1 ${isWriting ? "cursor-pointer" : "cursor-default"}`}
               disabled={!isWriting}
               onClick={() =>
-                setTempVault({
-                  ...tempVault!,
-                  isFavorite: !tempVault?.isFavorite,
+                setTempCredential({
+                  ...tempCredential!,
+                  isFavorite: !tempCredential?.isFavorite,
                 })
               }
             >
-              {tempVault?.isFavorite ? (
+              {tempCredential?.isFavorite ? (
                 <StarSolid className="text-amber-400 size-[25px]" />
               ) : (
                 <StarOutline className="text-zinc-600 size-[25px]" />
@@ -176,7 +198,7 @@ export const Header = ({
               />
             )}
           </>
-        ) : !tempVault.isDeleted ? (
+        ) : !tempCredential.isDeleted ? (
           <>
             <Button
               iconsSize={iconsSize}
@@ -204,7 +226,7 @@ export const Header = ({
               color="border-green-500 text-green-500 hover:bg-green-600"
               label={"RESTAURAR"}
               onClick={() => {
-                setTempVault({ ...tempVault, isDeleted: false });
+                setTempCredential({ ...tempCredential, isDeleted: false });
                 onSave(false, true);
               }}
             />

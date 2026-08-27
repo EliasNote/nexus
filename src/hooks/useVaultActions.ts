@@ -1,11 +1,12 @@
 import type {
+    AuditInfo,
   Credential,
+  CredentialSummary,
   Directory,
   VaultSummarizedData,
 } from "@/types/vault";
 import { cryptoService, useCloudStore } from "./useCloudStore";
 import { useStorageSync } from "./useStorageSync";
-import { updateSummaryVaultCredential } from "@/utils/utils";
 
 export const useVaultActions = () => {
   const vault = useCloudStore((state) => state.vault);
@@ -33,10 +34,50 @@ export const useVaultActions = () => {
     setIsPendingSync(false);
   };
 
+  const updateSummaryCredential = (updatedSummary: CredentialSummary) => {
+    if (!summaryVault) return;
+
+    const exists = summaryVault.credentials.find((c) => c.id === updatedSummary.id);
+
+    const newCredentials = exists
+      ? summaryVault.credentials.map((c) =>
+          c.id === updatedSummary.id ? updatedSummary : c,
+        )
+      : [updatedSummary, ...summaryVault.credentials];
+
+    setSummaryVault({
+      ...summaryVault,
+      credentials: newCredentials,
+    });
+  };
+
+  const buildSummaryCredential = (
+    credentialData: Credential,
+    auditInfo?: AuditInfo,
+    reusedIds?: string[],
+  ): CredentialSummary => {
+    const current = summaryVault?.credentials.find((c) => c.id === credentialData.id);
+
+    return {
+      id: credentialData.id,
+      type: credentialData.type,
+      title: credentialData.title,
+      username: credentialData.type === "login" ? credentialData.username : null,
+      holderName: credentialData.type === "card" ? credentialData.holderName : null,
+      name: credentialData.type === "note" ? credentialData.name : null,
+      auditInfo: auditInfo ?? current?.auditInfo,
+      reusedIds: reusedIds ?? current?.reusedIds,
+      directoriesIds: credentialData.directoriesIds,
+      isFavorite: credentialData.isFavorite,
+      isDeleted: credentialData.isDeleted,
+    };
+  };
+
   const saveCredential = async (
     credentialData: Credential,
     isTrashed?: boolean,
     isRestore?: boolean,
+    auditInfo?: AuditInfo,
     setIsLoading?: (isLoading: boolean) => void,
   ) => {
     if (!vault || !summaryVault) return;
@@ -56,13 +97,10 @@ export const useVaultActions = () => {
 
       setIsPendingSync(true);
 
-      const updatedSummary = updateSummaryVaultCredential(
-        summaryVault,
-        credentialToSave,
-      );
+      const summaryCredential = buildSummaryCredential(credentialToSave, auditInfo);
 
       setVault(newVault);
-      setSummaryVault(updatedSummary);
+      updateSummaryCredential(summaryCredential);
     } catch (error) {
       console.error(error);
       throw error;
@@ -169,5 +207,7 @@ export const useVaultActions = () => {
     renameDirectory,
     deleteDirectory,
     saveVault,
+    updateSummaryCredential,
+    buildSummaryCredential,
   };
 };
