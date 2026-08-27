@@ -93,7 +93,7 @@ export const Home = () => {
           throw new Error("Não foi possível carregar o arquivo do cofre.");
         }
 
-        const isValidEnvelope = encryptedVault && typeof encryptedVault === "object" && "encrypted_vault" in encryptedVault && Boolean((encryptedVault as any).encrypted_vault?.iv);
+        const isValidEnvelope = Boolean(encryptedVault?.encrypted_vault?.iv);
 
         if (!isValidEnvelope) {
           throw new Error(
