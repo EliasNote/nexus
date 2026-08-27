@@ -1,6 +1,5 @@
 import {
   CREDENTIAL_TYPES_LABELS,
-  type AuditInfo,
   type Credential,
   type CredentialSummary,
   type CredentialType,
@@ -59,12 +58,12 @@ export const Header = ({
 
     const password = tempCredential.password;
     const isPasswordChanged = originalCredential ? password !== originalCredential.password : false;
-    let auditInfo: AuditInfo = { isCompromised: false, isWeak: false, reusedsIds: [], isRenewal: false };
+    let auditInfo = null;
 
-    if (password) {
+    if (password && tempCredential.type === "login") {
       const isCompromised = await cryptoService.verifyCompromised(password);
       const isWeak = await cryptoService.verifyWeak(password);
-      auditInfo = { isCompromised, isWeak };
+      auditInfo = { isCompromised, isWeak, reusedsIds: [], isRenewal: false };
       if (!isCreate && isPasswordChanged) {
         const tempSummaryCredential: CredentialSummary = { ...summaryCredential!, auditInfo };
         updateSummaryCredential(tempSummaryCredential)

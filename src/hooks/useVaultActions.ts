@@ -53,7 +53,7 @@ export const useVaultActions = () => {
 
   const buildSummaryCredential = (
     credentialData: Credential,
-    auditInfo?: AuditInfo,
+    auditInfo?: AuditInfo | null,
   ): CredentialSummary => {
     const current = summaryVault?.credentials.find((c) => c.id === credentialData.id);
 
@@ -75,7 +75,7 @@ export const useVaultActions = () => {
     credentialData: Credential,
     isTrashed?: boolean,
     isRestore?: boolean,
-    auditInfo?: AuditInfo,
+    auditInfo?: AuditInfo | null,
     setIsLoading?: (isLoading: boolean) => void,
   ) => {
     if (!vault || !summaryVault) return;

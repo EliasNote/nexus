@@ -340,6 +340,8 @@ const cryptoService = {
     const tempSummarizedVault = summarizedVault
 
     tempSummarizedVault.credentials.map((c) => {
+      if (c.type !== "login") return;
+
       const credential = credentials.find((x) => x.id == c.id)
 
       if (credential && credential.password && credential.lastPasswordChange) {
@@ -374,18 +376,17 @@ const cryptoService = {
 
     const credentialsData: CredentialSummary[] = await Promise.all(
       credentials.map(async (c) => {
-        let isCompromised = false;
-        let isWeak = false;
-        let reusedsIds: string[] = [];
-        let isRenewal = false;
+        let auditInfo = null;
 
         const password = c.password;
 
-        if (password) {
-          isCompromised = await verifyCompromised(password);
-          isWeak = verifyWeak(password);
-          reusedsIds = verifyReused(c.id, password, credentials);
-          isRenewal = verifyReneval(new Date(c.lastPasswordChange!));
+        if (password && c.type === "login") {
+          auditInfo = {
+            isCompromised: await verifyCompromised(password),
+            isWeak: verifyWeak(password),
+            reusedsIds: verifyReused(c.id, password, credentials),
+            isRenewal: verifyReneval(new Date(c.lastPasswordChange!)),
+          }
         }
 
         const credentialData: CredentialSummary = {
@@ -395,12 +396,7 @@ const cryptoService = {
           username: c.type === "login" ? c.username : null,
           holderName: c.type === "card" ? c.holderName : null,
           name: c.type === "note" ? c.name : null,
-          auditInfo: {
-            isCompromised,
-            isWeak,
-            reusedsIds,
-            isRenewal,
-          },
+          auditInfo: auditInfo,
           directoriesIds: c.directoriesIds,
           isFavorite: c.isFavorite,
           isDeleted: c.isDeleted,

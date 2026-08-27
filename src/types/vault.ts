@@ -34,7 +34,7 @@ export interface CredentialSummary {
   username?: string | null | undefined;
   holderName?: string | null | undefined;
   name?: string | null | undefined;
-  auditInfo?: AuditInfo;
+  auditInfo?: AuditInfo | null;
   directoriesIds?: string[];
   isFavorite: boolean;
   isDeleted: boolean;
