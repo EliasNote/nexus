@@ -93,6 +93,14 @@ export const Home = () => {
           throw new Error("Não foi possível carregar o arquivo do cofre.");
         }
 
+        const isValidEnvelope = encryptedVault && typeof encryptedVault === "object" && "encrypted_vault" in encryptedVault && Boolean((encryptedVault as any).encrypted_vault?.iv);
+
+        if (!isValidEnvelope) {
+          throw new Error(
+            "O arquivo do cofre no Google Drive está corrompido ou em formato inválido."
+          );
+        }
+
         let vault: Vault;
         try {
           vault = await cryptoService.decryptVault(
@@ -128,7 +136,7 @@ export const Home = () => {
       navigate(dashboardRoute);
     } catch (error) {
       console.error("Erro geral: ", error);
-      setErrorContent(error instanceof Error ? error.message : "Erro ao abrir o cofre.");
+      setErrorContent(error instanceof Error ? error.message : "Erro inesperado ao sincronizar com o cofre.");
       setIsLoading(false);
     }
   };
