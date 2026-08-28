@@ -168,8 +168,8 @@ const Dashboard = () => {
           />
           {(selectedSideCredential && credential && tempVault) || isCreate ? (
             <Credential
-              tempVault={tempVault || newCredential(isCreate!)}
-              setTempVault={setTempVault}
+              tempCredential={tempVault || newCredential(isCreate!)}
+              setTempCredential={setTempVault}
               isEdit={isEdit}
               setIsEdit={setIsEdit}
               isCreate={isCreate}

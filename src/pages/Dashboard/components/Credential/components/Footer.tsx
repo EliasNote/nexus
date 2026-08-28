@@ -4,16 +4,16 @@ import { ShieldAlert, ShieldCheck } from "lucide-react";
 
 export const Footer = ({
   isCreate,
-  tempVault,
-  summaryVault,
+  tempCredential,
+  summaryCredential,
   handleStartCreate,
 }: {
   isCreate: CredentialType | null;
-  tempVault: Credential;
-  summaryVault: CredentialSummary | undefined;
+  tempCredential: Credential;
+  summaryCredential: CredentialSummary | undefined;
   handleStartCreate: (type: CredentialType) => void;
 }) => {
-  const isCompromised = summaryVault?.auditInfo?.isCompromised;
+  const isCompromised = summaryCredential?.auditInfo?.isCompromised;
 
   return (
     <div
@@ -24,11 +24,11 @@ export const Footer = ({
           <div className="flex flex-col text-[14px] text-zinc-400 w-full">
             <span>
               CRIADO:
-              {`${new Date(tempVault?.createdAt).toLocaleDateString("pt-BR")}, ${new Date(tempVault?.createdAt).toLocaleTimeString("pt-BR")}`}
+              {`${new Date(tempCredential?.createdAt).toLocaleDateString("pt-BR")}, ${new Date(tempCredential?.createdAt).toLocaleTimeString("pt-BR")}`}
             </span>
             <span>
               MODIFICADO:
-              {`${new Date(tempVault?.updatedAt).toLocaleDateString("pt-BR")}, ${new Date(tempVault?.updatedAt).toLocaleTimeString("pt-BR")}`}
+              {`${new Date(tempCredential?.updatedAt).toLocaleDateString("pt-BR")}, ${new Date(tempCredential?.updatedAt).toLocaleTimeString("pt-BR")}`}
             </span>
           </div>
           <div className="flex flex-col items-center justify-center gap-1 font-medium  min-w-[180px]">

@@ -1,7 +1,6 @@
-import { useCloudStore } from "@/hooks/useCloudStore";
-import type { Credential, CredentialSummary, VaultSummarizedData } from "@/types/vault";
 import { isTauri } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { REUSED_GROUP_COLORS } from "./constants";
 
 export const getGithubUserData = async (token: string) => {
   const userRes = await fetch("https://api.github.com/user", {
@@ -21,53 +20,12 @@ export const getGithubUserRepo = async (token: string, user: string) => {
 };
 
 export async function copyToClipboard(text: string): Promise<void> {
-    if (isTauri()) {
-      await writeText(text);
-    } else {
-      await navigator.clipboard.writeText(text);
-    }
-    return;
+  if (isTauri()) {
+    await writeText(text);
+  } else {
+    await navigator.clipboard.writeText(text);
   }
-
-export const updateSummaryVaultCredential = (
-  vault: VaultSummarizedData,
-  updatedCredential: Credential,
-): VaultSummarizedData => {
-  const setSummaryVault = useCloudStore.getState().setSummaryVault;
-
-  const currentCredential = vault.credentials.find(
-    (credential) => credential.id === updatedCredential.id,
-  );
-  const summaryCredential: CredentialSummary = {
-    id: updatedCredential.id,
-    type: updatedCredential.type,
-    title: updatedCredential.title,
-    username:
-      updatedCredential.type === "login" ? updatedCredential.username : null,
-    holderName:
-      updatedCredential.type === "card" ? updatedCredential.holderName : null,
-    name: updatedCredential.type === "note" ? updatedCredential.name : null,
-    auditInfo: currentCredential?.auditInfo,
-    reusedIds: currentCredential?.reusedIds,
-    directoriesIds: updatedCredential.directoriesIds,
-    isFavorite: updatedCredential.isFavorite,
-    isDeleted: updatedCredential.isDeleted,
-  };
-
-  const newCredentials = currentCredential
-    ? vault.credentials.map((credential) =>
-        credential.id === updatedCredential.id ? summaryCredential : credential,
-      )
-    : [summaryCredential, ...vault.credentials];
-
-  const result = {
-    ...vault,
-    credentials: newCredentials,
-  };
-
-  setSummaryVault(result);
-  return result;
-};
+}
 
 export function formatGitHubRemoteUrl(value: string): string {
   const input = value.trim();
@@ -84,12 +42,25 @@ export function formatGitHubRemoteUrl(value: string): string {
 }
 
 export function getHeadings(content: string) {
-    return content
-      .replace(/^\uFEFF/, "")
-      .split("\n")
-      .filter((line) => /^#\s/.test(line))
-      .map((line) => ({
-        level: 1,
-        text: line.replace(/^#{1,6}\s*/, "").trim(),
-      }));
-  }
+  return content
+    .replace(/^\uFEFF/, "")
+    .split("\n")
+    .filter((line) => /^#\s/.test(line))
+    .map((line) => ({
+      level: 1,
+      text: line.replace(/^#{1,6}\s*/, "").trim(),
+    }));
+}
+
+
+export const getReusedColorClass = (ids?: string[]) => {
+  if (!ids?.length) return undefined;
+
+  const groupKey = [...ids].sort().join(":");
+  const colorIndex = [...groupKey].reduce(
+    (acc, char) => acc + char.charCodeAt(0),
+    0,
+  );
+
+  return REUSED_GROUP_COLORS[colorIndex % REUSED_GROUP_COLORS.length];
+};
