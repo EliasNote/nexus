@@ -13,19 +13,19 @@ export const CREDENTIAL_TYPES_LABELS = {
 export type CredentialType =
   (typeof CREDENTIAL_TYPES)[keyof typeof CREDENTIAL_TYPES];
 
-export type Directory = {
+export interface Directory {
   id: string;
   name: string;
   icon?: string;
   colorHex?: string;
-};
+}
 
-export type AuditInfo = {
+export interface AuditInfo {
   isCompromised?: boolean;
   isWeak?: boolean;
   reusedsIds?: string[];
   isRenewal?: boolean;
-};
+}
 
 export interface CredentialSummary {
   id: string;
@@ -46,7 +46,7 @@ export interface VaultSummarizedData {
   credentials: CredentialSummary[];
 }
 
-export type CommonMetadata = {
+export interface CommonMetadata {
   id: string;
   title: string;
   notes?: string;
@@ -56,48 +56,50 @@ export type CommonMetadata = {
   createdAt: string;
   lastPasswordChange?: string;
   updatedAt: string;
-};
+}
 
-export type LoginCredential = CommonMetadata & {
+export interface LoginCredential extends CommonMetadata {
   type: typeof CREDENTIAL_TYPES.LOGIN;
   username?: string;
   password?: string;
   url?: string;
-};
+}
 
-export type CreditCardCredential = CommonMetadata & {
+export interface CreditCardCredential extends CommonMetadata {
   type: typeof CREDENTIAL_TYPES.CARD;
   holderName: string;
   cardNumber: string;
   password?: string;
   expirationDate: string;
   cvv: string;
-};
+}
 
-export type NoteCredential = CommonMetadata & {
+export interface NoteCredential extends CommonMetadata {
   type: typeof CREDENTIAL_TYPES.NOTE;
   name: string;
   password?: string;
   content: string;
-};
+}
 
 export type Credential =
-  LoginCredential | CreditCardCredential | NoteCredential;
+  | LoginCredential
+  | CreditCardCredential
+  | NoteCredential;
 
-export type EncryptedData = {
+export interface EncryptedData {
   iv: string;
   tag: string;
   ciphertext: string;
-};
+}
 
-export type KdfConfig = {
+export interface KdfConfig {
   salt: string;
   memory: number;
   iterations: number;
   parallelism: number;
-};
+}
 
-export type Vault = {
+export interface Vault {
   version: string;
   autoSaveInterval: number;
   kdf: KdfConfig;
@@ -106,10 +108,10 @@ export type Vault = {
   credentials: {
     [uuid: string]: EncryptedData;
   };
-};
+}
 
-export type EncryptedVault = {
+export interface EncryptedVault {
   version: string;
   kdf: KdfConfig;
   encrypted_vault: EncryptedData;
-};
+}
