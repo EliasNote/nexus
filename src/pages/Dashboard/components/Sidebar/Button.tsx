@@ -120,7 +120,7 @@ export const Button = ({
           />
         ) : (
           <span
-            className={`font-medium truncate ${isSelected ? "text-white" : isSyncButtonAllowed ? "text-zinc-500 group-hover:text-brand" : "text-zinc-500 group-hover:text-zinc-400"}`}
+            className={`font-medium truncate ${isSelected ? "text-white" : isSyncButtonAllowed ? "text-zinc-200 group-hover:text-brand" : "text-zinc-200 group-hover:text-zinc-100"}`}
           >
             {isDirectory && `/`}
             {titleText}
