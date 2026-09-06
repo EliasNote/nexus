@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
+import { Loader2 } from "lucide-react";
 import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
 import { cryptoService, useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
@@ -26,7 +27,7 @@ const Dashboard = () => {
   const [isEditFromAudit, setIsEditFromAudit] = useState(false);
   const [isCreate, setIsCreate] = useState<CredentialType["type"] | null>(null);
   const [tempVault, setTempVault] = useState<CredentialType | null>(credential);
-  const [isLoadingCredential] = useState(false);
+  const [isLoadingCredential, setIsLoadingCredential] = useState(false);
 
   const directories: Directory[] = useMemo(() => {
     return summaryVault?.directories || [];
@@ -44,10 +45,10 @@ const Dashboard = () => {
         if (typeof selected === "string") {
           const targetDirectory = directories.find((f) => f.id === selected);
           return targetDirectory?.name || "";
-        };
+        }
         return "TODOS OS ITENS";
     }
-  }
+  };
 
   const credentials = useMemo(() => {
     if (!summaryVault?.credentials) return [];
@@ -98,15 +99,30 @@ const Dashboard = () => {
     clearDecryptedCredential(id);
   };
 
+  const loadCredential = async (id: string) => {
+    if (!vault) return;
+    setIsLoadingCredential(true);
+
+    setCredential(null);
+    setTempVault(null);
+
+    try {
+      const data = await cryptoService.getCredential(id, vault);
+      if (data) {
+        setCredential(data);
+        setTempVault(data);
+        setIsCreate(null);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar credencial:", err);
+    } finally {
+      setIsLoadingCredential(false);
+    }
+  };
+
   useEffect(() => {
     if (selectedSideCredential && vault) {
-      cryptoService
-        .getCredential(selectedSideCredential, vault)
-        .then((data) => {
-          setCredential(data);
-          setTempVault(data);
-          setIsCreate(null);
-        });
+      loadCredential(selectedSideCredential);
     }
   }, [selectedSideCredential, vault]);
 
@@ -139,12 +155,17 @@ const Dashboard = () => {
     setIsCreate(type);
   };
 
-  const handleChangeCredentialFromAudit = (credentialId: string) => {
-    clearDecryptedCredential(credentialId);
-
+  const handleChangeCredentialFromAudit = async (credentialId: string) => {
     setSelected(SIDEBAR_BUTTONS_IDS.all);
     setIsEditFromAudit(true);
     setIsEdit(true);
+    setIsCreate(null);
+
+    if (selectedSideCredential === credentialId) {
+      await loadCredential(credentialId);
+    } else {
+      setSelectedSideCredential(credentialId);
+    }
   };
 
   return (
@@ -156,7 +177,9 @@ const Dashboard = () => {
       />
       {{
         [SIDEBAR_BUTTONS_IDS.generator]: <Generator />,
-        [SIDEBAR_BUTTONS_IDS.audit]: <Audit onChangeCredential={handleChangeCredentialFromAudit} />,
+        [SIDEBAR_BUTTONS_IDS.audit]: (
+          <Audit onChangeCredential={handleChangeCredentialFromAudit} />
+        ),
         [SIDEBAR_BUTTONS_IDS.config]: <Config />,
       }[selected] || (
         <>
@@ -166,7 +189,15 @@ const Dashboard = () => {
             credentials={credentials}
             topTitle={getTitle()}
           />
-          {(selectedSideCredential && credential && tempVault) || isCreate ? (
+          {isLoadingCredential ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-white" />
+              <span className="text-xs font-mono text-zinc-500">
+                Descriptografando dados...
+              </span>
+            </div>
+          ) : (selectedSideCredential && credential && tempVault) ||
+            isCreate ? (
             <Credential
               tempCredential={tempVault || newCredential(isCreate!)}
               setTempCredential={setTempVault}
