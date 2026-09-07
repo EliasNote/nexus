@@ -47,15 +47,28 @@ export const uint8ArrayToBase64 = (bytes: Uint8Array): string => {
 };
 
 const verifyCompromised = async (password: string): Promise<boolean> => {
-  const hash = sha1(password).toUpperCase();
-  const prefix = hash.slice(0, 5);
-  const suffix = hash.slice(5);
+  try {
+    const hash = sha1(password).toUpperCase();
+    const prefix = hash.slice(0, 5);
+    const suffix = hash.slice(5);
 
-  const compromisedPasswords = await fetch(
-    `https://api.pwnedpasswords.com/range/${prefix}`,
-  ).then((res) => res.text());
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-  return compromisedPasswords.includes(suffix);
+    const res = await fetch(
+      `https://api.pwnedpasswords.com/range/${prefix}`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timeoutId);
+
+    if (!res.ok) return false;
+
+    const compromisedPasswords = await res.text();
+    return compromisedPasswords.includes(suffix);
+  } catch (err) {
+    console.warn("Não foi possível checar vazamento online (offline ou timeout):", err);
+    return false;
+  }
 };
 
 const verifyWeak = (password: string): boolean => {
@@ -71,7 +84,9 @@ const verifyReused = (
   const reusedIds = credentials
     .filter(
       (credential) =>
-        (credential as LoginCredential).password === password && credential.id !== id,
+        (credential as LoginCredential).password === password &&
+        credential.id !== id &&
+        !credential.isDeleted,
     )
     .map((credential) => credential.id);
 
@@ -327,6 +342,8 @@ const cryptoService = {
     kekKey = null;
   },
 
+
+
   async verifyCredentials(
     vault: Vault,
     summarizedVault: VaultSummarizedData
@@ -337,24 +354,38 @@ const cryptoService = {
       ),
     );
 
-    const tempSummarizedVault = summarizedVault
+    const updatedCredentials = summarizedVault.credentials.map((c) => {
+      if (c.type !== "login") return c;
 
-    tempSummarizedVault.credentials.map((c) => {
-      if (c.type !== "login") return;
+      const credential = credentials.find((x) => x.id === c.id) as LoginCredential | undefined;
 
-      const credential = credentials.find((x) => x.id == c.id)
-
-      if (credential && credential.password && credential.lastPasswordChange) {
-        const reusedsIds = verifyReused(c.id, credential.password, credentials)
-        const isRenewal = verifyReneval(new Date(credential.lastPasswordChange))
-
-        c.auditInfo!.reusedsIds = reusedsIds
-        c.auditInfo!.isRenewal = isRenewal
-
+      if (!credential || !credential.password || credential.isDeleted) {
+        return {
+          ...c,
+          auditInfo: c.auditInfo ? { ...c.auditInfo, reusedsIds: [] } : null,
+        };
       }
-    })
 
-    return tempSummarizedVault
+      const reusedsIds = verifyReused(c.id, credential.password, credentials);
+      const isRenewal = credential.lastPasswordChange
+        ? verifyReneval(new Date(credential.lastPasswordChange))
+        : false;
+
+      return {
+        ...c,
+        auditInfo: {
+          isCompromised: c.auditInfo?.isCompromised ?? false,
+          isWeak: c.auditInfo?.isWeak ?? false,
+          reusedsIds,
+          isRenewal,
+        },
+      };
+    });
+
+    return {
+      ...summarizedVault,
+      credentials: updatedCredentials,
+    };
   },
 
   async getInitialData(

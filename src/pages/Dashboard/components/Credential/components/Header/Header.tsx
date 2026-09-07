@@ -1,5 +1,6 @@
 import {
   CREDENTIAL_TYPES_LABELS,
+  type AuditInfo,
   type Credential,
   type CredentialSummary,
   type CredentialType,
@@ -45,7 +46,7 @@ export const Header = ({
   autoFocus?: boolean;
   }) => {
   const isWriting = isEdit || isCreate;
-  const { saveCredential, deleteCredential, updateSummaryCredential } = useVaultActions();
+  const { saveCredential, deleteCredential } = useVaultActions();
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,22 +56,35 @@ export const Header = ({
   }, [autoFocus, isWriting]);
 
   const onSave = async (isTrashed: boolean, isRestore: boolean) => {
+    let auditInfo: AuditInfo | null = null;
+    let isPasswordChanged = false;
 
-    const password = tempCredential.password;
-    const isPasswordChanged = originalCredential ? password !== originalCredential.password : false;
-    let auditInfo = null;
+    if (tempCredential.type === "login") {
+      const newPassword = tempCredential.password ?? "";
+      const originalPassword = originalCredential?.password ?? "";
 
-    if (password && tempCredential.type === "login") {
-      const isCompromised = await cryptoService.verifyCompromised(password);
-      const isWeak = await cryptoService.verifyWeak(password);
-      auditInfo = { isCompromised, isWeak, reusedsIds: [], isRenewal: false };
-      if (!isCreate && isPasswordChanged) {
-        const tempSummaryCredential: CredentialSummary = { ...summaryCredential!, auditInfo };
-        updateSummaryCredential(tempSummaryCredential)
+      isPasswordChanged = isCreate ? Boolean(newPassword) : newPassword !== originalPassword;
+
+      if (newPassword && (isPasswordChanged || !summaryCredential?.auditInfo)) {
+        const isCompromised = await cryptoService.verifyCompromised(newPassword);
+        const isWeak = await cryptoService.verifyWeak(newPassword);
+
+        auditInfo = {
+          isCompromised,
+          isWeak,
+          reusedsIds: isPasswordChanged ? [] : (summaryCredential?.auditInfo?.reusedsIds ?? []),
+          isRenewal: false,
+        };
       }
     }
 
-    await saveCredential(tempCredential, isTrashed, isRestore, auditInfo);
+    await saveCredential(
+      tempCredential,
+      isTrashed,
+      isRestore,
+      auditInfo,
+      isPasswordChanged,
+    );
 
     if (isTrashed) {
       handleRemoveCredential();

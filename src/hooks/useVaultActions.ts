@@ -76,6 +76,7 @@ export const useVaultActions = () => {
     isTrashed?: boolean,
     isRestore?: boolean,
     auditInfo?: AuditInfo | null,
+    isPasswordChanged?: boolean,
     setIsLoading?: (isLoading: boolean) => void,
   ) => {
     if (!vault || !summaryVault) return;
@@ -84,7 +85,7 @@ export const useVaultActions = () => {
       setIsLoading?.(true);
       const credentialToSave: Credential = {
         ...credentialData,
-        isDeleted: isTrashed ?? isRestore ?? false,
+        isDeleted: isTrashed ? true : isRestore ? false : (credentialData.isDeleted ?? false),
       };
 
       const newVault =
@@ -93,12 +94,34 @@ export const useVaultActions = () => {
           credentialToSave,
         );
 
-      setIsPendingSync(true);
-
       const summaryCredential = buildSummaryCredential(credentialToSave, auditInfo);
+      const exists = summaryVault.credentials.some((c) => c.id === summaryCredential.id);
+      const intermediateCredentials = exists
+        ? summaryVault.credentials.map((c) => (c.id === summaryCredential.id ? summaryCredential : c))
+        : [summaryCredential, ...summaryVault.credentials];
 
+      const intermediateSummaryVault: VaultSummarizedData = {
+        ...summaryVault,
+        credentials: intermediateCredentials,
+      };
+
+      const isLogin = credentialToSave.type === "login";
+      const isNew = !exists;
+      const isStatusChanged = Boolean(isTrashed) || Boolean(isRestore);
+      const shouldVerifyAudit = isLogin && (isNew || isStatusChanged || Boolean(isPasswordChanged));
+
+      let finalSummaryVault = intermediateSummaryVault;
+
+      if (shouldVerifyAudit) {
+        finalSummaryVault = await cryptoService.verifyCredentials(
+          newVault,
+          intermediateSummaryVault,
+        );
+      }
+
+      setIsPendingSync(true);
       setVault(newVault);
-      updateSummaryCredential(summaryCredential);
+      setSummaryVault(finalSummaryVault);
     } catch (error) {
       console.error(error);
       throw error;
@@ -120,9 +143,14 @@ export const useVaultActions = () => {
       updatedSummaryVault,
     );
 
+    const finalSummaryVault = await cryptoService.verifyCredentials(
+      newVault,
+      updatedSummaryVault,
+    );
+
     setIsPendingSync(true);
     setVault(newVault);
-    setSummaryVault(updatedSummaryVault);
+    setSummaryVault(finalSummaryVault);
   };
 
   const createDirectory = async (directoryName: string) => {
