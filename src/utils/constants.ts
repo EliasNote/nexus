@@ -57,7 +57,7 @@ export const CLOUD_OPTIONS: CloudOption[] = [
   },
   {
     id: "git",
-    title: "GITHUB",
+    title: "GIT",
     subtitle: "Usar cofre do Git",
     type: ["desktop"],
     icon: GitFork,
