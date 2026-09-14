@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboardRoute, manualRoute } from "@/App";
 import { useStorageSync } from "@/hooks/useStorageSync";
-import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
+import { getCryptoService, initCryptoWorker, useCloudStore } from "@/hooks/useCloudStore";
 import { motion } from "framer-motion";
 import type { Vault } from "@/types/vault";
 import { Input } from "../Dashboard/components/Credential/components/Input";
@@ -83,6 +83,8 @@ export const Home = () => {
       setIsLoading(true);
       setErrorContent(null);
 
+      initCryptoWorker();
+
       const data = await exists();
 
       if (data) {
@@ -103,7 +105,7 @@ export const Home = () => {
 
         let vault: Vault;
         try {
-          vault = await cryptoService.decryptVault(
+          vault = await getCryptoService().decryptVault(
             encryptedVault,
             password,
           );
@@ -114,18 +116,18 @@ export const Home = () => {
           return;
         }
 
-        const summaryVault = await cryptoService.getInitialData(vault);
+        const summaryVault = await getCryptoService().getInitialData(vault);
         setSummaryVault(summaryVault);
         setEncryptedVault(encryptedVault);
         setVault(vault);
       } else {
         console.log("Vault não existe, inicializando novo cofre");
-        const vault = await cryptoService.setupInitialVault(password);
-        const encryptedVault = await cryptoService.encryptVault(vault);
+        const vault = await getCryptoService().setupInitialVault(password);
+        const encryptedVault = await getCryptoService().encryptVault(vault);
         await upload(encryptedVault);
         setEncryptedVault(encryptedVault);
         setVault(vault);
-        setSummaryVault(await cryptoService.getInitialData(vault));
+        setSummaryVault(await getCryptoService().getInitialData(vault));
       }
 
       if (inputRef.current) {

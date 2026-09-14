@@ -5,7 +5,7 @@ import type {
   Directory,
   VaultSummarizedData,
 } from "@/types/vault";
-import { cryptoService, useCloudStore } from "./useCloudStore";
+import { getCryptoService, useCloudStore } from "./useCloudStore";
 import { useStorageSync } from "./useStorageSync";
 
 export const useVaultActions = () => {
@@ -30,7 +30,7 @@ export const useVaultActions = () => {
       return;
     }
 
-    await upload(await cryptoService.encryptVault(vault));
+    await upload(await getCryptoService().encryptVault(vault));
     setIsPendingSync(false);
   };
 
@@ -89,7 +89,7 @@ export const useVaultActions = () => {
       };
 
       const newVault =
-        await cryptoService.updateVaultFromCredentialAndTrackPasswordChange(
+        await getCryptoService().updateVaultFromCredentialAndTrackPasswordChange(
           vault,
           credentialToSave,
         );
@@ -113,7 +113,7 @@ export const useVaultActions = () => {
       let finalSummaryVault = intermediateSummaryVault;
 
       if (shouldVerifyAudit) {
-        finalSummaryVault = await cryptoService.verifyCredentials(
+        finalSummaryVault = await getCryptoService().verifyCredentials(
           newVault,
           intermediateSummaryVault,
         );
@@ -138,12 +138,12 @@ export const useVaultActions = () => {
       credentials: summaryVault.credentials.filter((e) => e.id !== credentialId),
     };
 
-    const newVault = await cryptoService.updateVaultFromSummary(
+    const newVault = await getCryptoService().updateVaultFromSummary(
       vault,
       updatedSummaryVault,
     );
 
-    const finalSummaryVault = await cryptoService.verifyCredentials(
+    const finalSummaryVault = await getCryptoService().verifyCredentials(
       newVault,
       updatedSummaryVault,
     );
@@ -169,7 +169,7 @@ export const useVaultActions = () => {
       directories: [...summaryVault.directories, newDirectory],
     };
 
-    const newVault = await cryptoService.updateVaultFromSummary(
+    const newVault = await getCryptoService().updateVaultFromSummary(
       vault,
       updatedSummaryVault,
     );
@@ -194,7 +194,7 @@ export const useVaultActions = () => {
       ),
     };
 
-    const newVault = await cryptoService.updateVaultFromSummary(
+    const newVault = await getCryptoService().updateVaultFromSummary(
       vault,
       updatedSummaryVault,
     );
@@ -216,7 +216,7 @@ export const useVaultActions = () => {
       })),
     };
 
-    const newVault = await cryptoService.updateVaultFromSummary(
+    const newVault = await getCryptoService().updateVaultFromSummary(
       vault,
       updatedSummaryVault,
     );

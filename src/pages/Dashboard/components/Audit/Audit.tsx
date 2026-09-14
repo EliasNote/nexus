@@ -1,4 +1,4 @@
-import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
+import { getCryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import {
   AlertCircle,
   Clock,
@@ -106,7 +106,7 @@ export const Audit = ({
     try {
       setIsChecking(true);
       setCheckError(null);
-      const updatedSummary = await cryptoService.verifyCredentials(vault, summaryVault!);
+      const updatedSummary = await getCryptoService().verifyCredentials(vault, summaryVault!);
       setSummaryVault(updatedSummary);
     } catch (error) {
       console.error(error);

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useStorageSync } from "./useStorageSync";
-import { cryptoService, useCloudStore } from "./useCloudStore";
+import { getCryptoService, useCloudStore } from "./useCloudStore";
 import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
 
 export const useAutoSave = () => {
@@ -27,7 +27,7 @@ export const useAutoSave = () => {
       try {
         setIsSaving(true);
 
-        const vault = await cryptoService.encryptVault(currentVault);
+        const vault = await getCryptoService().encryptVault(currentVault);
         await uploadRef.current(vault);
 
         setIsPendingSync(false);
@@ -78,7 +78,7 @@ export const useSaveNow = () => {
     try {
       setIsSaving(true);
 
-      const vault = await cryptoService.encryptVault(currentVault);
+      const vault = await getCryptoService().encryptVault(currentVault);
       await uploadRef.current(vault);
 
       setIsPendingSync(false);

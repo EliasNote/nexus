@@ -1,4 +1,4 @@
-import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
+import { getCryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
 import { Check, ChevronDown, Download, Save, Settings, Trash2, Upload } from "lucide-react";
 import { save, open } from "@tauri-apps/plugin-dialog";
@@ -44,7 +44,7 @@ export const Config = () => {
     const selectedOption = AUTO_SAVE_INTERVAL_OPTIONS[selectedOptionId];
     const updatedSummaryVault: VaultSummarizedData = { ...summaryVault!, autoSaveInterval: selectedOption.value };
     setSummaryVault(updatedSummaryVault);
-    setVault(await cryptoService.updateVaultFromSummary(vault!, updatedSummaryVault))
+    setVault(await getCryptoService().updateVaultFromSummary(vault!, updatedSummaryVault))
     console.log("INTERVALO DO VAULT: ", vault?.autoSaveInterval)
     console.log("AUTO SAVE INTERVALO: ", updatedSummaryVault.autoSaveInterval)
     setIsSaving(false);
@@ -63,10 +63,10 @@ export const Config = () => {
       console.log("ENCRYPTED VAULT: ", tempEncryptedVault!);
       console.log("PASSWORD: ", passwordImport);
 
-      const decryptedVault = await cryptoService.decryptVault(tempEncryptedVault!, passwordImport);
+      const decryptedVault = await getCryptoService().decryptVault(tempEncryptedVault!, passwordImport);
 
       setVault(decryptedVault);
-      setSummaryVault(await cryptoService.getInitialData(decryptedVault));
+      setSummaryVault(await getCryptoService().getInitialData(decryptedVault));
       await upload(tempEncryptedVault!);
       setEncryptedVault(tempEncryptedVault!);
 
@@ -86,7 +86,7 @@ export const Config = () => {
   };
 
   const onExport = async () => {
-    const encryptedData = await cryptoService.encryptVault(vault!);
+    const encryptedData = await getCryptoService().encryptVault(vault!);
 
     if (isTauri()) {
       const filePath = await save({
@@ -179,7 +179,7 @@ export const Config = () => {
     setIsDelete(false);
 
     try {
-      await cryptoService.decryptVault(encryptedVault!, passwordDelete);
+      await getCryptoService().decryptVault(encryptedVault!, passwordDelete);
       await remove();
       setVault(null);
       setSummaryVault(null);

@@ -1,86 +1,112 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 import { wrap } from "comlink";
 import type { CryptoService } from "../utils/worker";
 import type { CloudState } from "./types";
 
-const worker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
-  type: "module",
-});
+import type { Remote } from "comlink";
 
-export const cryptoService = wrap<CryptoService>(worker);
+let rawWorker: Worker | null = null;
+let wrappedWorker: Remote<CryptoService> | null = null;
 
-export const useCloudStore = create<CloudState>(
-  (set) => ({
-    activeProvider: null,
+export const initCryptoWorker = (): Remote<CryptoService> => {
+  if (rawWorker) {
+    rawWorker.terminate();
+  }
+  rawWorker = new Worker(new URL("../utils/worker.ts", import.meta.url), {
+    type: "module",
+  });
+  wrappedWorker = wrap<CryptoService>(rawWorker);
+  return wrappedWorker;
+};
 
-    setActiveProvider: (provider) => {
-      set({ activeProvider: provider });
-    },
+export const terminateCryptoWorker = () => {
+  if (rawWorker) {
+    rawWorker.terminate();
+    rawWorker = null;
+    wrappedWorker = null;
+  }
+};
 
-    encryptedVault: null,
+export const getCryptoService = (): Remote<CryptoService> => {
+  if (!wrappedWorker) {
+    return initCryptoWorker();
+  }
+  return wrappedWorker;
+};
 
-    setEncryptedVault: (encryptedVault) => {
-      set({ encryptedVault });
-    },
+export const useCloudStore = create<CloudState>((set) => ({
+  activeProvider: null,
 
-    vault: null,
+  setActiveProvider: (provider) => {
+    set({ activeProvider: provider });
+  },
 
-    setVault: (vault) => {
-      set({ vault });
-    },
+  encryptedVault: null,
 
-    vaultPath: null,
+  setEncryptedVault: (encryptedVault) => {
+    set({ encryptedVault });
+  },
 
-    setVaultPath: (vaultPath) => {
-      set({ vaultPath });
-    },
+  vault: null,
 
-    summaryVault: null,
+  setVault: (vault) => {
+    set({ vault });
+  },
 
-    setSummaryVault: (summaryVault) => {
-      set({ summaryVault });
-    },
+  vaultPath: null,
 
-    accessToken: null,
+  setVaultPath: (vaultPath) => {
+    set({ vaultPath });
+  },
 
-    setAccessToken: (accessToken) => {
-      set({ accessToken });
-    },
+  summaryVault: null,
 
-    expiresIn: null,
+  setSummaryVault: (summaryVault) => {
+    set({ summaryVault });
+  },
 
-    setExpiresIn: (expiresIn) => {
-      set({ expiresIn });
-    },
+  accessToken: null,
 
-    isTokenValid: false,
+  setAccessToken: (accessToken) => {
+    set({ accessToken });
+  },
 
-    setIsTokenValid: (isTokenValid) => {
-      set({ isTokenValid });
-    },
+  expiresIn: null,
 
-    isPendingSync: false,
+  setExpiresIn: (expiresIn) => {
+    set({ expiresIn });
+  },
 
-    setIsPendingSync: (isPendingSync) => {
-      set({ isPendingSync });
-    },
+  isTokenValid: false,
 
-    isSaving: false,
+  setIsTokenValid: (isTokenValid) => {
+    set({ isTokenValid });
+  },
 
-    setIsSaving: (isSaving) => {
-      set({ isSaving });
-    },
+  isPendingSync: false,
 
-    clearSession: () => {
-      cryptoService.destroyKey();
-      set({
-        activeProvider: null,
-        accessToken: null,
-        expiresIn: null,
-        isTokenValid: false,
-        vault: null,
-        summaryVault: null,
-      });
-    },
-  }),
-);
+  setIsPendingSync: (isPendingSync) => {
+    set({ isPendingSync });
+  },
+
+  isSaving: false,
+
+  setIsSaving: (isSaving) => {
+    set({ isSaving });
+  },
+
+  clearSession: () => {
+    if (wrappedWorker) {
+      wrappedWorker.destroyKey();
+    }
+    terminateCryptoWorker();
+    set({
+      activeProvider: null,
+      accessToken: null,
+      expiresIn: null,
+      isTokenValid: false,
+      vault: null,
+      summaryVault: null,
+    });
+  },
+}));

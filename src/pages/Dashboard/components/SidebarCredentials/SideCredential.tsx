@@ -1,4 +1,4 @@
-import { cryptoService, useCloudStore } from "@/hooks/useCloudStore";
+import { getCryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import type { CredentialSummary } from "@/types/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
@@ -32,9 +32,9 @@ const Credential = ({
   const handleCopy = async () => {
     switch (credential.type) {
       case "login":
-        cryptoService
+        getCryptoService()
           .getPassword(vault!, credential.id)
-          .then(async (password) => {
+          .then(async (password: string | null) => {
             await copyToClipboard(password || "");
           })
           .finally(() => {

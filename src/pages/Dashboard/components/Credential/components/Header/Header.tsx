@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import { Button } from "./components/Button";
 import { useVaultActions } from "@/hooks/useVaultActions";
 import { useEffect, useRef } from "react";
-import { cryptoService } from "@/hooks/useCloudStore";
+import { getCryptoService } from "@/hooks/useCloudStore";
 
 export const Header = ({
   originalCredential,
@@ -66,8 +66,8 @@ export const Header = ({
       isPasswordChanged = isCreate ? Boolean(newPassword) : newPassword !== originalPassword;
 
       if (newPassword && (isPasswordChanged || !summaryCredential?.auditInfo)) {
-        const isCompromised = await cryptoService.verifyCompromised(newPassword);
-        const isWeak = await cryptoService.verifyWeak(newPassword);
+        const isCompromised = await getCryptoService().verifyCompromised(newPassword);
+        const isWeak = await getCryptoService().verifyWeak(newPassword);
 
         auditInfo = {
           isCompromised,

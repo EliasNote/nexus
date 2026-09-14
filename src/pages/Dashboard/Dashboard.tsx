@@ -1,8 +1,8 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import { Loader2 } from "lucide-react";
 import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
-import { cryptoService, useCloudStore } from "../../hooks/useCloudStore";
+import { getCryptoService, useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
 import type { Credential as CredentialType, Directory } from "@/types/vault";
 import { AddButton } from "./components/Credential/AddButton";
@@ -107,7 +107,7 @@ const Dashboard = () => {
     setTempVault(null);
 
     try {
-      const data = await cryptoService.getCredential(id, vault);
+      const data = await getCryptoService().getCredential(id, vault);
       if (data) {
         setCredential(data);
         setTempVault(data);
