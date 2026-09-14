@@ -9,7 +9,7 @@ import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { isTauri } from "@tauri-apps/api/core";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { Input } from "../Credential/components/Input";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { BlueButton } from "@/pages/Home/components/BlueButton";
 import { GrayButton } from "@/pages/Home/components/GrayButton";
 import { Loading } from "@/components/Loading";

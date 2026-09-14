@@ -1,7 +1,7 @@
 import { ArrowRight, Binary, Check, Copy, RefreshCw, X } from "lucide-react";
 import { Input } from "../Credential/components/Input";
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { GeneratorOptions } from "./Components/GeneratorOptions";
 import { copyToClipboard } from "@/utils/utils";
 import { generateCustomPassword, type GeneratorConfig } from "@/hooks/usePasswordGenerator";

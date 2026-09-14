@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { BlueButton } from "@/pages/Home/components/BlueButton";
 import { GrayButton } from "@/pages/Home/components/GrayButton";
 

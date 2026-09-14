@@ -1,7 +1,7 @@
 import { dashboardRoute } from "@/App";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import ManualContent from './manual.mdx';
 import manualRaw from "./manual.mdx?raw";
 import { getHeadings } from "@/utils/utils";

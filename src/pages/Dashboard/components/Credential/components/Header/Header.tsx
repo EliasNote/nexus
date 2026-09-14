@@ -8,7 +8,7 @@ import {
 import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Button } from "./components/Button";
 import { useVaultActions } from "@/hooks/useVaultActions";
 import { useEffect, useRef } from "react";

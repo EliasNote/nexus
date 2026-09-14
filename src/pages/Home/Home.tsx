@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { dashboardRoute, manualRoute } from "@/App";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { getCryptoService, initCryptoWorker, useCloudStore } from "@/hooks/useCloudStore";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import type { Vault } from "@/types/vault";
 import { Input } from "../Dashboard/components/Credential/components/Input";
 import LetterGlitch from "./components/LetterGlitch";
