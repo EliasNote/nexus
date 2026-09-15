@@ -1,5 +1,5 @@
 import { getCryptoService, useCloudStore } from "@/hooks/useCloudStore";
-import type { CredentialSummary } from "@/types/vault";
+import type { CredentialSummary } from "@/utils/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";

@@ -1,4 +1,4 @@
-import type { Vault, KdfConfig, EncryptedData } from "@/types/vault";
+import type { Vault, KdfConfig, EncryptedData } from "@/utils/vault";
 
 export const version = "1.0";
 

@@ -13,7 +13,7 @@ import type {
   Directory as DirectoryType,
   Credential,
   CreditCardCredential,
-} from "@/types/vault";
+} from "@/utils/vault";
 import { Date } from "../components/Date";
 
 export const Card = ({

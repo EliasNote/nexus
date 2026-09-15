@@ -7,7 +7,7 @@ import type {
   LoginCredential,
   VaultSummarizedData,
   Directory,
-} from "@/types/vault";
+} from "@/utils/vault";
 import { expose } from "comlink";
 import { argon2id } from "hash-wasm";
 import { sha1 } from "js-sha1";

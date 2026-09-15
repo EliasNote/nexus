@@ -4,7 +4,7 @@ import type {
   CredentialSummary,
   Directory,
   VaultSummarizedData,
-} from "@/types/vault";
+} from "@/utils/vault";
 import { getCryptoService, useCloudStore } from "./useCloudStore";
 import { useStorageSync } from "./useStorageSync";
 

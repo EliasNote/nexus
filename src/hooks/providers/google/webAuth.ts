@@ -5,7 +5,7 @@
   type NonOAuthError,
 } from "@react-oauth/google";
 import { useRef } from "react";
-import type { GoogleAuthProvider, GoogleToken } from "@/types/types";
+import type { GoogleAuthProvider, GoogleToken } from "@/utils/types";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const TOKEN_EXPIRY_SAFETY_WINDOW_MS = 5 * 60 * 1000;

@@ -1,4 +1,4 @@
-import type { AuditType } from "@/types/types";
+import type { AuditType } from "@/utils/types";
 
 export const AuditTypeCard = ({
   data,

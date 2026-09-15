@@ -4,7 +4,7 @@ import {
   type Credential,
   type CredentialSummary,
   type CredentialType,
-} from "@/types/vault";
+} from "@/utils/vault";
 import { Trash2, Pencil, X, Save, RefreshCcw, Undo2 } from "lucide-react";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";

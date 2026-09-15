@@ -6,7 +6,7 @@ import {
   remove,
   writeTextFile,
 } from "@tauri-apps/plugin-fs";
-import type { EncryptedVault } from "@/types/vault";
+import type { EncryptedVault } from "@/utils/vault";
 import type { VaultStorage } from "../../types";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { join } from "@tauri-apps/api/path";

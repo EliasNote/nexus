@@ -1,4 +1,4 @@
-import type { Credential, CredentialType, CredentialSummary } from "@/types/vault";
+import type { Credential, CredentialType, CredentialSummary } from "@/utils/vault";
 import { AddButton } from "../AddButton";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 

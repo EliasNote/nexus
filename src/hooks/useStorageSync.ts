@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { EncryptedVault } from "@/types/vault";
+import type { EncryptedVault } from "@/utils/vault";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { useGoogleDrive } from "./providers/google/useGoogleDrive";
 import { useLocalFile } from "./providers/local/useLocalFile";

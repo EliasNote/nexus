@@ -2,7 +2,7 @@ import { Command } from "@tauri-apps/plugin-shell";
 import type {
   GitRepoStatus,
   GitSyncResult,
-} from "@/types/types";
+} from "@/utils/types";
 
 async function runGit(
   directory: string,

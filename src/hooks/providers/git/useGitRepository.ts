@@ -7,7 +7,7 @@ import {
 } from "./gitSync";
 import type { VaultStorage } from "../../types";
 import { useCloudStore } from "@/hooks/useCloudStore";
-import type { EncryptedVault } from "@/types/vault";
+import type { EncryptedVault } from "@/utils/vault";
 import { useLocalFile } from "../local/useLocalFile";
 
 export function useGitRepository(): VaultStorage {

@@ -1,4 +1,4 @@
-import type { CredentialSummary } from "@/types/vault";
+import type { CredentialSummary } from "@/utils/vault";
 
 export const AuditCredential = ({
   credentialSummary,

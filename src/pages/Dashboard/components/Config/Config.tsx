@@ -4,7 +4,7 @@ import { Check, ChevronDown, Download, Save, Settings, Trash2, Upload } from "lu
 import { save, open } from "@tauri-apps/plugin-dialog";
 import { useState, useRef } from "react";
 import { Button } from "../Credential/components/Header/components/Button";
-import type { EncryptedVault, VaultSummarizedData } from "@/types/vault";
+import type { EncryptedVault, VaultSummarizedData } from "@/utils/vault";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { isTauri } from "@tauri-apps/api/core";
 import { useStorageSync } from "@/hooks/useStorageSync";

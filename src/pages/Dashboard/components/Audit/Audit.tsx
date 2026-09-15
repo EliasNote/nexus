@@ -8,7 +8,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { AuditTypeCard } from "./components/AuditTypeCard";
-import type { AuditType } from "@/types/types";
+import type { AuditType } from "@/utils/types";
 import { useEffect, useState } from "react";
 import { AuditCredential } from "./components/AuditCredential";
 import { getReusedColorClass } from "@/utils/utils";

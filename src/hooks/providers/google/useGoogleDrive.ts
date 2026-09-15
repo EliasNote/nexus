@@ -1,6 +1,6 @@
 import { useCloudStore } from "@/hooks/useCloudStore";
-import type { GoogleToken } from "@/types/types";
-import type { EncryptedVault } from "@/types/vault";
+import type { GoogleToken } from "@/utils/types";
+import type { EncryptedVault } from "@/utils/vault";
 import { useGoogleWebAuth } from "./webAuth";
 import type {
   AuthSession,

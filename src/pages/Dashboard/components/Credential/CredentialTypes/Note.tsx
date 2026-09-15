@@ -5,7 +5,7 @@ import type {
   Directory as DirectoryType,
   Credential,
   NoteCredential,
-} from "@/types/vault";
+} from "@/utils/vault";
 
 export const Note = ({
   directories,

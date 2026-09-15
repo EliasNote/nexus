@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { Directory } from "@/types/vault";
+import type { Directory } from "@/utils/vault";
 
 export const DirectorySelect = ({
   iconTop: Icontop,

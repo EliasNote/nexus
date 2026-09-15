@@ -11,7 +11,7 @@ import { useStorageSync } from "@/hooks/useStorageSync";
 import { useSaveNow } from "@/hooks/useSave";
 import { useVaultActions } from "@/hooks/useVaultActions";
 import { useCloudStore } from "@/hooks/useCloudStore";
-import type { Directory } from "@/types/vault";
+import type { Directory } from "@/utils/vault";
 import { Button } from "./Button";
 import { getAllButtons, SIDEBAR_BUTTONS_IDS } from "./Buttons";
 

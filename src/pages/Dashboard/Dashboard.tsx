@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import SidebarCredentials from "./components/SidebarCredentials/SidebarCredentials";
 import { getCryptoService, useCloudStore } from "../../hooks/useCloudStore";
 import { Credential } from "./components/Credential/Credential";
-import type { Credential as CredentialType, Directory } from "@/types/vault";
+import type { Credential as CredentialType, Directory } from "@/utils/vault";
 import { AddButton } from "./components/Credential/AddButton";
 import { useAutoSave } from "@/hooks/useSave";
 import { SIDEBAR_BUTTONS_IDS } from "./components/Sidebar/Buttons";

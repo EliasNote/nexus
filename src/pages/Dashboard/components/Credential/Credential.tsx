@@ -1,4 +1,4 @@
-import { type Credential as CredentialType } from "@/types/vault";
+import { type Credential as CredentialType } from "@/utils/vault";
 import { Login } from "./CredentialTypes/Login";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { Footer } from "./components/Footer";

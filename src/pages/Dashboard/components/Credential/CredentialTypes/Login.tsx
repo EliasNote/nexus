@@ -12,7 +12,7 @@ import type {
   Directory as DirectoryType,
   LoginCredential,
   Credential,
-} from "@/types/vault";
+} from "@/utils/vault";
 
 export const Login = ({
   directories,

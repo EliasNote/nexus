@@ -1,6 +1,6 @@
 import { GitFork, HardDrive, Server, Globe, CreditCard, FileText, type LucideIcon } from "lucide-react";
-import { CREDENTIAL_TYPES, type CredentialType } from "@/types/vault";
-import type { CloudOption } from "@/types/types";
+import { CREDENTIAL_TYPES, type CredentialType } from "@/utils/vault";
+import type { CloudOption } from "@/utils/types";
 
 export interface CredentialMenuOption {
   type: CredentialType;

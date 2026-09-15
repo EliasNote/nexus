@@ -2,7 +2,7 @@ import type {
   Vault,
   EncryptedVault,
   VaultSummarizedData,
-} from "@/types/vault";
+} from "@/utils/vault";
 
 export type StorageProvider =
   | "google"

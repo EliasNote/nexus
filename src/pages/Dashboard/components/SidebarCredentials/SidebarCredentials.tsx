@@ -1,4 +1,4 @@
-import type { CredentialSummary } from "@/types/vault";
+import type { CredentialSummary } from "@/utils/vault";
 import SideCredential from "./SideCredential";
 import { useState, useMemo } from "react";
 

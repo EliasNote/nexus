@@ -6,7 +6,7 @@ import { dashboardRoute, manualRoute } from "@/App";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { getCryptoService, initCryptoWorker, useCloudStore } from "@/hooks/useCloudStore";
 import { motion } from "motion/react";
-import type { Vault } from "@/types/vault";
+import type { Vault } from "@/utils/vault";
 import { Input } from "../Dashboard/components/Credential/components/Input";
 import LetterGlitch from "./components/LetterGlitch";
 import { IconButton } from "./components/IconButton";
