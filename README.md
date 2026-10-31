@@ -3,10 +3,8 @@
   <h1>Nexus</h1>
   <p><strong>Gerenciador de senhas descentralizado, seguro e de código aberto.</strong></p>
 
-  <blockquote>
-    <p><strong>“Dai graças ao Senhor, porque ele é bom; porque a sua benignidade dura para sempre.”</strong></p>
-    <p>— Salmos 136:1</p>
-  </blockquote>
+  <p><strong>“Dai graças ao Senhor, porque ele é bom; porque a sua benignidade dura para sempre.”</strong></p>
+  <p>— Salmos 136:1</p>
 
   <p>
     <img src="https://img.shields.io/badge/React-19.2.5-blue?style=flat-square&logo=react" alt="React" />
