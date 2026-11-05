@@ -20,7 +20,7 @@ export const RangeSlider = ({
       max={maxLength}
       step={1}
     >
-      <Slider.Track className="bg-gray-700 relative grow rounded-full h-1.5">
+      <Slider.Track className="bg-surface-active relative grow rounded-full h-1.5">
         <Slider.Range className="absolute bg-brand rounded-full h-full" />
       </Slider.Track>
 

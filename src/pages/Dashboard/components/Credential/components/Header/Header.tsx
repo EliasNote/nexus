@@ -116,19 +116,19 @@ export const Header = ({
   };
 
   return (
-    <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-zinc-800 shrink-0">
+    <div className="flex flex-row w-full justify-between px-10 py-7.5 border-b border-line shrink-0">
       <div className="flex gap-2.5">
-        <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-zinc-900 border border-zinc-800 text-zinc-300">
+        <div className="w-15 h-15 flex items-center justify-center text-[32px] bg-surface border border-line text-secondary">
           {(tempCredential?.title?.[0] || "?").toUpperCase()}
         </div>
 
         <div className="flex flex-col items-start" onDoubleClick={() => !isWriting && handleEditClick()}>
           {isWriting ? (
-            <div className="group flex items-center focus-within:border-zinc-600 bg-zinc-900 border border-zinc-800 h-[35px] w-full min-w-[300px]">
+            <div className="group flex items-center focus-within:border-line-focus bg-surface border border-line h-[35px] w-full min-w-[300px]">
               <input
                 ref={titleInputRef}
                 type="text"
-                className={`flex-1 bg-transparent px-3 text-[16px] text-white font-bold outline-none placeholder:text-zinc-500 ${!isWriting ? "pointer-events-none" : ""}`}
+                className={`flex-1 bg-transparent px-3 text-[16px] text-primary font-bold outline-none placeholder:text-muted ${!isWriting ? "pointer-events-none" : ""}`}
                 value={tempCredential?.title || ""}
                 onChange={(e) =>
                   setTempCredential((prev) =>
@@ -139,13 +139,13 @@ export const Header = ({
               />
             </div>
           ) : (
-            <h2 className="text-[18px] text-zinc-300 font-bold max-w-100 truncate cursor-default">
+            <h2 className="text-[18px] text-secondary font-bold max-w-100 truncate cursor-default">
               {tempCredential?.title}
             </h2>
           )}
 
           <div className="flex">
-            <span className="flex items-center justify-center px-3 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[14px] font-bold uppercase">
+            <span className="flex items-center justify-center px-3 py-1 bg-surface border border-line text-muted text-[14px] font-bold uppercase">
               {CREDENTIAL_TYPES_LABELS[tempCredential?.type ?? ""]}
             </span>
 
@@ -162,7 +162,7 @@ export const Header = ({
               {tempCredential?.isFavorite ? (
                 <StarSolid className="text-amber-400 size-[25px]" />
               ) : (
-                <StarOutline className="text-zinc-600 size-[25px]" />
+                <StarOutline className="text-faint size-[25px]" />
               )}
             </button>
           </div>
@@ -173,7 +173,8 @@ export const Header = ({
         {!isCreate && (
           <Button
             iconsSize={iconsSize}
-            color="border-zinc-800 bg-zinc-900 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="credential-back-button"
+            color="border-line bg-surface text-muted transition-colors hover:border-line-focus hover:bg-surface-raised hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             label={"VOLTAR"}
             icon={Undo2}
             onClick={onUndo}
@@ -206,7 +207,7 @@ export const Header = ({
               <Button
                 iconsSize={iconsSize}
                 icon={X}
-                color="border-zinc-700 text-zinc-300 hover:bg-zinc-700"
+                color="border-line-strong text-secondary hover:bg-surface-active"
                 label={"CANCELAR"}
                 onClick={handleCancel}
               />
@@ -237,7 +238,7 @@ export const Header = ({
             <Button
               iconsSize={iconsSize}
               icon={Undo2}
-              color="border-green-500 text-green-500 hover:bg-green-600"
+              color="border-green-500 text-success hover:bg-green-600"
               label={"RESTAURAR"}
               onClick={() => {
                 setTempCredential({ ...tempCredential, isDeleted: false });

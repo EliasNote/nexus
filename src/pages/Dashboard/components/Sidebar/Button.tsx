@@ -32,7 +32,7 @@ export const Button = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isSelected = id === selectedId && !isSyncButton;
-  const iconStyle = `font-medium ${isSelected ? "text-brand" : isSyncButtonAllowed ? "text-zinc-500 group-hover:text-brand" : "text-zinc-500 group-hover:text-zinc-400"}`;
+  const iconStyle = `font-medium ${isSelected ? "text-navigation-accent" : isSyncButtonAllowed ? "text-muted group-hover:text-navigation-accent" : "text-muted group-hover:text-muted"}`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -84,7 +84,7 @@ export const Button = ({
     <div
       role="button"
       tabIndex={0}
-      className={`group relative flex items-center justify-between px-3 py-[8px] w-[248px] h-fit text-[14px] ${isSyncButton && !isSyncButtonAllowed ? "cursor-default" : "cursor-pointer"} border-l-3 ${isSelected ? "border-l-brand bg-zinc-800" : isSyncButtonAllowed ? "border-l-transparent hover:border-l-brand" : "border-l-transparent hover:border-l-zinc-700 hover:bg-zinc-900"}`}
+      className={`group relative flex items-center justify-between px-3 py-[8px] w-[248px] h-fit text-[14px] ${isSyncButton && !isSyncButtonAllowed ? "cursor-default" : "cursor-pointer"} border-l-3 ${isSelected ? "border-l-navigation-accent bg-selected" : isSyncButtonAllowed ? "border-l-transparent hover:border-l-navigation-accent" : "border-l-transparent hover:border-l-line-strong hover:bg-surface"}`}
       onClick={handleSelect}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -100,7 +100,7 @@ export const Button = ({
             ref={inputRef}
             type="text"
             value={titleText}
-            className="min-w-0 flex-1 bg-zinc-900 border border-zinc-700 px-1 py-0.5 font-medium text-zinc-100 outline-none focus:border-brand"
+            className="min-w-0 flex-1 bg-surface border border-line-strong px-1 py-0.5 font-medium text-primary outline-none focus:border-navigation-accent"
             onClick={(event) => event.stopPropagation()}
             onChange={(event) => setTitleText(event.target.value)}
             onBlur={confirmRename}
@@ -120,7 +120,7 @@ export const Button = ({
           />
         ) : (
           <span
-            className={`font-medium truncate ${isSelected ? "text-white" : isSyncButtonAllowed ? "text-zinc-200 group-hover:text-brand" : "text-zinc-200 group-hover:text-zinc-100"}`}
+            className={`font-medium truncate ${isSelected ? "text-primary" : isSyncButtonAllowed ? "text-secondary group-hover:text-navigation-accent" : "text-secondary group-hover:text-primary"}`}
           >
             {isDirectory && `/`}
             {titleText}
@@ -133,7 +133,7 @@ export const Button = ({
           <button
             type="button"
             aria-label={`Opcoes de ${title}`}
-            className={`flex items-center justify-center opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-opacity cursor-pointer ${isMenuOpen ? "opacity-100 text-zinc-300" : ""}`}
+            className={`flex items-center justify-center opacity-0 group-hover:opacity-100 text-muted hover:text-secondary transition-opacity cursor-pointer ${isMenuOpen ? "opacity-100 text-secondary" : ""}`}
             onClick={(event) => {
               event.stopPropagation();
               setIsMenuOpen((prev) => !prev);
@@ -144,12 +144,12 @@ export const Button = ({
 
           {isMenuOpen && (
             <div
-              className="absolute right-0 top-6 z-50 w-36 border border-zinc-700 bg-zinc-900 shadow-xl"
+              className="nexus-sidebar-menu absolute right-0 top-6 z-50 w-36 border border-line-strong bg-surface shadow-xl"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 type="button"
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-zinc-300 hover:bg-zinc-800 hover:text-white cursor-pointer"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-secondary hover:bg-surface-raised hover:text-primary cursor-pointer"
                 onClick={() => {
                   setIsMenuOpen(false);
                   setIsRenameDirectory(true);

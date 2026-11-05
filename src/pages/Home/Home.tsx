@@ -1,3 +1,4 @@
+import { ThemeSelect } from "@/components/ThemeSelect";
 import { isTauri } from "@tauri-apps/api/core";
 import { exists as fsExists } from "@tauri-apps/plugin-fs";
 import { useEffect, useRef, useState } from "react";
@@ -149,21 +150,22 @@ export const Home = () => {
     (activeProvider === "google" && isTokenValid);
 
   return (
-    <div className="relative h-full overflow-hidden text-white">
+    <div className="nexus-home relative h-full overflow-hidden text-primary">
       <LetterGlitch
         glitchSpeed={25}
         centerVignette={true}
         outerVignette={false}
         smooth={false}
-        classname="fixed inset-0 z-0 pointer-events-none"
+        classname="home-wallpaper fixed inset-0 z-0 pointer-events-none"
       />
+      <div className="absolute right-5 top-5 z-20"><ThemeSelect /></div>
       <section className="relative z-10 flex h-full items-center justify-center">
         {/*<button className="bg-red-500 w-100 h-50" onClick={remove}>APAGAR ESSA COISA</button>*/}
         {currentStep === 0 && (
           <Step key="step0" direction={direction}>
             <div className="flex flex-col items-center justify-center gap-[20px]">
               <div className="flex flex-row items-center justify-center gap-[10px] text-[64px]">
-                <img src="/logo.svg" alt="Logo" className="w-[124px]" />
+                <img src="/logo.svg" alt="Logo" className="nexus-logo w-[124px]" />
                 <h1 className="font-medium">Nexus</h1>
               </div>
               <div className="flex gap-3">
@@ -194,7 +196,7 @@ export const Home = () => {
                           width={22}
                           height={22}
                           strokeWidth={1.5}
-                          className="text-zinc-400"
+                          className="text-muted"
                         />
                       }
                       title={option.title}
@@ -247,7 +249,7 @@ export const Home = () => {
         {currentStep === 2 && isLoading && (
           <div className="flex flex-col items-center gap-3" role="status" aria-live="polite">
             <img src="/loading.webp" className="h-18 w-18 object-contain" alt="" />
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-zinc-300">Abrindo seu cofre...</motion.p>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-secondary">Abrindo seu cofre...</motion.p>
           </div>
         )}
       </section>

@@ -31,15 +31,15 @@ export const Step = (
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.15 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-zinc-900 border border-zinc-800 max-w-md w-full p-6 flex flex-col items-center text-center gap-4"
+        className="bg-surface border border-line max-w-md w-full p-6 flex flex-col items-center text-center gap-4"
       >
-        <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+        <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-danger">
           <AlertTriangle size={24} />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <h4 className="text-lg font-bold text-white">{title}</h4>
-          <p className="text-sm text-zinc-100">
+          <h4 className="text-lg font-bold text-primary">{title}</h4>
+          <p className="text-sm text-primary">
             {children}
           </p>
         </div>

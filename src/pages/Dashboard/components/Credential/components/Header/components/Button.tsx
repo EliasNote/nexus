@@ -6,6 +6,7 @@ export const Button = ({
   iconsSize,
   icon: Icon,
   color,
+  className,
   label,
   onClick,
   disabled,
@@ -14,6 +15,7 @@ export const Button = ({
   iconsSize?: number;
   icon?: IconType;
   color: string;
+  className?: string;
   label?: string;
   onClick?: () => void;
   disabled?: boolean;
@@ -23,7 +25,7 @@ export const Button = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex gap-1.25 items-center ${children ? "px-2" : "px-3.5"} py-2 border-2 font-bold ${color} hover:text-white cursor-pointer`}
+      className={`flex gap-1.25 items-center ${children ? "px-2" : "px-3.5"} py-2 border-2 font-bold ${color} hover:text-white cursor-pointer ${className ?? ""}`}
     >
       {Icon && <Icon size={iconsSize} className="size-[22px]" />}
       {label && <span>{label}</span>}

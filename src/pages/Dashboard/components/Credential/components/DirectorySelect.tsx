@@ -70,7 +70,7 @@ export const DirectorySelect = ({
       }}
       tabIndex={-1}
     >
-      <span className="text-[12px] text-zinc-400 font-medium flex items-start gap-1">
+      <span className="text-[12px] text-muted font-medium flex items-start gap-1">
         <Icontop size={16} strokeWidth={1.5} />
         <span>{topName}</span>
       </span>
@@ -79,19 +79,19 @@ export const DirectorySelect = ({
         <button
           disabled={disabled}
           onClick={() => setIsOpen(!isOpen)}
-          className={`flex items-center justify-between bg-zinc-900 border ${isOpen ? "border-zinc-600" : "border-zinc-800"} h-[45px] w-full px-3 ${disabled ? "pointer-events-none" : "cursor-pointer"} transition-colors`}
+          className={`flex items-center justify-between bg-surface border ${isOpen ? "border-line-focus" : "border-line"} h-[45px] w-full px-3 ${disabled ? "pointer-events-none" : "cursor-pointer"} transition-colors`}
         >
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
             {selectedDirectories.length > 0 ? (
               selectedDirectories.map((directory) => (
                 <span
                   key={directory.id}
-                  className="flex items-center gap-1 bg-zinc-800 text-white text-[12px] px-2 py-0.5 whitespace-nowrap border border-zinc-700"
+                  className="flex items-center gap-1 bg-surface-raised text-primary text-[12px] px-2 py-0.5 whitespace-nowrap border border-line-strong"
                 >
                   {directory.name}
                   <X
                     size={14}
-                    className={`${isEdit && "hover:text-red-500 cursor-pointer"}`}
+                    className={`${isEdit && "hover:text-danger cursor-pointer"}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleDirectory(directory.id);
@@ -100,24 +100,24 @@ export const DirectorySelect = ({
                 </span>
               ))
             ) : (
-              <span className="text-zinc-500 text-sm">
+              <span className="text-muted text-sm">
                 Nenhum diretório selecionado
               </span>
             )}
           </div>
           <ChevronDown
             size={18}
-            className={`text-zinc-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+            className={`text-muted transition-transform ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
 
         {isOpen && (
-          <div className="absolute top-[50px] left-0 w-full bg-zinc-900 border border-zinc-700 z-50 shadow-2xl max-h-[200px] overflow-y-auto">
+          <div className="absolute top-[50px] left-0 w-full bg-surface border border-line-strong z-50 shadow-2xl max-h-[200px] overflow-y-auto">
             {directories.map((directory) => (
               <div
                 key={directory.id}
                 onClick={() => toggleDirectory(directory.id)}
-                className="flex items-center justify-between px-4 py-2 hover:bg-zinc-800 cursor-pointer text-sm text-zinc-300 transition-colors"
+                className="flex items-center justify-between px-4 py-2 hover:bg-surface-raised cursor-pointer text-sm text-secondary transition-colors"
               >
                 <span>{directory.name}</span>
                 {selectedDirectoriesIds.includes(directory.id) && (
@@ -126,7 +126,7 @@ export const DirectorySelect = ({
               </div>
             ))}
             {directories.length === 0 && (
-              <div className="p-4 text-zinc-500 text-center text-sm">
+              <div className="p-4 text-muted text-center text-sm">
                 Crie um diretório na barra lateral primeiro.
               </div>
             )}

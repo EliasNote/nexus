@@ -74,7 +74,7 @@ export const Date = ({
   return (
     <div className="flex w-full items-center justify-center outline-none">
       <div className="flex gap-0.5 flex-col w-full max-w-[760px]">
-        <div className="flex items-start font-medium gap-1 text-[12px] text-zinc-400">
+        <div className="flex items-start font-medium gap-1 text-[12px] text-muted">
           <Icontop size={16} strokeWidth={1.5} />
           <span>{topName}</span>
         </div>
@@ -90,30 +90,30 @@ export const Date = ({
               type="button"
               disabled={disabled}
               onClick={() => setIsMonthOpen(!isMonthOpen)}
-              className={`flex items-center justify-between bg-zinc-900 border ${
-                isMonthOpen ? "border-zinc-600" : "border-zinc-800"
+              className={`flex items-center justify-between bg-surface border ${
+                isMonthOpen ? "border-line-focus" : "border-line"
               } h-[45px] w-full px-3 ${disabled ? "pointer-events-none" : "cursor-pointer"} transition-colors`}
             >
               <span
                 className={
-                  monthVal ? "text-white text-sm" : "text-zinc-500 text-sm"
+                  monthVal ? "text-primary text-sm" : "text-muted text-sm"
                 }
               >
                 {getMonthDisplay()}
               </span>
               <ChevronDown
                 size={18}
-                className={`text-zinc-500 transition-transform ${isMonthOpen ? "rotate-180" : ""}`}
+                className={`text-muted transition-transform ${isMonthOpen ? "rotate-180" : ""}`}
               />
             </button>
 
             {isMonthOpen && (
-              <div className="absolute top-[50px] left-0 w-full bg-zinc-900 border border-zinc-700 z-50 shadow-2xl max-h-[200px] overflow-y-auto no-scrollbar">
+              <div className="absolute top-[50px] left-0 w-full bg-surface border border-line-strong z-50 shadow-2xl max-h-[200px] overflow-y-auto no-scrollbar">
                 {MONTH_OPTIONS.map((month) => (
                   <div
                     key={month}
                     onClick={() => handleSelectMonth(month)}
-                    className="flex items-center justify-between px-4 py-2 hover:bg-zinc-800 cursor-pointer text-sm text-zinc-300 transition-colors"
+                    className="flex items-center justify-between px-4 py-2 hover:bg-surface-raised cursor-pointer text-sm text-secondary transition-colors"
                   >
                     <span>{month}</span>
                     {monthVal === month.split(" - ")[0] && (
@@ -129,11 +129,11 @@ export const Date = ({
             className="flex-1"
             onDoubleClick={() => handleEditTarget("year")}
           >
-            <div className="group flex items-center focus-within:border-zinc-600 bg-zinc-900 border border-zinc-800 h-[45px] w-full">
+            <div className="group flex items-center focus-within:border-line-focus bg-surface border border-line h-[45px] w-full">
               <input
                 ref={yearInputRef}
                 disabled={disabled}
-                className={`flex-1 bg-transparent px-3 text-[14px] text-white outline-none placeholder:text-zinc-500 ${disabled ? "pointer-events-none" : ""}`}
+                className={`flex-1 bg-transparent px-3 text-[14px] text-primary outline-none placeholder:text-muted ${disabled ? "pointer-events-none" : ""}`}
                 type="text"
                 pattern="[0-9]*"
                 inputMode="numeric"

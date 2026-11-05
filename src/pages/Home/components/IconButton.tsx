@@ -75,23 +75,23 @@ export const IconButton = ({
       <button
         onClick={handleClick}
         aria-pressed={isActive}
-        className={`relative flex min-h-[63px] w-full cursor-pointer items-center justify-between overflow-hidden border bg-zinc-900 p-[14px] text-left transition-colors ${
+        className={`home-neutral-surface relative flex min-h-[63px] w-full cursor-pointer items-center justify-between overflow-hidden border bg-surface p-[14px] text-left transition-colors ${
           isActive
-            ? "border-zinc-600"
-            : "border-zinc-800 hover:border-zinc-700"
+            ? "border-line-focus"
+            : "border-line hover:border-line-strong"
         }`}
       >
         {isActive && (
-          <span className="absolute inset-y-0 left-0 w-[2px] bg-brand" />
+          <span className="home-provider-accent absolute inset-y-0 left-0 w-[2px] bg-brand" />
         )}
 
         <div className="flex min-w-0 flex-1 flex-row items-center gap-[14px]">
-          <div className="flex h-[35px] w-[35px] shrink-0 flex-row items-center justify-center border border-zinc-700 bg-zinc-950">
+          <div className="flex h-[35px] w-[35px] shrink-0 flex-row items-center justify-center border border-line-strong bg-surface-low">
             {icon}
           </div>
 
           <div className="min-w-0 gap-1 flex flex-col justify-center items-start leading-tight">
-            {title && <span className="text-[14px] font-bold text-white">
+            {title && <span className="text-[14px] font-bold text-primary">
               {title}
             </span>
             }
@@ -99,14 +99,14 @@ export const IconButton = ({
 
             <div className="flex flex-col items-start">
               {subtitle &&
-                <span className="text-[12px] text-zinc-600">
+                <span className="text-[12px] text-faint">
                   {subtitle}
                 </span>
               }
 
               {id === "local" && vaultPath && (
                 <span
-                  className="mt-0.5 max-w-[230px] truncate font-mono text-[12px] text-zinc-600"
+                  className="mt-0.5 max-w-[230px] truncate font-mono text-[12px] text-faint"
                   title={vaultPath}
                 >
                   {vaultPath}
@@ -117,7 +117,7 @@ export const IconButton = ({
         </div>
 
         {isActive && (
-          <span className="ml-3 flex items-center gap-2 text-[12px] font-bold text-zinc-500">
+          <span className="ml-3 flex items-center gap-2 text-[12px] font-bold text-muted">
             <span className="h-1.5 w-1.5 bg-green-500" />
             ATIVO
           </span>

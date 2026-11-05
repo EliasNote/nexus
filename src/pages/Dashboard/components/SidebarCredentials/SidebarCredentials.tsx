@@ -28,20 +28,20 @@ const SidebarCredentials = ({
     });
   }, [searchTerm, credentials]);
   return (
-    <section className="flex flex-col items-start border-r border-zinc-800 h-full max-w-[320px] w-full">
+    <section className="nexus-credentials-panel bg-list-panel flex flex-col items-start border-r border-line h-full max-w-[320px] w-full">
       <div className="flex flex-col w-full p-[14px] gap-[14px]">
-        <span className="border-l-brand border-l-4 text-white pl-3 text-[18px] font-bold truncate">
+        <span className="border-l-brand border-l-4 text-primary pl-3 text-[18px] font-bold truncate">
           {topTitle}
         </span>
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-zinc-900 text-white px-2 py-2 outline-none border border-zinc-700 focus:border-brand text-sm w-full"
+          className="bg-surface text-primary px-2 py-2 outline-none border border-line-strong focus:border-brand text-sm w-full"
           placeholder="Procurar título ou usuário..."
         />
       </div>
-      <hr className="w-full text-zinc-800" />
+      <hr className="w-full text-line" />
       <div className="w-full h-full overflow-y-auto overflow-x-hidden">
         {credentials && filteredCredentials!.length > 0 ? (
           filteredCredentials!.map((credential) => (
@@ -53,7 +53,7 @@ const SidebarCredentials = ({
             />
           ))
         ) : (
-          <div className="p-4 text-zinc-500 text-center text-sm">
+          <div className="p-4 text-muted text-center text-sm">
             Nenhum resultado encontrado.
           </div>
         )}

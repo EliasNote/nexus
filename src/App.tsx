@@ -35,7 +35,7 @@ function App() {
 
   return (
     <HashRouter>
-          <div className="flex h-screen flex-col overflow-hidden bg-dark-background">
+          <div className="flex h-screen flex-col overflow-hidden bg-canvas">
             {isTauri() && <TitleBar />}
 
             <div className="min-h-0 flex-1">

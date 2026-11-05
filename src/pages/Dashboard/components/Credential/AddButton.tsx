@@ -32,7 +32,7 @@ export const AddButton = ({
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute bottom-full left-0 mb-1 w-[168px] bg-zinc-900 border border-zinc-800 shadow-2xl py-2 flex flex-col overflow-hidden"
+            className="absolute bottom-full left-0 mb-1 w-[168px] bg-surface border border-line shadow-2xl py-2 flex flex-col overflow-hidden"
           >
             {Object.values(CrendetialTypes).map((item) => (
               <button
@@ -41,7 +41,7 @@ export const AddButton = ({
                   handleStartCreate(item.type);
                   setIsOpen(false);
                 }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer group"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-surface-raised text-muted hover:text-primary transition-colors cursor-pointer group"
               >
                 <item.icon size={18} className="text-brand" />
                 <span className="text-[14px] font-bold tracking-wider">

@@ -99,13 +99,13 @@ const Sidebar = ({
   }, []);
 
   return (
-    <section className="flex flex-col gap-[20px] items-start border-r border-zinc-800 h-full overflow-hidden max-w-[248px] w-full">
+    <section className="nexus-sidebar bg-navigation flex flex-col gap-[20px] items-start border-r border-line h-full overflow-hidden max-w-[248px] w-full">
       <div className="w-full">
-        <div className="flex items-center gap-[10px] justify-center h-[60px] py-[20px]">
-          <img src="/logo.svg" alt="Logo" className="w-[40px]" />
-          <h1 className="text-white font-bold text-[22px]">Nexus</h1>
+        <div className="nexus-brand-panel flex items-center gap-[10px] justify-center h-[60px] py-[20px]">
+          <img src="/logo.svg" alt="Logo" className="nexus-logo w-[40px]" />
+          <h1 className="text-primary font-bold text-[22px]">Nexus</h1>
         </div>
-        <hr className="w-full text-zinc-800" />
+        <hr className="w-full text-line" />
       </div>
       <div className="flex flex-col gap-[5px]">
         {defaults.map((button) => (
@@ -120,7 +120,7 @@ const Sidebar = ({
         ))}
       </div>
       <div className="flex flex-col gap-[10px]">
-        <div className="text-white font-medium text-[16px] flex flex-row">
+        <div className="text-primary font-medium text-[16px] flex flex-row">
           <Dot />
           <span>FERRAMENTAS</span>
         </div>
@@ -138,12 +138,12 @@ const Sidebar = ({
         </div>
       </div>
       <div className="flex flex-col gap-[10px] w-full flex-1 min-h-0">
-        <div className="text-white font-medium text-[16px] flex flex-row pr-2">
+        <div className="text-primary font-medium text-[16px] flex flex-row pr-2">
           <Dot />
           <div className="flex items-center justify-between w-full">
             <span>DIRETÓRIOS</span>
             <motion.button
-              className="cursor-pointer text-zinc-300 hover:text-brand"
+              className="cursor-pointer text-secondary hover:text-navigation-accent"
               whileHover={{ rotate: 180 }}
               onClick={() => setIsAddDirectory(!isAddDirectory)}
             >
@@ -158,7 +158,7 @@ const Sidebar = ({
                 type="text"
                 value={newDirectory}
                 onChange={(e) => setNewDirectory(e.target.value)}
-                className="bg-zinc-900 text-white px-2 py-1.5 outline-none border border-zinc-700 focus:border-brand text-sm w-full"
+                className="bg-surface text-primary px-2 py-1.5 outline-none border border-line-strong focus:border-navigation-accent text-sm w-full"
                 placeholder="Novo diretório"
                 autoFocus
                 onKeyDown={(e) => {
@@ -171,7 +171,7 @@ const Sidebar = ({
                 }}
               />
               <button
-                className="px-5 py-1.5 bg-brand text-white font-medium hover:bg-blue-700 transition-colors text-sm cursor-pointer"
+                className="px-5 py-1.5 bg-navigation-action text-white font-medium hover:bg-navigation-action-hover transition-colors text-sm cursor-pointer"
                 onClick={onSave}
               >
                 Confirmar
@@ -194,7 +194,7 @@ const Sidebar = ({
         </div>
       </div>
 
-      <hr className="w-full text-zinc-800 mt-[-20px] mb-[-15px]" />
+      <hr className="w-full text-line mt-[-20px] mb-[-15px]" />
       <div className="flex flex-col w-full gap-2 ">
         {footers.map((item, index) => (
           <Button
@@ -235,7 +235,7 @@ const Sidebar = ({
               className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
             >
               <div
-                className="pointer-events-auto flex flex-col gap-4 p-5 bg-zinc-900 border border-zinc-700 shadow-xl w-full max-w-sm mx-4"
+                className="pointer-events-auto flex flex-col gap-4 p-5 bg-surface border border-line-strong shadow-xl w-full max-w-sm mx-4"
                 onClick={(e) => e.stopPropagation()}
               >
                 {isSyncing ? (
@@ -256,18 +256,18 @@ const Sidebar = ({
                             damping: 20,
                           }}
                         >
-                          <CheckCircle2 size={24} className="text-green-500" />
+                          <CheckCircle2 size={24} className="text-success" />
                         </motion.div>
                       ) : (
                         <img src="/loading.webp" className="h-16 w-16 object-contain" alt="loader" />
                       )}
-                      <span className="text-white font-medium">
+                      <span className="text-primary font-medium">
                         {syncSuccess
                           ? "Sincronizado com sucesso!"
                           : "Sincronizando..."}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 text-center">
+                    <p className="text-xs text-muted text-center">
                       {syncSuccess
                         ? "Preparando para sair..."
                         : "Salvando suas alterações"}
@@ -276,10 +276,10 @@ const Sidebar = ({
                 ) : (
                   <>
                     <div className="flex flex-col gap-1">
-                      <h2 className="text-white font-semibold text-base">
+                      <h2 className="text-primary font-semibold text-base">
                         Sincronizar antes de sair?
                       </h2>
-                      <p className="text-sm text-zinc-400">
+                      <p className="text-sm text-muted">
                         Você possui alterações pendentes que não foram
                         sincronizadas.
                       </p>
@@ -287,7 +287,7 @@ const Sidebar = ({
 
                     <div className="flex flex-col gap-3">
                       <motion.button
-                        className="w-full px-4 py-2.5 border border-brand bg-brand/60 text-white font-medium text-sm cursor-pointer  hover:bg-brand"
+                        className="w-full px-4 py-2.5 border border-brand bg-brand text-white font-medium text-sm cursor-pointer hover:bg-blue-700"
                         onClick={handleLogout}
                         disabled={isSyncing}
                       >
@@ -295,7 +295,7 @@ const Sidebar = ({
                       </motion.button>
 
                       <motion.button
-                        className="w-full px-4 py-2.5 border border-zinc-500 text-zinc-100 bg-zinc-700 hover:bg-zinc-500 text-sm  cursor-pointer font-medium"
+                        className="w-full px-4 py-2.5 border border-line-focus text-primary bg-surface-active hover:bg-surface-strong text-sm  cursor-pointer font-medium"
                         onClick={handleLogoutWithoutSync}
                         disabled={isSyncing}
                       >
@@ -303,7 +303,7 @@ const Sidebar = ({
                       </motion.button>
 
                       <button
-                        className="w-full px-4 py-2.5 border border-zinc-700 text-zinc-100 hover:bg-zinc-700 text-sm font-medium cursor-pointer"
+                        className="w-full px-4 py-2.5 border border-line-strong text-primary hover:bg-surface-active text-sm font-medium cursor-pointer"
                         onClick={() => setIsLogoutPending(false)}
                         disabled={isSyncing}
                       >

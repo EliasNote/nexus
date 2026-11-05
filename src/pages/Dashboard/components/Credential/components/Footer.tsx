@@ -17,11 +17,11 @@ export const Footer = ({
 
   return (
     <div
-      className={`w-full flex justify-between items-center border-t border-zinc-800 px-[40px] py-[30px] shrink-0`}
+      className="flex w-full shrink-0 items-center justify-between border-t border-line bg-surface-raised px-[40px] py-[30px]"
     >
       {!isCreate && (
         <>
-          <div className="flex flex-col text-[14px] text-zinc-400 w-full">
+          <div className="flex flex-col text-[14px] text-muted w-full">
             <span>
               CRIADO:
               {`${new Date(tempCredential?.createdAt).toLocaleDateString("pt-BR")}, ${new Date(tempCredential?.createdAt).toLocaleTimeString("pt-BR")}`}
@@ -35,10 +35,10 @@ export const Footer = ({
             {isCompromised ? (
               <ShieldAlert className="text-red-600" strokeWidth={1} size={50} />
             ) : (
-              <ShieldCheck className="text-green-500" strokeWidth={1} size={50} />
+              <ShieldCheck className="text-success" strokeWidth={1} size={50} />
             )}
 
-            <span className={`text-${isCompromised ? "red-600" : "green-500"}`}>
+            <span className={isCompromised ? "text-red-alert" : "text-success"}>
               Senha {isCompromised ? "Comprometida" : "Segura"}
             </span>
           </div>

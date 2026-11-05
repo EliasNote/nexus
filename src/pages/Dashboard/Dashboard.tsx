@@ -169,7 +169,7 @@ const Dashboard = () => {
   };
 
   return (
-    <main className="flex bg-dark-background h-full w-full">
+    <main className="flex bg-canvas h-full w-full">
       <Sidebar
         selected={selected}
         setSelected={setSelected}
@@ -191,8 +191,8 @@ const Dashboard = () => {
           />
           {isLoadingCredential ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-3">
-              <Loader2 className="h-8 w-8 animate-spin text-white" />
-              <span className="text-xs font-mono text-zinc-500">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="text-xs font-mono text-muted">
                 Descriptografando dados...
               </span>
             </div>

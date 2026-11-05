@@ -43,11 +43,11 @@ export const GeneratorOptions = ({
   };
 
   return (
-    <div className="flex flex-col w-full gap-5 items-center bg-zinc-900 border border-zinc-800 p-5">
+    <div className="flex flex-col w-full gap-5 items-center bg-surface border border-line p-5">
       <div className="flex items-center justify-between w-full">
-        <span className="text-white">TAMANHO</span>
+        <span className="text-primary">TAMANHO</span>
         <input
-          className="text-white text-center text-xl w-12 h-10 focus-within:border-zinc-600 bg-zinc-800 border border-zinc-700 outline-none"
+          className="text-primary text-center text-xl w-12 h-10 focus-within:border-line-focus bg-surface-raised border border-line-strong outline-none"
           type="text"
           pattern="[0-9]*"
           min={minLength}
@@ -92,7 +92,7 @@ export const GeneratorOptions = ({
             handleToggle={handleToggle}
           />
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-xs text-zinc-400 font-medium">MÍN:</span>
+            <span className="text-xs text-muted font-medium">MÍN:</span>
             <input
               type="text"
               pattern="[0-9]*"
@@ -102,7 +102,7 @@ export const GeneratorOptions = ({
               onChange={(e) =>
                 handleMinChange(e.target.value, "minLowercase", maxLength)
               }
-              className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="text-primary text-center text-sm w-9 h-7 bg-surface-raised border border-line-strong outline-none focus:border-line-focus disabled:opacity-30 disabled:cursor-not-allowed"
             />
           </div>
         </div>
@@ -115,7 +115,7 @@ export const GeneratorOptions = ({
             handleToggle={handleToggle}
           />
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-xs text-zinc-400 font-medium">MÍN:</span>
+            <span className="text-xs text-muted font-medium">MÍN:</span>
             <input
               type="text"
               pattern="[0-9]*"
@@ -125,7 +125,7 @@ export const GeneratorOptions = ({
               onChange={(e) =>
                 handleMinChange(e.target.value, "minUppercase", maxLength)
               }
-              className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="text-primary text-center text-sm w-9 h-7 bg-surface-raised border border-line-strong outline-none focus:border-line-focus disabled:opacity-30 disabled:cursor-not-allowed"
             />
           </div>
         </div>
@@ -138,7 +138,7 @@ export const GeneratorOptions = ({
             handleToggle={handleToggle}
           />
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-xs text-zinc-400 font-medium">MÍN:</span>
+            <span className="text-xs text-muted font-medium">MÍN:</span>
             <input
               type="text"
               pattern="[0-9]*"
@@ -148,7 +148,7 @@ export const GeneratorOptions = ({
               onChange={(e) =>
                 handleMinChange(e.target.value, "minNumbers", maxLength)
               }
-              className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="text-primary text-center text-sm w-9 h-7 bg-surface-raised border border-line-strong outline-none focus:border-line-focus disabled:opacity-30 disabled:cursor-not-allowed"
             />
           </div>
         </div>
@@ -161,7 +161,7 @@ export const GeneratorOptions = ({
             handleToggle={handleToggle}
           />
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-xs text-zinc-400 font-medium">MÍN:</span>
+            <span className="text-xs text-muted font-medium">MÍN:</span>
             <input
               type="text"
               pattern="[0-9]*"
@@ -171,17 +171,17 @@ export const GeneratorOptions = ({
               onChange={(e) =>
                 handleMinChange(e.target.value, "minSymbols", maxLength)
               }
-              className="text-white text-center text-sm w-9 h-7 bg-zinc-800 border border-zinc-700 outline-none focus:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="text-primary text-center text-sm w-9 h-7 bg-surface-raised border border-line-strong outline-none focus:border-line-focus disabled:opacity-30 disabled:cursor-not-allowed"
             />
           </div>
         </div>
       </div>
 
-      <div className="flex w-full justify-around gap-2 pt-3 border-t border-zinc-800">
+      <div className="flex w-full justify-around gap-2 pt-3 border-t border-line">
         <div className="flex flex-col gap-1 items-center">
           <div className="flex flex-col items-center">
-            <span className="text-sm font-bold text-white">SÍMBOLOS PADRÕES</span>
-            <span className="text-xs text-zinc-400">
+            <span className="text-sm font-bold text-primary">SÍMBOLOS PADRÕES</span>
+            <span className="text-xs text-muted">
               {options.standardSymbols
                 ? "!@#$%*()_+-="
                 : "!@#$%^&*()_+-=[..."}
@@ -193,7 +193,7 @@ export const GeneratorOptions = ({
             onCheckedChange={(checked) =>
               setOptions((prev) => ({ ...prev, standardSymbols: checked }))
             }
-            className="relative h-[25px] w-[42px] cursor-pointer rounded-full bg-zinc-700 outline-none data-[state=checked]:bg-brand disabled:opacity-30 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+            className="relative h-[25px] w-[42px] cursor-pointer rounded-full bg-surface-active outline-none data-[state=checked]:bg-brand disabled:opacity-30 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
           >
             <Switch.Thumb
               className="block size-[21px] translate-x-0.5 rounded-full bg-white transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]"
@@ -202,8 +202,8 @@ export const GeneratorOptions = ({
         </div>
         <div className="flex flex-col gap-1 items-center">
           <div className="flex flex-col items-center">
-            <span className="text-sm font-bold text-white">REMOVER CARACTERES AMBIGUOS</span>
-            <span className="text-xs text-zinc-400">
+            <span className="text-sm font-bold text-primary">REMOVER CARACTERES AMBIGUOS</span>
+            <span className="text-xs text-muted">
               il1Lo0IO
             </span>
           </div>
@@ -212,7 +212,7 @@ export const GeneratorOptions = ({
             onCheckedChange={(checked) =>
               setOptions((prev) => ({ ...prev, excludeAmbiguous: checked }))
             }
-            className="relative h-[25px] w-[42px] cursor-pointer rounded-full bg-zinc-700 outline-none data-[state=checked]:bg-brand disabled:opacity-30 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+            className="relative h-[25px] w-[42px] cursor-pointer rounded-full bg-surface-active outline-none data-[state=checked]:bg-brand disabled:opacity-30 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
           >
             <Switch.Thumb
               className="block size-[21px] translate-x-0.5 rounded-full bg-white transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]"
@@ -221,9 +221,9 @@ export const GeneratorOptions = ({
         </div>
       </div>
 
-      <div className="flex flex-col w-full gap-4 pt-3 border-t border-zinc-800">
+      <div className="flex flex-col w-full gap-4 pt-3 border-t border-line">
         <div className="flex flex-col gap-1 w-full">
-          <label className="text-sm font-bold text-white">
+          <label className="text-sm font-bold text-primary">
             CARACTERES OBRIGATÓRIOS
           </label>
           <input
@@ -233,12 +233,12 @@ export const GeneratorOptions = ({
             onChange={(e) =>
               setOptions((prev) => ({ ...prev, includeChars: e.target.value }))
             }
-            className="w-full h-9 px-3 bg-zinc-800 border border-zinc-700 text-white text-sm outline-none focus:border-zinc-500"
+            className="w-full h-9 px-3 bg-surface-raised border border-line-strong text-primary text-sm outline-none focus:border-line-focus"
           />
         </div>
 
         <div className="flex flex-col gap-1 w-full">
-          <label className="text-sm font-bold text-white">
+          <label className="text-sm font-bold text-primary">
             EXCLUIR CARACTERES ESPECÍFICOS
           </label>
           <input
@@ -248,7 +248,7 @@ export const GeneratorOptions = ({
             onChange={(e) =>
               setOptions((prev) => ({ ...prev, excludeChars: e.target.value }))
             }
-            className="w-full h-9 px-3 bg-zinc-800 border border-zinc-700 text-white text-sm outline-none focus:border-zinc-500"
+            className="w-full h-9 px-3 bg-surface-raised border border-line-strong text-primary text-sm outline-none focus:border-line-focus"
           />
         </div>
       </div>

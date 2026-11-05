@@ -89,11 +89,11 @@ export const Generator = ({
 
   return (
     <section className="flex justify-center w-full p-7 relative">
-      {isCredential && <X className="absolute top-4 right-4 text-white cursor-pointer" onClick={onClick} />}
+      {isCredential && <X className="absolute top-4 right-4 text-primary cursor-pointer" onClick={onClick} />}
       <div className="flex items-center flex-col max-w-[700px] w-full gap-5">
         <div className="flex gap-1 items-center justify-center">
           <Binary size={32} className="text-brand" />
-          <h2 className="text-[24px] text-white font-bold">
+          <h2 className="text-[24px] text-primary font-bold">
             GERADOR DE SENHAS
           </h2>
         </div>
@@ -109,7 +109,7 @@ export const Generator = ({
           <div className="flex items-center justify-center gap-4">
             {onChange ? (
               <button
-                className="group flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 cursor-pointer"
+                className="group flex items-center justify-center gap-2 bg-surface hover:bg-surface-active border border-line-strong text-primary px-4 py-2.5 cursor-pointer"
                 onClick={() => {
                   onChange(password!);
                   onClick?.();
@@ -120,12 +120,12 @@ export const Generator = ({
               </button>
             ) : (
               <button
-                className="flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 cursor-pointer"
+                className="flex items-center justify-center gap-2 bg-surface hover:bg-surface-active border border-line-strong text-primary px-4 py-2.5 cursor-pointer"
                 onClick={handleCopy}
               >
                 {copied ? (
                   <Check
-                    className="text-green-500"
+                    className="text-success"
                     size={22}
                     strokeWidth={2.5}
                   />
@@ -136,7 +136,7 @@ export const Generator = ({
               </button>
             )}
             <motion.button
-              className="group flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2.5 cursor-pointer"
+              className="group flex items-center justify-center gap-2 bg-surface hover:bg-surface-active border border-line-strong text-primary px-4 py-2.5 cursor-pointer"
               onClick={() => setSeed((s) => s + 1)}
               whileHover="hovered"
             >

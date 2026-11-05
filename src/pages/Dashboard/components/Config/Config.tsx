@@ -1,3 +1,4 @@
+import { ThemeSelect } from "@/components/ThemeSelect";
 import { getCryptoService, useCloudStore } from "@/hooks/useCloudStore";
 import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
 import { Check, ChevronDown, Download, Save, Settings, Trash2, Upload } from "lucide-react";
@@ -198,7 +199,7 @@ export const Config = () => {
   };
 
   return (
-    <section className="flex flex-col items-center w-full p-7 text-white">
+    <section className="flex flex-col items-center w-full p-7 text-primary">
       <div className="flex items-center flex-col max-w-[700px] w-full gap-10">
         <div className="flex gap-1 items-center justify-center mb-[-20px]">
           <Settings size={32} className="text-brand" />
@@ -206,22 +207,26 @@ export const Config = () => {
             CONFIGURAÇÕES
           </h2>
         </div>
+        <div className="w-full flex flex-col gap-3">
+          <h3 className="font-bold border-l-4 border-brand pl-2">APARÊNCIA</h3>
+          <ThemeSelect />
+        </div>
         <div className="flex flex-col gap-4 w-full items-center">
           <div className="w-full">
             <div className="relative flex flex-col w-full gap-2">
               <h3 className="font-bold border-l-4 border-brand pl-2">SALVAMENTO AUTOMÁTICO</h3>
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center justify-between bg-zinc-900 border ${isOpen ? "border-zinc-600" : "border-zinc-800"} h-[45px] w-full px-3 cursor-pointer transition-colors`}
+                className={`flex items-center justify-between bg-surface border ${isOpen ? "border-line-focus" : "border-line"} h-[45px] w-full px-3 cursor-pointer transition-colors`}
               >
                 <span>{AUTO_SAVE_INTERVAL_OPTIONS[selectedOptionId]?.title}</span>
                 <ChevronDown
                   size={18}
-                  className={`text-zinc-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  className={`text-muted transition-transform ${isOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {isOpen && (
-                <div className="absolute top-[70px] left-0 w-full bg-zinc-900 border border-zinc-700 z-50 shadow-2xl max-h-[200px] overflow-y-auto">
+                <div className="absolute top-[70px] left-0 w-full bg-surface border border-line-strong z-50 shadow-2xl max-h-[200px] overflow-y-auto">
                   {AUTO_SAVE_INTERVAL_OPTIONS.map((option, index) => (
                     <div
                       key={option.value}
@@ -230,7 +235,7 @@ export const Config = () => {
                         setIsOpen(false);
 
                       }}
-                      className="flex items-center justify-between px-4 py-2 hover:bg-zinc-800 cursor-pointer text-sm text-zinc-300 transition-colors"
+                      className="flex items-center justify-between px-4 py-2 hover:bg-surface-raised cursor-pointer text-sm text-secondary transition-colors"
                     >
                       <span>{option.title}</span>
                       {selectedOptionId === option.value && (
@@ -265,7 +270,7 @@ export const Config = () => {
           <div className="flex gap-2">
             <motion.button
               whileTap={{ scale: 0.97 }}
-              className="bg-zinc-900 border border-zinc-800 font-medium cursor-pointer py-5 flex-1 flex items-center justify-center gap-2 hover:border-zinc-700 hover:bg-zinc-800 active:bg-zinc-700 select-none"
+              className="bg-surface border border-line font-medium cursor-pointer py-5 flex-1 flex items-center justify-center gap-2 hover:border-line-strong hover:bg-surface-raised active:bg-surface-active select-none"
               onClick={onExport}
             >
               <Download /> EXPORTAR
@@ -273,7 +278,7 @@ export const Config = () => {
 
             <motion.button
               whileTap={{ scale: 0.97 }}
-              className="bg-zinc-900 border border-zinc-800 font-medium cursor-pointer py-5 flex-1 flex items-center justify-center gap-2 hover:border-zinc-700 hover:bg-zinc-800 active:bg-zinc-700 select-none"
+              className="bg-surface border border-line font-medium cursor-pointer py-5 flex-1 flex items-center justify-center gap-2 hover:border-line-strong hover:bg-surface-raised active:bg-surface-active select-none"
               onClick={() => setImportVaultStep(true)}
             >
               <Upload /> IMPORTAR
@@ -289,7 +294,7 @@ export const Config = () => {
                 await onImport();
               }}
             >
-              Esta ação irá <strong className="text-red-500">sobrescrever todos os dados</strong> do seu cofre atual pelo arquivo importado. Deseja continuar?
+              Esta ação irá <strong className="text-danger">sobrescrever todos os dados</strong> do seu cofre atual pelo arquivo importado. Deseja continuar?
             </Step>
 
           )}
@@ -316,7 +321,7 @@ export const Config = () => {
                 setIsModalOpen(true);
               }}
             >
-              Esta ação irá <strong className="text-red-500">apagar permanentemente</strong> seu cofre. Deseja continuar?
+              Esta ação irá <strong className="text-danger">apagar permanentemente</strong> seu cofre. Deseja continuar?
             </Step>
           )}
         </div>

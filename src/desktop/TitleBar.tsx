@@ -6,7 +6,7 @@ export function TitleBar() {
   return (
     <header
         data-tauri-drag-region
-        className="relative z-50 flex h-9 shrink-0 select-none items-center justify-between border-b border-zinc-800 bg-dark-background"
+        className="relative z-50 flex h-9 shrink-0 select-none items-center justify-between border-b border-line bg-canvas"
       >
         <div
           data-tauri-drag-region
@@ -16,13 +16,13 @@ export function TitleBar() {
         <img
           data-tauri-drag-region
           src="/logo.svg"
-          className="h-5 w-5"
+          className="nexus-logo h-5 w-5"
           alt=""
         />
 
         <span
           data-tauri-drag-region
-          className="text-xs text-white font-bold"
+          className="text-xs text-primary font-bold"
         >
           Nexus
         </span>
@@ -31,7 +31,7 @@ export function TitleBar() {
       <div className="flex h-full">
         <button
           onClick={() => appWindow.minimize()}
-          className="flex w-12 items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white"
+          className="flex w-12 items-center justify-center text-muted hover:bg-surface-raised hover:text-primary"
           aria-label="Minimizar"
         >
           <Minus size={16} />
@@ -39,7 +39,7 @@ export function TitleBar() {
 
         <button
           onClick={() => appWindow.toggleMaximize()}
-          className="flex w-12 items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white"
+          className="flex w-12 items-center justify-center text-muted hover:bg-surface-raised hover:text-primary"
           aria-label="Maximizar"
         >
           <Square size={13} />
@@ -47,7 +47,7 @@ export function TitleBar() {
 
         <button
           onClick={() => appWindow.close()}
-          className="flex w-12 items-center justify-center text-zinc-400 hover:bg-red-600 hover:text-white"
+          className="flex w-12 items-center justify-center text-muted hover:bg-red-600 hover:text-white"
           aria-label="Fechar"
         >
           <X size={17} />

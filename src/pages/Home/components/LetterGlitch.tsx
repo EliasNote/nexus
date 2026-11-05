@@ -1,3 +1,4 @@
+import { useThemeStore } from "@/config/themeStore";
 import { useRef, useEffect } from "react";
 
 type RGBColor = { r: number; g: number; b: number };
@@ -23,7 +24,7 @@ type LetterGlitchProps = {
 const DEFAULT_GLITCH_COLORS = ["#60a5fa", "#61dca3", "#61b3dc", "#dbeafe"];
 
 const LetterGlitch = ({
-  glitchColors = DEFAULT_GLITCH_COLORS,
+  glitchColors,
   glitchSpeed = 50,
   centerVignette = false,
   outerVignette = true,
@@ -31,6 +32,13 @@ const LetterGlitch = ({
   characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789",
   classname = "",
 }: LetterGlitchProps) => {
+  const theme = useThemeStore((state) => state.resolved);
+  const background = theme === "light" ? "#e4e4e7" : "#000000";
+  const palette = glitchColors ?? (
+    theme === "light"
+      ? ["#1e293b", "#15803d", "#1d4ed8", "#334155"]
+      : DEFAULT_GLITCH_COLORS
+  );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const isVisibleRef = useRef(true);
@@ -41,7 +49,7 @@ const LetterGlitch = ({
   const context = useRef<CanvasRenderingContext2D | null>(null);
   const lastGlitchTime = useRef(0);
   const lastDrawTime = useRef(0);
-  const glitchColorsKey = glitchColors.join(",");
+  const glitchColorsKey = palette.join(",");
 
   const lettersAndSymbols = Array.from(characters);
 
@@ -71,7 +79,7 @@ const LetterGlitch = ({
       : null;
   };
 
-  const availableColors = glitchColors
+  const availableColors = palette
     .map(hexToRgb)
     .filter((color): color is RGBColor => color !== null);
 
@@ -116,6 +124,9 @@ const LetterGlitch = ({
       };
     });
     dirtyIndices.current.clear();
+    for (let index = 0; index < totalLetters; index++) {
+      dirtyIndices.current.add(index);
+    }
   };
 
   const resizeCanvas = () => {
@@ -142,7 +153,7 @@ const LetterGlitch = ({
     const { columns, rows } = calculateGrid(rect.width, rect.height);
     initializeLetters(columns, rows);
     if (context.current) {
-      context.current.fillStyle = "#000";
+      context.current.fillStyle = background;
       context.current.fillRect(0, 0, rect.width, rect.height);
     }
   };
@@ -155,7 +166,7 @@ const LetterGlitch = ({
     const x = (index % grid.current.columns) * charWidth;
     const y = Math.floor(index / grid.current.columns) * charHeight;
 
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = background;
     ctx.fillRect(x, y, charWidth, charHeight);
     ctx.fillStyle = colorToCss(letter.color);
     ctx.fillText(letter.char, x, y);
@@ -297,16 +308,16 @@ const LetterGlitch = ({
       clearTimeout(resizeTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [characters, glitchColorsKey, glitchSpeed, smooth]);
+  }, [characters, glitchColorsKey, glitchSpeed, smooth, theme]);
 
   return (
-    <div className={`w-full h-full bg-black overflow-hidden ${classname}`}>
+    <div className={`w-full h-full bg-canvas overflow-hidden ${classname}`}>
       <canvas ref={canvasRef} className="w-full h-full" />
       {outerVignette && (
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,rgba(0,0,0,0)_60%,rgba(0,0,0,1)_100%)]"></div>
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none glitch-outer"></div>
       )}
       {centerVignette && (
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0)_60%)]"></div>
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none glitch-center"></div>
       )}
     </div>
   );

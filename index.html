@@ -2,6 +2,15 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <script>
+            (() => {
+                let theme = "dark";
+                try { theme = localStorage.getItem("nexus-theme") || "dark"; } catch {}
+                if (theme === "system") theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                document.documentElement.dataset.theme = theme === "light" ? "light" : "dark";
+                document.documentElement.style.colorScheme = document.documentElement.dataset.theme;
+            })();
+        </script>
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>nexus</title>
