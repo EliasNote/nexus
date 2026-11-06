@@ -1,11 +1,16 @@
-import { ThemeSelect } from "@/components/ThemeSelect";
+import { useThemeStore } from "@/config/themeStore";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { isTauri } from "@tauri-apps/api/core";
 import { exists as fsExists } from "@tauri-apps/plugin-fs";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboardRoute, manualRoute } from "@/App";
 import { useStorageSync } from "@/hooks/useStorageSync";
-import { getCryptoService, initCryptoWorker, useCloudStore } from "@/hooks/useCloudStore";
+import {
+  getCryptoService,
+  initCryptoWorker,
+  useCloudStore,
+} from "@/hooks/useCloudStore";
 import { motion } from "motion/react";
 import type { Vault } from "@/utils/vault";
 import { Input } from "../Dashboard/components/Credential/components/Input";
@@ -18,6 +23,12 @@ import { BlueButton } from "./components/BlueButton";
 import { GrayButton } from "./components/GrayButton";
 
 export const Home = () => {
+  const theme = useThemeStore((state) => state.preference);
+  const setTheme = useThemeStore((state) => state.setPreference);
+  const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+  const themeNames = { light: "claro", dark: "escuro", system: "do sistema" };
+  const themeLabel = `Tema ${themeNames[theme]}. Ativar tema ${themeNames[nextTheme]}`;
+  const ThemeIcon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
   const { upload, download, exists } = useStorageSync();
   const isDesktop = isTauri();
 
@@ -39,7 +50,6 @@ export const Home = () => {
   const setSummaryVault = useCloudStore((state) => state.setSummaryVault);
   const setVaultPath = useCloudStore((state) => state.setVaultPath);
   const setActiveProvider = useCloudStore((state) => state.setActiveProvider);
-
 
   useEffect(() => {
     const init = async () => {
@@ -100,7 +110,7 @@ export const Home = () => {
 
         if (!isValidEnvelope) {
           throw new Error(
-            "O arquivo do cofre no Google Drive está corrompido ou em formato inválido."
+            "O arquivo do cofre no Google Drive está corrompido ou em formato inválido.",
           );
         }
 
@@ -139,7 +149,11 @@ export const Home = () => {
       navigate(dashboardRoute);
     } catch (error) {
       console.error("Erro geral: ", error);
-      setErrorContent(error instanceof Error ? error.message : "Erro inesperado ao sincronizar com o cofre.");
+      setErrorContent(
+        error instanceof Error
+          ? error.message
+          : "Erro inesperado ao sincronizar com o cofre.",
+      );
       setIsLoading(false);
     }
   };
@@ -158,19 +172,36 @@ export const Home = () => {
         smooth={false}
         classname="home-wallpaper fixed inset-0 z-0 pointer-events-none"
       />
-      <div className="absolute right-5 top-5 z-20"><ThemeSelect /></div>
+      <div className="absolute right-5 top-5 z-20">
+        <button
+          type="button"
+          aria-label={themeLabel}
+          title={themeLabel}
+          onClick={() => setTheme(nextTheme)}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center border border-line-strong bg-surface text-primary transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        >
+          <ThemeIcon size={20} aria-hidden="true" />
+        </button>
+      </div>
       <section className="relative z-10 flex h-full items-center justify-center">
         {/*<button className="bg-red-500 w-100 h-50" onClick={remove}>APAGAR ESSA COISA</button>*/}
         {currentStep === 0 && (
           <Step key="step0" direction={direction}>
             <div className="flex flex-col items-center justify-center gap-[20px]">
               <div className="flex flex-row items-center justify-center gap-[10px] text-[64px]">
-                <img src="/logo.svg" alt="Logo" className="nexus-logo w-[124px]" />
+                <img
+                  src="/logo.svg"
+                  alt="Logo"
+                  className="nexus-logo w-[124px]"
+                />
                 <h1 className="font-medium">Nexus</h1>
               </div>
               <div className="flex gap-3">
                 <BlueButton text="Começar" onClick={nextStep} />
-                <GrayButton text="Manual" onClick={() => navigate(manualRoute)} />
+                <GrayButton
+                  text="Manual"
+                  onClick={() => navigate(manualRoute)}
+                />
               </div>
             </div>
           </Step>
@@ -247,9 +278,23 @@ export const Home = () => {
           </Step>
         )}
         {currentStep === 2 && isLoading && (
-          <div className="flex flex-col items-center gap-3" role="status" aria-live="polite">
-            <img src="/loading.webp" className="h-18 w-18 object-contain" alt="" />
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-secondary">Abrindo seu cofre...</motion.p>
+          <div
+            className="flex flex-col items-center gap-3"
+            role="status"
+            aria-live="polite"
+          >
+            <img
+              src="/loading.webp"
+              className="h-18 w-18 object-contain"
+              alt=""
+            />
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm text-secondary font-bold"
+            >
+              Abrindo seu cofre...
+            </motion.p>
           </div>
         )}
       </section>

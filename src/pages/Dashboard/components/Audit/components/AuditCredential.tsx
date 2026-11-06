@@ -3,7 +3,7 @@ import type { CredentialSummary } from "@/utils/vault";
 export const AuditCredential = ({
   credentialSummary,
   onChangeCredential,
-  reusedColorClass = "border-line text-primary",
+  reusedColorClass,
 }: {
   credentialSummary: CredentialSummary;
   onChangeCredential: (credentialId: string) => void;
@@ -11,10 +11,11 @@ export const AuditCredential = ({
 }) => {
   return (
     <div
-      className={`flex flex-row items-center justify-between border p-[12px] ${reusedColorClass}`}
+      data-reused={Boolean(reusedColorClass)}
+      className={`audit-credential-card flex flex-row items-center justify-between border p-[12px] ${reusedColorClass ?? "border-line text-primary"}`}
     >
       <div className="flex gap-2">
-        <div className="flex items-center justify-center h-[38px] w-[38px] border border-line-strong bg-surface text-primary">
+        <div className="audit-credential-avatar flex items-center justify-center h-[38px] w-[38px] border border-line-strong bg-surface text-primary">
           {credentialSummary.title?.[0]}
         </div>
         <div className="flex flex-col">

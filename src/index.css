@@ -206,7 +206,7 @@ input::-webkit-credentials-auto-fill-button {
     --text-faint: #52525b;
     --line: #c9c9d0;
     --line-strong: #a1a1aa;
-    --line-focus: #2563eb;
+    --line-focus: #71717a;
     --danger-text: #b91c1c;
     --success-text: #166534;
     --warning-text: #854d0e;
@@ -220,15 +220,16 @@ body { margin: 0; background: var(--canvas); color: var(--text-primary); }
 
 :root[data-theme="light"] .glitch-center {
     background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.62) 0%,
-        rgba(255, 255, 255, 0.28) 38%,
-        rgba(255, 255, 255, 0) 68%
+        ellipse 600px 400px at center,
+        rgba(255, 255, 255, 0.75) 0%,
+        rgba(255, 255, 255, 0.38) 38%,
+        rgba(255, 255, 255, 0) 100%
     );
 }
 
 :root[data-theme="light"] .nexus-home {
     background-color: var(--canvas);
+    --line-focus: #71717a;
 }
 
 :root[data-theme="light"] .nexus-home .home-wallpaper {
@@ -245,9 +246,9 @@ body { margin: 0; background: var(--canvas); color: var(--text-primary); }
 
 :root[data-theme="light"] .nexus-home :is(.home-primary-action, .home-secondary-action):disabled {
     opacity: 1;
-    background-color: #d4d4d8;
-    color: #52525b;
-    border-color: #b4b4bd;
+    background-color: #e4e4e7;
+    color: #71717a;
+    border-color: #d4d4d8;
     box-shadow: none;
     cursor: not-allowed;
 }
@@ -267,65 +268,69 @@ body { margin: 0; background: var(--canvas); color: var(--text-primary); }
 }
 
 :root[data-theme="light"] .nexus-home .home-provider-accent {
-    background-color: var(--line-focus);
+    background-color: var(--color-brand);
 }
 
 :root[data-theme="light"] .nexus-home button.home-neutral-surface[aria-pressed="false"] {
-    background-color: #18181b;
-    border-color: #27272a;
-    color: #ffffff;
-    --surface-low: #09090b;
-    --line-strong: #3f3f46;
-    --text-primary: #ffffff;
-    --text-secondary: #d4d4d8;
-    --text-muted: #a1a1aa;
-    --text-faint: #71717a;
+    background-color: #d4d4d8;
+    border-color: #d4d4d8;
+    color: #18181b;
+    --surface-low: #e4e4e7;
+    --line-strong: #d4d4d8;
+    --text-primary: #18181b;
+    --text-secondary: #3f3f46;
+    --text-muted: #52525b;
+    --text-faint: #52525b;
 }
 
 :root[data-theme="light"] .nexus-home button.home-neutral-surface[aria-pressed="false"]:hover {
-    background-color: #27272a;
-    border-color: #3f3f46;
+    background-color: #e4e4e7;
+    border-color: #a1a1aa;
 }
 
 :root[data-theme="light"] .nexus-home button.home-neutral-surface svg {
-    color: #a1a1aa;
+    color: #475569;
 }
 
 :root[data-theme="light"] .nexus-home button.home-neutral-surface[aria-pressed="true"] {
-    background-color: #18181b;
+    background-color: #f7f7f8;
     border-color: #71717a;
-    color: #ffffff;
-    --surface-low: #09090b;
-    --line-strong: #3f3f46;
-    --text-primary: #ffffff;
-    --text-secondary: #d4d4d8;
-    --text-muted: #a1a1aa;
-    --text-faint: #71717a;
+    color: #18181b;
+    --surface-low: #f4f4f5;
+    --line-strong: #d4d4d8;
+    --text-primary: #18181b;
+    --text-secondary: #3f3f46;
+    --text-muted: #52525b;
+    --text-faint: #52525b;
 }
 
 :root[data-theme="light"] .nexus-home button.home-neutral-surface:focus-visible {
-    outline: 2px solid #2563eb;
+    outline: 2px solid #71717a;
     outline-offset: 3px;
 }
 
 :root[data-theme="light"] .nexus-home .home-secondary-action {
-    background-color: #d4d4d8;
+    background-color: #fafafa;
     color: #27272a;
     border-color: #a1a1aa;
 }
 
 :root[data-theme="light"] .nexus-home .home-secondary-action:hover:not(:disabled) {
-    background-color: #c4c4cc;
+    background-color: #f4f4f5;
     border-color: #71717a;
 }
 
 :root[data-theme="light"] .nexus-home .home-secondary-action:active:not(:disabled) {
-    background-color: #a1a1aa;
+    background-color: #e4e4e7;
 }
 
 :root[data-theme="light"] .nexus-home .theme-select:focus-visible {
-    border-color: #2563eb;
-    --tw-ring-color: #2563eb;
+    border-color: #71717a;
+    --tw-ring-color: #71717a;
+}
+
+:root[data-theme="light"] .nexus-home button.bg-surface:focus-visible {
+    --tw-ring-color: #71717a;
 }
 
 :root[data-theme="light"] .nexus-home .credential-input-field:has(input[aria-invalid="true"]) {
@@ -365,6 +370,7 @@ body { margin: 0; background: var(--canvas); color: var(--text-primary); }
     --surface-raised: #1e40af;
     --line: #ffffff;
     --line-strong: #93c5fd;
+    --line-focus: #93c5fd;
 }
 
 :root[data-theme="light"] .nexus-sidebar .nexus-logo {
@@ -381,17 +387,21 @@ body { margin: 0; background: var(--canvas); color: var(--text-primary); }
 }
 
 :root[data-theme="light"] .nexus-credentials-panel {
-    --list-panel: #e4e4e7;
-    --canvas: #e4e4e7;
+    --list-panel: #f4f4f5;
+    --canvas: #f4f4f5;
     --surface: #fafafa;
-    --selected: #c9c9d0;
-    --surface-hover: #d4d4d8;
+    --selected: #dedee3;
+    --surface-hover: #eaeaed;
     --text-primary: #18181b;
     --text-secondary: #3f3f46;
     --text-muted: #52525b;
-    --line: #c4c4cc;
-    --line-strong: #71717a;
-    --line-focus: #2563eb;
+    --line: #d4d4d8;
+    --line-strong: #a1a1aa;
+    --line-focus: #71717a;
+}
+
+:root[data-theme="light"] :is(.bg-surface, .bg-surface-low, .bg-surface-raised, .bg-surface-active):not(.nexus-sidebar *):focus-visible {
+    --tw-ring-color: #71717a;
 }
 
 :root[data-theme="light"] .nexus-credentials-panel input::placeholder {
@@ -405,7 +415,7 @@ body { margin: 0; background: var(--canvas); color: var(--text-primary); }
 
 :root[data-theme="light"] .nexus-credentials-panel button:focus-visible {
     color: #1d4ed8;
-    outline: 2px solid #2563eb;
+    outline: 2px solid #71717a;
     outline-offset: 3px;
 }
 
@@ -427,7 +437,59 @@ body { margin: 0; background: var(--canvas); color: var(--text-primary); }
     border-color: #52525b;
 }
 
+:root[data-theme="light"] .nexus-audit {
+    background-color: #dedee3;
+    --line: #b4b4bd;
+    --line-strong: #a1a1aa;
+}
+
+:root[data-theme="light"] .audit-type-card {
+    background-color: #dedee3;
+}
+
+:root[data-theme="light"] .audit-type-card[data-selected="false"]:hover {
+    background-color: #d4d4da;
+}
+
+:root[data-theme="light"] .audit-type-card[data-selected="true"] {
+    background-color: #ececef;
+}
+
+:root[data-theme="light"] .audit-credential-card {
+    --surface: #dedee3;
+    --line: #b4b4bd;
+    --line-strong: #a1a1aa;
+    --line-focus: #71717a;
+}
+
+:root[data-theme="light"] .audit-credential-card[data-reused="false"] {
+    background-color: #ececef;
+}
+
+:root[data-theme="light"] .audit-credential-card[data-reused="true"] {
+    background-color: color-mix(in srgb, currentColor 17%, #ececef);
+    border-color: color-mix(in srgb, currentColor 60%, #ececef);
+    --line-strong: #c4c4cc;
+    --line-focus: #a1a1aa;
+}
+
+:root[data-theme="light"] .audit-credential-card[data-reused="true"] button {
+    background-color: #f4f4f5;
+    border-color: #a1a1aa;
+}
+
+:root[data-theme="light"] .audit-credential-card[data-reused="true"] .audit-credential-avatar {
+    background-color: #f4f4f5;
+    border-color: #a1a1aa;
+    font-weight: 600;
+}
+
+:root[data-theme="light"] .audit-credential-card[data-reused="true"] button:hover {
+    background-color: #e4e4e7;
+    border-color: #71717a;
+}
+
 /* Emphasis is typographic; red is reserved for actual warnings. */
-:root[data-theme="light"] .markdown-content strong {
+:root[data-theme="light"] .markdown-content strong:not(.text-danger) {
     color: var(--text-primary);
 }

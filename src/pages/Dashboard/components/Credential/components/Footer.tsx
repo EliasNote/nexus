@@ -17,7 +17,7 @@ export const Footer = ({
 
   return (
     <div
-      className="flex w-full shrink-0 items-center justify-between border-t border-line bg-surface-raised px-[40px] py-[30px]"
+      className="flex w-full shrink-0 items-center justify-between border-t border-line bg-transparent px-[40px] py-[30px]"
     >
       {!isCreate && (
         <>
@@ -31,7 +31,7 @@ export const Footer = ({
               {`${new Date(tempCredential?.updatedAt).toLocaleDateString("pt-BR")}, ${new Date(tempCredential?.updatedAt).toLocaleTimeString("pt-BR")}`}
             </span>
           </div>
-          <div className="flex flex-col items-center justify-center gap-1 font-medium  min-w-[180px]">
+          <div className="flex flex-col items-center justify-center gap-1 font-medium min-w-[180px] [[data-theme=light]_&]:[--success-text:#15803d]">
             {isCompromised ? (
               <ShieldAlert className="text-red-600" strokeWidth={1} size={50} />
             ) : (

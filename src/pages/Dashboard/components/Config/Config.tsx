@@ -388,7 +388,7 @@ export const Config = () => {
             <div
               onClick={(e) => e.stopPropagation()}
               className="flex flex-col max-w-90 w-full items-center gap-2">
-              <p className="font-medium whitespace-nowrap">Digite a senha do seu cofre para confirmar a exclusão</p>
+              <p className="font-medium whitespace-nowrap text-zinc-100">Digite a senha do seu cofre para confirmar a exclusão</p>
               <Input
                 autoFocus={true}
                 isPasswordIcon={true}

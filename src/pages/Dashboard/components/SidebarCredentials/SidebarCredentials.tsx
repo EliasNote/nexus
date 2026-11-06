@@ -37,7 +37,7 @@ const SidebarCredentials = ({
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-surface text-primary px-2 py-2 outline-none border border-line-strong focus:border-brand text-sm w-full"
+          className="bg-surface text-primary px-2 py-2 outline-none border border-line-strong focus:border-brand [[data-theme=light]_&]:focus:border-line-focus text-sm w-full"
           placeholder="Procurar título ou usuário..."
         />
       </div>

@@ -77,7 +77,7 @@ export const Audit = ({
       bg05: "bg-red-500/5",
     },
     weak: {
-      text: "text-orange-500",
+      text: "text-orange-500 [[data-theme=light]_&]:text-orange-700",
       border: "border-orange-500",
       border20: "border-orange-500/20",
       bg05: "bg-orange-500/5",
@@ -127,7 +127,7 @@ export const Audit = ({
   }, [])
 
   return (
-    <section className="flex flex-col items-center h-full w-full p-10">
+    <section className="nexus-audit flex flex-col items-center h-full w-full p-10">
       <div className="max-w-[700px] w-full h-full flex flex-col gap-5">
         <div className="flex gap-5 items-center flex-col w-full">
           <div className="flex items-center justify-center w-full">

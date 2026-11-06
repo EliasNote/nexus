@@ -3,7 +3,6 @@ import type { CredentialSummary } from "@/utils/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 
 const Credential = ({
   selected,
@@ -43,7 +42,7 @@ const Credential = ({
       await copyToClipboard(password || "");
       if (copyTimeout.current !== null) clearTimeout(copyTimeout.current);
       setCopied(true);
-      copyTimeout.current = setTimeout(() => setCopied(false), 1500);
+      copyTimeout.current = setTimeout(() => setCopied(false), 1000);
     } catch (error) {
       console.error("Falha ao copiar senha:", error);
     }
@@ -80,18 +79,11 @@ const Credential = ({
         }}
         onKeyDown={(e) => e.stopPropagation()}
       >
-        <AnimatePresence initial={false} mode="wait">
-          <motion.span
-            key={copied ? "copied" : "copy"}
-            className={`flex items-center justify-center ${copied ? "text-success" : ""}`}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.15 }}
-          >
-            {copied ? <Check size={20} strokeWidth={2.5} /> : <Copy size={18} strokeWidth={2} />}
-          </motion.span>
-        </AnimatePresence>
+        {copied ? (
+          <Check className="text-success" size={20} strokeWidth={2.5} />
+        ) : (
+          <Copy size={20} strokeWidth={2} />
+        )}
       </button>
     </div>
   );

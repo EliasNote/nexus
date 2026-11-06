@@ -25,7 +25,7 @@ export const RangeSlider = ({
       </Slider.Track>
 
       <Slider.Thumb
-        className="block w-4 h-4 bg-white rounded-full hover:scale-125 transition-all cursor-pointer outline-none"
+        className="block w-4 h-4 bg-white rounded-full hover:scale-125 transition-all cursor-pointer outline-none [[data-theme=light]_&]:bg-zinc-100 [[data-theme=light]_&]:border [[data-theme=light]_&]:border-zinc-600 [[data-theme=light]_&]:shadow-sm focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         aria-label="Comprimento da senha"
       />
     </Slider.Root>
