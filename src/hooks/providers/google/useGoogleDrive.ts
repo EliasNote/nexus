@@ -7,6 +7,7 @@ import type {
   VaultMetadata,
   VaultStorage,
 } from "../../types";
+import { logger } from "@/utils/logger";
 
 const VAULT_FILE_NAME = "vault.json";
 const APP_DATA_SPACE = "appDataFolder";
@@ -96,7 +97,7 @@ export function useGoogleDrive(): VaultStorage & {
 
       return response ? applyToken(response) : null;
     } catch (error) {
-      console.error("Erro no login Google:", error);
+      logger.error("Erro no login Google", error);
       clearSession();
       throw error;
     }
@@ -108,7 +109,7 @@ export function useGoogleDrive(): VaultStorage & {
 
       return response ? applyToken(response) : null;
     } catch (error) {
-      console.error("Erro ao renovar o token Google:", error);
+      logger.error("Erro ao renovar o token Google", error);
       clearSession();
       return null;
     }

@@ -3,6 +3,7 @@ import type { CredentialSummary } from "@/utils/vault";
 import { copyToClipboard } from "@/utils/utils";
 import { Copy, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { logger } from "@/utils/logger";
 
 const Credential = ({
   selected,
@@ -44,7 +45,7 @@ const Credential = ({
       setCopied(true);
       copyTimeout.current = setTimeout(() => setCopied(false), 1000);
     } catch (error) {
-      console.error("Falha ao copiar senha:", error);
+      logger.error("Falha ao copiar credencial", error);
     }
   };
 

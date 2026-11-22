@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { GeneratorOptions } from "./Components/GeneratorOptions";
 import { copyToClipboard } from "@/utils/utils";
 import { generateCustomPassword, type GeneratorConfig } from "@/hooks/usePasswordGenerator";
+import { logger } from "@/utils/logger";
 
 export const Generator = ({
   onChange,
@@ -74,7 +75,7 @@ export const Generator = ({
         length: effectiveLength,
       });
     } catch (e) {
-      console.log(e);
+      logger.error("Falha ao gerar senha", e);
       return "";
     }
   }, [options, effectiveLength, seed]);

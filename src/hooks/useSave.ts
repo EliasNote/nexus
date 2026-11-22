@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useStorageSync } from "./useStorageSync";
 import { getCryptoService, useCloudStore } from "./useCloudStore";
 import { AUTO_SAVE_INTERVAL_OPTIONS } from "@/utils/constants";
+import { logger } from "@/utils/logger";
 
 export const useAutoSave = () => {
   const { setIsPendingSync, setIsSaving, summaryVault } = useCloudStore();
@@ -32,10 +33,7 @@ export const useAutoSave = () => {
 
         setIsPendingSync(false);
       } catch (error) {
-        console.error(
-          "Falha ao salvar automaticamente:",
-          error,
-        );
+        logger.error("Falha ao salvar automaticamente", error);
       } finally {
         setIsSaving(false);
       }
@@ -83,10 +81,7 @@ export const useSaveNow = () => {
 
       setIsPendingSync(false);
     } catch (error) {
-      console.error(
-        "Falha ao salvar o cofre:",
-        error,
-      );
+      logger.error("Falha ao salvar o cofre", error);
 
       throw error;
     } finally {

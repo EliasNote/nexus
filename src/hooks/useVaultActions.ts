@@ -7,6 +7,7 @@ import type {
 } from "@/utils/vault";
 import { getCryptoService, useCloudStore } from "./useCloudStore";
 import { useStorageSync } from "./useStorageSync";
+import { logger } from "@/utils/logger";
 
 export const useVaultActions = () => {
   const vault = useCloudStore((state) => state.vault);
@@ -123,7 +124,7 @@ export const useVaultActions = () => {
       setVault(newVault);
       setSummaryVault(finalSummaryVault);
     } catch (error) {
-      console.error(error);
+      logger.error("Falha ao carregar o vault", error);
       throw error;
     } finally {
       setIsLoading?.(false);

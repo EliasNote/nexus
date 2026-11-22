@@ -15,6 +15,7 @@ import { BlueButton } from "@/pages/Home/components/BlueButton";
 import { GrayButton } from "@/pages/Home/components/GrayButton";
 import { Loading } from "@/components/Loading";
 import { Step } from "./components/Step";
+import { logger } from "@/utils/logger";
 
 export const Config = () => {
   const { summaryVault, setSummaryVault, vault, setVault, setIsPendingSync, encryptedVault, setEncryptedVault } = useCloudStore.getState();
@@ -39,15 +40,13 @@ export const Config = () => {
 
   const toggleOption = (id: number) => setSelectedOptionId(id);
   const onSave = async () => {
-    console.log("AUTO SAVE DO VAULT: ", vault?.autoSaveInterval)
+    logger.debug("Iniciando atualizacao do intervalo de salvamento");
     setIsSaving(true);
-    console.log("AUTO SAVE INTERVALO: ", summaryVault?.autoSaveInterval)
     const selectedOption = AUTO_SAVE_INTERVAL_OPTIONS[selectedOptionId];
     const updatedSummaryVault: VaultSummarizedData = { ...summaryVault!, autoSaveInterval: selectedOption.value };
     setSummaryVault(updatedSummaryVault);
     setVault(await getCryptoService().updateVaultFromSummary(vault!, updatedSummaryVault))
-    console.log("INTERVALO DO VAULT: ", vault?.autoSaveInterval)
-    console.log("AUTO SAVE INTERVALO: ", updatedSummaryVault.autoSaveInterval)
+    logger.debug("Intervalo de salvamento atualizado");
     setIsSaving(false);
     setIsPendingSync(true);
   };
@@ -61,8 +60,7 @@ export const Config = () => {
     setErrorContent(null);
     setIsLoading(true);
     try {
-      console.log("ENCRYPTED VAULT: ", tempEncryptedVault!);
-      console.log("PASSWORD: ", passwordImport);
+      logger.debug("Importacao de vault iniciada");
 
       const decryptedVault = await getCryptoService().decryptVault(tempEncryptedVault!, passwordImport);
 
@@ -71,14 +69,14 @@ export const Config = () => {
       await upload(tempEncryptedVault!);
       setEncryptedVault(tempEncryptedVault!);
 
-      console.log("Vault importado com sucesso!");
+      logger.info("Vault importado com sucesso");
       setIsLoading(false);
       setIsModalOpen(false);
       setIsImportPasswordOpen(false);
       setPasswordImport("");
       setTempEncryptedVault(null);
     } catch (e) {
-      console.error(e);
+      logger.error("Falha ao importar vault", e);
       setIsLoading(false);
       setIsModalOpen(true);
       setIsImportPasswordOpen(true);
@@ -164,7 +162,7 @@ export const Config = () => {
       setIsImportPasswordOpen(true);
       setIsModalOpen(true);
     } catch (e) {
-      console.error("Erro ao ler arquivo do cofre:", e);
+      logger.error("Erro ao ler arquivo do cofre", e);
     } finally {
       setIsLoading(false);
     }
@@ -188,7 +186,7 @@ export const Config = () => {
       disconnect();
       setIsModalOpen(false);
     } catch (e) {
-      console.error(e);
+      logger.error("Falha ao excluir vault", e);
       setIsLoading(false);
       setIsModalOpen(true);
       setIsDelete(true);

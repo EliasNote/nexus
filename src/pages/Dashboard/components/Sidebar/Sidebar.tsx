@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { useSaveNow } from "@/hooks/useSave";
 import { useVaultActions } from "@/hooks/useVaultActions";
+import { logger } from "@/utils/logger";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import type { Directory } from "@/utils/vault";
 import { Button } from "./Button";
@@ -80,7 +81,7 @@ const Sidebar = ({
       }
       disconnect();
     } catch (e) {
-      console.error(e);
+      logger.error("Falha ao desconectar armazenamento", e);
       setIsSyncing(false);
       setSyncSuccess(false);
     }

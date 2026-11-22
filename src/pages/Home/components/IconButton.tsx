@@ -5,6 +5,7 @@ import type { StorageProvider } from "@/hooks/types";
 import { useCloudStore } from "@/hooks/useCloudStore";
 import { GitSteps } from "./GitSteps";
 import { saveSettings } from "@/config/settingsStore";
+import { logger } from "@/utils/logger";
 
 export const IconButton = ({
   id,
@@ -49,7 +50,7 @@ export const IconButton = ({
           const connected = await connect("local");
 
           if (connected) {
-            console.log("Conectado ao local com sucesso!");
+            logger.info("Conectado ao armazenamento local");
           }
 
           return;
@@ -59,14 +60,14 @@ export const IconButton = ({
           const connected = await connect("google");
 
           if (connected) {
-            console.log("Conectado ao Google com sucesso!");
+            logger.info("Conectado ao Google");
           }
 
           return;
         }
       }
     } catch (error) {
-      console.error(`Erro ao conectar ao ${id}:`, error);
+      logger.error(`Erro ao conectar ao provedor ${id}`, error);
     }
   };
 

@@ -8,6 +8,7 @@ import Home from "./pages/Home/Home";
 import Manual from "./pages/Manual/Manual";
 import { TitleBar } from "./desktop/TitleBar";
 import { isTauri } from "@tauri-apps/api/core";
+import { logger } from "@/utils/logger";
 
 export const dashboardRoute = "/dashboard";
 export const manualRoute = "/manual";
@@ -21,8 +22,7 @@ function App() {
   const { refresh } = useStorageSync();
 
   useEffect(() => {
-    console.log("Token: ", token);
-    console.log("ExpiresIn: ", expiresIn);
+    logger.debug("Estado do token atualizado");
     if (token && expiresIn) {
       if (Date.now() < expiresIn) {
         setIsTokenValid(true);

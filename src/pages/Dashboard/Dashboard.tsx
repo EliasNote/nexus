@@ -11,6 +11,7 @@ import { SIDEBAR_BUTTONS_IDS } from "./components/Sidebar/Buttons";
 import { Generator } from "./components/Generator/Generator";
 import { Audit } from "./components/Audit/Audit";
 import { Config } from "./components/Config/Config";
+import { logger } from "@/utils/logger";
 
 const Dashboard = () => {
   useAutoSave();
@@ -114,7 +115,7 @@ const Dashboard = () => {
         setIsCreate(null);
       }
     } catch (err) {
-      console.error("Erro ao carregar credencial:", err);
+      logger.error("Erro ao carregar credencial", err);
     } finally {
       setIsLoadingCredential(false);
     }

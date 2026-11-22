@@ -13,6 +13,7 @@ import { argon2id } from "hash-wasm";
 import { sha1 } from "js-sha1";
 import { ZxcvbnFactory } from "@zxcvbn-ts/core";
 import { getBaseVault, version } from "./initialVault";
+import { logger } from "./logger";
 
 let secureKey: CryptoKey | null = null;
 let kekKey: CryptoKey | null = null;
@@ -66,7 +67,7 @@ const verifyCompromised = async (password: string): Promise<boolean> => {
     const compromisedPasswords = await res.text();
     return compromisedPasswords.includes(suffix);
   } catch (err) {
-    console.warn("Não foi possível checar vazamento online (offline ou timeout):", err);
+    logger.warn("Não foi possível checar vazamento online (offline ou timeout):", err);
     return false;
   }
 };

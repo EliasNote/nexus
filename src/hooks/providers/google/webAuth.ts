@@ -6,6 +6,7 @@
 } from "@react-oauth/google";
 import { useRef } from "react";
 import type { GoogleAuthProvider, GoogleToken } from "@/utils/types";
+import { logger } from "@/utils/logger";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const TOKEN_EXPIRY_SAFETY_WINDOW_MS = 5 * 60 * 1000;
@@ -70,7 +71,7 @@ export const useGoogleWebAuth = (): GoogleAuthProvider => {
           TOKEN_EXPIRY_SAFETY_WINDOW_MS,
       });
     } catch (error: unknown) {
-      console.error("Erro ao validar permissões:", error);
+      logger.error("Erro ao validar permissoes", error);
       rejectPromise(
         error instanceof Error
           ? error
@@ -84,7 +85,7 @@ export const useGoogleWebAuth = (): GoogleAuthProvider => {
     prompt: "select_account",
     onSuccess: handleSuccess,
     onError: (errorResponse: Pick<TokenResponse, "error" | "error_description" | "error_uri">) => {
-      console.error("Erro no login rápido do Google:", errorResponse);
+      logger.error("Erro no login rapido do Google", errorResponse);
       rejectPromise(
         new Error(
           errorResponse.error_description || "Falha na autenticação com o Google."
@@ -92,7 +93,7 @@ export const useGoogleWebAuth = (): GoogleAuthProvider => {
       );
     },
     onNonOAuthError: (nonOAuthError: NonOAuthError) => {
-      console.error("Erro não-oauth:", nonOAuthError);
+      logger.error("Erro ao abrir autenticacao", nonOAuthError);
       rejectPromise(new Error("Janela de login fechada ou bloqueada."));
     },
   });
@@ -102,7 +103,7 @@ export const useGoogleWebAuth = (): GoogleAuthProvider => {
     prompt: "consent",
     onSuccess: handleSuccess,
     onError: (errorResponse: Pick<TokenResponse, "error" | "error_description" | "error_uri">) => {
-      console.error("Erro no login com consentimento do Google:", errorResponse);
+      logger.error("Erro no login com consentimento do Google", errorResponse);
       rejectPromise(
         new Error(
           errorResponse.error_description || "Falha na autenticação com o Google."
@@ -110,7 +111,7 @@ export const useGoogleWebAuth = (): GoogleAuthProvider => {
       );
     },
     onNonOAuthError: (nonOAuthError: NonOAuthError) => {
-      console.error("Erro não-oauth:", nonOAuthError);
+      logger.error("Erro ao abrir autenticacao", nonOAuthError);
       rejectPromise(new Error("Janela de login fechada ou bloqueada."));
     },
   });
@@ -132,7 +133,7 @@ export const useGoogleWebAuth = (): GoogleAuthProvider => {
     try {
       return await loginWithPromise();
     } catch (error: unknown) {
-      console.error("Erro ao renovar a sessão:", error);
+      logger.error("Erro ao renovar a sessao", error);
       return null;
     }
   };

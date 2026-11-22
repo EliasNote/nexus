@@ -10,6 +10,7 @@ import {
 import { AuditTypeCard } from "./components/AuditTypeCard";
 import type { AuditType } from "@/utils/types";
 import { useEffect, useState } from "react";
+import { logger } from "@/utils/logger";
 import { AuditCredential } from "./components/AuditCredential";
 import { getReusedColorClass } from "@/utils/utils";
 
@@ -109,7 +110,7 @@ export const Audit = ({
       const updatedSummary = await getCryptoService().verifyCredentials(vault, summaryVault!);
       setSummaryVault(updatedSummary);
     } catch (error) {
-      console.error(error);
+      logger.error("Falha ao verificar senhas vazadas", error);
       setCheckError("Não foi possível verificar as senhas agora.");
     } finally {
       setIsChecking(false);

@@ -3,6 +3,7 @@ import type {
   GitRepoStatus,
   GitSyncResult,
 } from "@/utils/types";
+import { logger } from "@/utils/logger";
 
 async function runGit(
   directory: string,
@@ -187,7 +188,9 @@ export async function syncGitRepo(
 ): Promise<GitSyncResult> {
   const repository = await checkGitRepo(directory);
 
-  console.log("Repositório Git:", repository);
+  logger.debug("Estado do repositorio Git", {
+    isGitRepo: repository.isGitRepo,
+  });
 
   if (!repository.isGitRepo) {
     throw new Error(

@@ -1,0 +1,23 @@
+const isDevelopment = import.meta.env.DEV;
+
+export const logger = {
+  debug: (...args: unknown[]) => {
+    if (isDevelopment) {
+      console.debug(...args);
+    }
+  },
+
+  info: (...args: unknown[]) => {
+    if (isDevelopment) {
+      console.info(...args);
+    }
+  },
+
+  warn: (...args: unknown[]) => {
+    console.warn(...args);
+  },
+
+  error: (message: string, error?: unknown) => {
+    console.error(message, error);
+  },
+};

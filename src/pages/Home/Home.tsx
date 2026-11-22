@@ -21,6 +21,7 @@ import { loadSettings } from "@/config/settingsStore";
 import { CLOUD_OPTIONS } from "@/utils/constants";
 import { BlueButton } from "./components/BlueButton";
 import { GrayButton } from "./components/GrayButton";
+import { logger } from "@/utils/logger";
 
 export const Home = () => {
   const theme = useThemeStore((state) => state.preference);
@@ -63,7 +64,7 @@ export const Home = () => {
         }
       }
       setIsConfigLoaded(true);
-      console.log("isConfigLoaded", isConfigLoaded);
+      logger.debug("Configuracoes carregadas");
     };
     if (isDesktop) init();
   }, [setActiveProvider, setVaultPath]);
@@ -99,7 +100,7 @@ export const Home = () => {
       const data = await exists();
 
       if (data) {
-        console.log("Vault existe");
+        logger.debug("Vault existente encontrado");
         const encryptedVault = await download();
 
         if (!encryptedVault) {
@@ -121,7 +122,7 @@ export const Home = () => {
             password,
           );
         } catch (error) {
-          console.error("Erro ao descriptografar:", error);
+          logger.error("Erro ao descriptografar", error);
           setErrorContent("Senha incorreta ou cofre corrompido.");
           setIsLoading(false);
           return;
@@ -132,7 +133,7 @@ export const Home = () => {
         setEncryptedVault(encryptedVault);
         setVault(vault);
       } else {
-        console.log("Vault não existe, inicializando novo cofre");
+        logger.debug("Vault inexistente, inicializando novo cofre");
         const vault = await getCryptoService().setupInitialVault(password);
         const encryptedVault = await getCryptoService().encryptVault(vault);
         await upload(encryptedVault);
@@ -148,7 +149,7 @@ export const Home = () => {
       setIsLoading(false);
       navigate(dashboardRoute);
     } catch (error) {
-      console.error("Erro geral: ", error);
+      logger.error("Erro geral ao inicializar o vault", error);
       setErrorContent(
         error instanceof Error
           ? error.message
